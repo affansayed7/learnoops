@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Why Procedural Programming Falls Short — OOP Prep Notes</title>
+<style>
+  :root{
+    --paper:#fbfaf7;
+    --ink:#232323;
+    --grid:#e8e5dd;
+    --blue:#2456a6;
+    --red:#c0392b;
+    --green:#1e7a4f;
+    --amber:#b8860b;
+    --soft:#6b6b6b;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    line-height:1.65;
+    padding:40px 16px 80px;
+  }
+  .page{max-width:860px;margin:0 auto;}
+  .eyebrow{
+    font-family:'Courier New',monospace;
+    font-size:13px;letter-spacing:2px;text-transform:uppercase;
+    color:var(--blue);margin-bottom:8px;
+  }
+  h1{
+    font-size:clamp(28px,5vw,42px);
+    line-height:1.15;margin-bottom:6px;
+  }
+  h1 .strike{position:relative;white-space:nowrap;}
+  h1 .strike::after{
+    content:"";position:absolute;left:-2%;right:-2%;top:52%;
+    height:3px;background:var(--red);transform:rotate(-2deg);
+  }
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{
+    background:var(--card);
+    border:1px solid #dedbd2;
+    border-radius:10px;
+    padding:26px 28px;
+    margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{
+    font-size:22px;margin-bottom:14px;
+    display:flex;align-items:center;gap:10px;
+  }
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+    background:var(--ink);color:var(--paper);
+    border-radius:50%;width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  ul{padding-left:22px;margin:10px 0;}
+  li{margin-bottom:8px;}
+  b{color:var(--ink);}
+  .tag{
+    display:inline-block;font-family:'Courier New',monospace;font-size:12px;
+    padding:2px 8px;border-radius:4px;margin-left:6px;vertical-align:middle;
+  }
+  .tag.red{background:#fdecea;color:var(--red);border:1px solid #f2b8b0;}
+  .tag.blue{background:#eaf1fb;color:var(--blue);border:1px solid #bcd0ee;}
+  .memory{
+    border-left:4px solid var(--amber);
+    background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;
+    font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);
+    background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;
+    font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  code{
+    font-family:'Courier New',monospace;font-size:14px;
+    background:#f1efe8;padding:1px 6px;border-radius:4px;
+  }
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.5;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .bad{color:#ff8a80;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{
+    font-family:'Courier New',monospace;font-size:12px;color:var(--soft);
+    margin-top:8px;letter-spacing:.5px;
+  }
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.bad{color:var(--red);}
+  td.good{color:var(--green);}
+  .footer-note{
+    text-align:center;font-style:italic;color:var(--soft);
+    margin-top:34px;font-size:15px;
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="eyebrow">OOP Interview Prep · Note 01</div>
+  <h1>Why <span class="strike">Procedural Programming</span> wasn't enough</h1>
+  <p class="subtitle">The problems that made the world invent OOP — know these, and every OOP feature suddenly makes sense.</p>
+
+  <!-- ================= WHAT IS PROCEDURAL ================= -->
+  <div class="card">
+    <h2><span class="num">0</span> Quick recap: what is procedural programming?</h2>
+    <ul>
+      <li>Program = a list of <b>step-by-step instructions</b> organized into <b>functions (procedures)</b>.</li>
+      <li><b>Data and functions live separately</b> — functions take data, modify it, pass it around.</li>
+      <li>Follows a <b>top-down approach</b>: break the big task into smaller functions.</li>
+      <li>Examples: <b>C, Pascal, FORTRAN, BASIC</b>.</li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- global data box -->
+        <rect x="230" y="15" width="240" height="52" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+        <text x="350" y="38" text-anchor="middle" font-size="15" fill="#c0392b" font-weight="bold">GLOBAL DATA</text>
+        <text x="350" y="56" text-anchor="middle" font-size="12" fill="#c0392b">(open to everyone)</text>
+        <!-- functions -->
+        <g>
+          <rect x="40" y="150" width="130" height="48" rx="8" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+          <text x="105" y="178" text-anchor="middle" font-size="14" fill="#2456a6">func_A()</text>
+          <rect x="285" y="150" width="130" height="48" rx="8" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+          <text x="350" y="178" text-anchor="middle" font-size="14" fill="#2456a6">func_B()</text>
+          <rect x="530" y="150" width="130" height="48" rx="8" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+          <text x="595" y="178" text-anchor="middle" font-size="14" fill="#2456a6">func_C()</text>
+        </g>
+        <!-- arrows all touch global data -->
+        <g stroke="#6b6b6b" stroke-width="2" fill="none" marker-end="url(#arr)">
+          <path d="M105 150 C130 100 220 70 250 60"/>
+          <path d="M350 150 L350 72"/>
+          <path d="M595 150 C570 100 480 70 450 60"/>
+        </g>
+        <defs>
+          <marker id="arr" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" fill="#6b6b6b"/>
+          </marker>
+        </defs>
+        <text x="350" y="120" text-anchor="middle" font-size="12" fill="#6b6b6b" font-style="italic">every function can touch &amp; change the data</text>
+      </svg>
+      <figcaption>fig 0 — procedural world: naked data, everyone has hands on it</figcaption>
+    </figure>
+  </div>
+
+  <!-- ================= DISADVANTAGE 1 ================= -->
+  <div class="card">
+    <h2><span class="num">1</span> No data security <span class="tag red">biggest problem</span></h2>
+    <ul>
+      <li>Data is usually <b>global</b> → <b>any function can read or modify it</b>, even by accident.</li>
+      <li>There is <b>no concept of access control</b> (no <code>private</code>, no <code>protected</code>).</li>
+      <li>One buggy function can corrupt data used by 50 other functions → <b>hard to trace who broke it</b>.</li>
+    </ul>
+    <pre><span class="c">// C-style procedural code</span>
+<span class="k">float</span> balance = 5000;              <span class="c">// global — fully exposed</span>
+
+<span class="k">void</span> printReport()  { ... }
+<span class="k">void</span> updateUI()     { <span class="bad">balance = 0;</span> } <span class="c">// oops! nothing stops this</span></pre>
+    <div class="memory">💡 <b>Memory hook:</b> Procedural data is like <b>money lying on the table</b> — anyone walking by can take it. OOP puts it in a <b>locker (encapsulation)</b> and only gives keys (methods) to trusted people.</div>
+  </div>
+
+  <!-- ================= DISADVANTAGE 2 ================= -->
+  <div class="card">
+    <h2><span class="num">2</span> Data and functions are separated</h2>
+    <ul>
+      <li>Data structures and the functions that operate on them are <b>not bound together</b>.</li>
+      <li>Real-world things are <b>data + behavior together</b> (a Car has speed <i>and</i> can accelerate) — procedural code can't model this naturally.</li>
+      <li>Result: <b>poor mapping to real-world problems</b> as systems grow.</li>
+    </ul>
+    <figure>
+      <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- left: procedural -->
+        <text x="165" y="24" text-anchor="middle" font-size="14" fill="#c0392b" font-weight="bold">PROCEDURAL</text>
+        <rect x="55" y="45" width="100" height="40" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+        <text x="105" y="70" text-anchor="middle" font-size="13" fill="#c0392b">speed</text>
+        <rect x="175" y="45" width="110" height="40" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+        <text x="230" y="70" text-anchor="middle" font-size="13" fill="#2456a6">drive()</text>
+        <rect x="55" y="110" width="100" height="40" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+        <text x="105" y="135" text-anchor="middle" font-size="13" fill="#c0392b">fuel</text>
+        <rect x="175" y="110" width="110" height="40" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+        <text x="230" y="135" text-anchor="middle" font-size="13" fill="#2456a6">refuel()</text>
+        <text x="165" y="182" text-anchor="middle" font-size="12" fill="#6b6b6b" font-style="italic">scattered pieces</text>
+        <!-- divider -->
+        <line x1="350" y1="15" x2="350" y2="190" stroke="#dedbd2" stroke-width="2" stroke-dasharray="6 6"/>
+        <!-- right: OOP -->
+        <text x="525" y="24" text-anchor="middle" font-size="14" fill="#1e7a4f" font-weight="bold">OOP</text>
+        <rect x="420" y="40" width="210" height="125" rx="10" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2.5"/>
+        <text x="525" y="62" text-anchor="middle" font-size="14" fill="#1e7a4f" font-weight="bold">class Car</text>
+        <line x1="435" y1="72" x2="615" y2="72" stroke="#1e7a4f" stroke-width="1"/>
+        <text x="440" y="92" font-size="13" fill="#232323">speed, fuel</text>
+        <line x1="435" y1="102" x2="615" y2="102" stroke="#1e7a4f" stroke-width="1" stroke-dasharray="4 4"/>
+        <text x="440" y="124" font-size="13" fill="#232323">drive()</text>
+        <text x="440" y="146" font-size="13" fill="#232323">refuel()</text>
+        <text x="525" y="182" text-anchor="middle" font-size="12" fill="#6b6b6b" font-style="italic">one self-contained unit</text>
+      </svg>
+      <figcaption>fig 2 — data + behavior: scattered vs bundled</figcaption>
+    </figure>
+    <div class="memory">💡 <b>Memory hook:</b> Procedural = <b>engine in one room, wheels in another</b>. OOP = the whole car in one garage.</div>
+  </div>
+
+  <!-- ================= DISADVANTAGE 3 ================= -->
+  <div class="card">
+    <h2><span class="num">3</span> Poor reusability &amp; no real-world extension</h2>
+    <ul>
+      <li>Reuse happens only through <b>copy-pasting functions</b> or minor tweaks → duplicated code everywhere.</li>
+      <li><b>No inheritance</b>: you cannot say "a Truck is a Car with extra features" — you rewrite it.</li>
+      <li><b>No polymorphism</b>: one function name can't behave differently for different data types cleanly.</li>
+    </ul>
+    <div class="memory">💡 <b>Memory hook:</b> Procedural is a <b>photocopy machine</b> (duplicate everything). OOP is a <b>family tree</b> (children inherit from parents).</div>
+  </div>
+
+  <!-- ================= DISADVANTAGE 4 ================= -->
+  <div class="card">
+    <h2><span class="num">4</span> Hard to maintain &amp; scale <span class="tag blue">spaghetti code</span></h2>
+    <ul>
+      <li>As the program grows, functions call functions call functions → <b>tangled dependencies</b>.</li>
+      <li>Changing one global variable or function signature can <b>break many unrelated places</b> (ripple effect).</li>
+      <li>Big teams struggle: <b>no clear ownership boundaries</b> in the code.</li>
+      <li>Debugging is painful — the bug's <i>symptom</i> and its <i>cause</i> may live in totally different files.</li>
+    </ul>
+    <figure>
+      <svg viewBox="0 0 700 210" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <g stroke="#c0392b" stroke-width="1.8" fill="none" opacity="0.75">
+          <path d="M90 60 C 250 160, 200 20, 360 100"/>
+          <path d="M90 60 C 150 190, 450 190, 610 70"/>
+          <path d="M360 100 C 300 30, 550 30, 610 70"/>
+          <path d="M360 100 C 420 190, 180 200, 130 160"/>
+          <path d="M610 70 C 500 160, 300 160, 130 160"/>
+          <path d="M130 160 C 60 100, 250 40, 360 100"/>
+        </g>
+        <g font-size="13">
+          <rect x="45" y="42" width="90" height="34" rx="6" fill="#fff" stroke="#232323" stroke-width="1.5"/>
+          <text x="90" y="64" text-anchor="middle">f1()</text>
+          <rect x="315" y="83" width="90" height="34" rx="6" fill="#fff" stroke="#232323" stroke-width="1.5"/>
+          <text x="360" y="105" text-anchor="middle">f2()</text>
+          <rect x="565" y="52" width="90" height="34" rx="6" fill="#fff" stroke="#232323" stroke-width="1.5"/>
+          <text x="610" y="74" text-anchor="middle">f3()</text>
+          <rect x="85" y="143" width="90" height="34" rx="6" fill="#fff" stroke="#232323" stroke-width="1.5"/>
+          <text x="130" y="165" text-anchor="middle">f4()</text>
+        </g>
+        <text x="350" y="200" text-anchor="middle" font-size="12" fill="#6b6b6b" font-style="italic">"spaghetti" — everything depends on everything</text>
+      </svg>
+      <figcaption>fig 4 — change f1() and pray nothing else breaks</figcaption>
+    </figure>
+    <div class="memory">💡 <b>Memory hook:</b> Pull one noodle in a <b>plate of spaghetti</b> — the whole plate moves. That's a large procedural codebase.</div>
+  </div>
+
+  <!-- ================= DISADVANTAGE 5 ================= -->
+  <div class="card">
+    <h2><span class="num">5</span> Function-first, not data-first (wrong emphasis)</h2>
+    <ul>
+      <li>Procedural design asks: <b>"what steps do I do?"</b> — importance is given to <b>functions</b>, not to the <b>data</b>.</li>
+      <li>But in real systems, <b>data is what actually matters</b> (bank balance, patient record, user profile) — steps change often, data outlives them.</li>
+      <li>OOP flips this: model the <b>data (objects) first</b>, then attach behavior to it.</li>
+    </ul>
+    <div class="interview">🎯 <b>Interview line:</b> "Procedural programming gives importance to <b>functions over data</b>; OOP gives importance to <b>data over functions</b> — and protects it via encapsulation."</div>
+  </div>
+
+  <!-- ================= SUMMARY TABLE ================= -->
+  <div class="card">
+    <h2><span class="num">★</span> One-glance revision table</h2>
+    <table>
+      <tr><th>Problem in Procedural</th><th>OOP's Answer</th></tr>
+      <tr><td class="bad">Global data, no protection</td><td class="good">Encapsulation (private/public)</td></tr>
+      <tr><td class="bad">Data &amp; functions separated</td><td class="good">Classes bundle both</td></tr>
+      <tr><td class="bad">Copy-paste reuse</td><td class="good">Inheritance</td></tr>
+      <tr><td class="bad">One name, one behavior</td><td class="good">Polymorphism</td></tr>
+      <tr><td class="bad">Poor real-world modeling</td><td class="good">Objects mirror real entities</td></tr>
+      <tr><td class="bad">Spaghetti at scale</td><td class="good">Modular, bottom-up design</td></tr>
+    </table>
+    <div class="memory">💡 <b>Mnemonic — "SDRMS":</b> <b>S</b>ecurity ✗ · <b>D</b>ata-function split ✗ · <b>R</b>eusability ✗ · <b>M</b>aintenance ✗ · <b>S</b>caling ✗ — the five sins of procedural code.</div>
+  </div>
+
+  <p class="footer-note">Next note → "The 4 Pillars of OOP" (each pillar fixes one problem above)</p>
+
+</div>
+</body>
+</html>
