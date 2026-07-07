@@ -94,6 +94,73 @@
     font-family:'Courier New',monospace;font-size:14px;
   }
   .nav-bottom a{color:var(--blue);text-decoration:none;}
+
+  /* ===== QUIZ ===== */
+  .quiz-head{
+    text-align:center;margin:44px 0 24px;
+  }
+  .quiz-head h2{justify-content:center;font-size:26px;}
+  .quiz-head p{color:var(--soft);font-style:italic;font-size:15px;margin-top:4px;}
+  .scoreboard{
+    position:sticky;top:0;z-index:20;
+    background:var(--ink);color:var(--paper);
+    font-family:'Courier New',monospace;font-size:15px;
+    text-align:center;padding:10px;border-radius:0 0 10px 10px;
+    margin-bottom:20px;box-shadow:0 3px 8px rgba(0,0,0,.15);
+  }
+  .scoreboard b{color:#8be0a4;}
+  .q{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:22px 24px;margin-bottom:22px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  .q-tag{
+    display:inline-block;font-family:'Courier New',monospace;font-size:11px;
+    letter-spacing:1px;padding:3px 9px;border-radius:4px;margin-bottom:10px;
+    background:#f3edfa;color:var(--purple);border:1px solid #d8c8ee;
+  }
+  .q-tag.hard{background:#fdecea;color:var(--red);border-color:#f2b8b0;}
+  .q-tag.med{background:#fdf6e3;color:var(--amber);border-color:#ecd9a0;}
+  .q h3{font-size:17px;margin:2px 0 6px;line-height:1.4;}
+  .q pre{margin:10px 0 14px;font-size:13px;}
+  .opts{list-style:none;padding:0;}
+  .opt{
+    display:flex;align-items:flex-start;gap:10px;
+    border:1.5px solid #dedbd2;border-radius:8px;
+    padding:11px 14px;margin-bottom:9px;cursor:pointer;
+    font-size:15px;transition:background .12s,border-color .12s;
+    background:#fff;
+  }
+  .opt:hover{background:#f7f5ef;}
+  .opt .key{
+    font-family:'Courier New',monospace;font-weight:bold;color:var(--soft);
+    flex:0 0 auto;
+  }
+  .opt.correct{border-color:var(--green);background:#e7f6ec;}
+  .opt.correct .key{color:var(--green);}
+  .opt.wrong{background:#fdecea;border-color:var(--red);}
+  .opt.wrong .key{color:var(--red);}
+  .opt.locked{cursor:default;pointer-events:none;}
+  .opt.dim{opacity:.55;}
+  .mark{margin-left:auto;font-weight:bold;font-size:16px;}
+  .explain{
+    margin-top:12px;padding:13px 16px;border-radius:8px;
+    font-size:14.5px;line-height:1.55;display:none;
+    border-left:4px solid var(--blue);background:#eef3fb;
+  }
+  .explain.show{display:block;}
+  .explain b{color:var(--blue);}
+  .explain.ok{border-left-color:var(--green);background:#edf7f1;}
+  .explain.ok b{color:var(--green);}
+  .explain.no{border-left-color:var(--red);background:#fdecea;}
+  .explain.no b{color:var(--red);}
+  .quiz-done{
+    text-align:center;font-family:'Courier New',monospace;
+    background:#edf7f1;border:1px solid #bfe0cd;border-radius:10px;
+    padding:20px;margin-top:10px;font-size:17px;display:none;
+  }
+  .quiz-done.show{display:block;}
+  .quiz-done .big{font-size:34px;color:var(--green);display:block;margin-bottom:6px;}
 </style>
 </head>
 <body>
@@ -318,11 +385,314 @@
     </ul>
   </div>
 
+  <!-- ============ INTERACTIVE QUIZ ============ -->
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Medium→hard. Read carefully — some differ by a single character. Tap an option to lock your answer &amp; see the explanation.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
   <div class="nav-bottom">
     <a href="definitions.html">← Note 02: OOP vocabulary</a>
     <a href="index.html">home ↑</a>
   </div>
 
 </div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "What is the output / result of this program?",
+    code:
+`class emp {
+    int a = 5;
+public:
+    void show() { cout << a; }
+};
+int main() {
+    emp e;
+    cout << e.a;      // line X
+    e.show();
+}`,
+    options: [
+      "Prints 55",
+      "Prints 5 (only show works, e.a ignored)",
+      "Compile error at line X — 'a' is private",
+      "Runtime error at line X"
+    ],
+    correct: 2,
+    explain: "Access control is resolved at COMPILE time, not runtime. `e.a` from main() touches a private member, so the program never builds — the compiler rejects it before any output is produced. It's a compile error, not a runtime error."
+  },
+  {
+    q: "The definition below sits OUTSIDE the class. Which line is correct?",
+    code:
+`class emp {
+public:
+    void setData(int x);
+};
+// choose the correct external definition:`,
+    options: [
+      "void emp.setData(int x) { ... }",
+      "void emp::setData(int x) { ... }",
+      "void setData::emp(int x) { ... }",
+      "emp::void setData(int x) { ... }"
+    ],
+    correct: 1,
+    explain: "The scope resolution operator is `::`, not `.` (that's for objects). Syntax is: returnType ClassName::functionName(params). So `void emp::setData(int x)`. Order matters — return type first, then Class::function."
+  },
+  {
+    q: "What's wrong with this code?",
+    code:
+`class emp {
+    int a, b, c;
+public:
+    void setData(int a, int b, int c) {
+        a = a;
+        b = b;
+        c = c;
+    }
+};`,
+    options: [
+      "Nothing — members get set correctly",
+      "Compile error: duplicate names not allowed",
+      "It compiles but members a,b,c are NEVER updated",
+      "It compiles but crashes at runtime"
+    ],
+    correct: 2,
+    explain: "Classic self-assignment bug. Inside the function, plain `a` refers to the nearest scope — the PARAMETER, not the member. So `a = a;` assigns the parameter to itself; the data members stay untouched (garbage). Fix: use `this->a = a;`. It compiles fine and never crashes — it just silently does nothing useful. This is why `this->` matters."
+  },
+  {
+    q: "Which statement about the `this` pointer is FALSE?",
+    code: null,
+    options: [
+      "`this` holds the address of the object that called the method",
+      "Every static member function also receives a `this` pointer",
+      "`this->a = a` disambiguates member from parameter",
+      "Returning `*this` enables method chaining"
+    ],
+    correct: 1,
+    explain: "FALSE one: static member functions do NOT get a `this` pointer — they belong to the class, not to any object, so there's no 'calling object' to point to. The other three are all true. (Interviewers love this because it links `this` to the concept of static members.)"
+  },
+  {
+    q: "Given `class` vs `struct`, what does this print?",
+    code:
+`struct A { int x; };      // note: struct
+class  B { int y; };      // note: class
+int main() {
+    A a; a.x = 10;
+    B b; b.y = 20;
+    cout << a.x << " " << b.y;
+}`,
+    options: [
+      "Prints: 10 20",
+      "Compile error — b.y is private (class default)",
+      "Compile error — a.x is private (struct default)",
+      "Prints: 20 10"
+    ],
+    correct: 1,
+    explain: "In a `struct`, members default to PUBLIC → a.x is reachable. In a `class`, members default to PRIVATE → b.y is private, and `b.y = 20` from main() is a compile error. This one-character difference (struct vs class) is the classic trap."
+  },
+  {
+    q: "Where is the access-control violation caught?",
+    code:
+`class emp {
+    int secret;
+public:
+    int reveal() { return secret; }  // (1)
+};
+int main() {
+    emp e;
+    int x = e.secret;                // (2)
+    int y = e.reveal();              // (3)
+}`,
+    options: [
+      "Line (1) — reveal() can't access private secret",
+      "Line (2) — at runtime when e.secret is read",
+      "Line (2) — at compile time; private outside class",
+      "Line (3) — reveal returns a private value"
+    ],
+    correct: 2,
+    explain: "Line (1) is fine — member functions CAN access private data (they're 'staff'). Line (3) is fine — reveal() legally returns the value. Line (2) is the violation: main() reaches private `secret` directly. And it's caught at COMPILE time, not runtime. So: line (2), compile time."
+  },
+  {
+    q: "What happens here with the protected member?",
+    code:
+`class Base {
+protected:
+    int p = 42;
+};
+class Derived : public Base {
+public:
+    int get() { return p; }   // (A)
+};
+int main() {
+    Derived d;
+    cout << d.get();          // (B)
+    cout << d.p;              // (C)
+}`,
+    options: [
+      "Both (A) and (C) work — protected is like public",
+      "(A) works, (C) is a compile error",
+      "(A) is an error — child can't see protected",
+      "Only (C) works, (A) fails"
+    ],
+    correct: 1,
+    explain: "protected = accessible inside the class AND its derived classes, but NOT from outside. So (A) works — Derived is a child, it inherits access to `p`. But (C) fails — main() is 'outside', and protected blocks external access just like private does. Answer: (A) works, (C) compile error."
+  },
+  {
+    q: "Which of these correctly makes `getData` a read-only method (can't modify members)?",
+    code:
+`class emp {
+    int a;
+public:
+    // pick the correct signature:
+};`,
+    options: [
+      "void getData() const { cout << a; }",
+      "const void getData() { cout << a; }",
+      "void const getData() { cout << a; }",
+      "void getData() { const cout << a; }"
+    ],
+    correct: 0,
+    explain: "A `const` member function places `const` AFTER the parameter list: `void getData() const`. This promises the method won't modify any data member. Putting const before the return type (option B) makes the RETURN value const — a different meaning. Option D is not valid syntax. This is heavily tested."
+  },
+  {
+    q: "What does this print? (member function memory model)",
+    code:
+`class Counter {
+    int count;
+public:
+    void set(int c) { this->count = c; }
+    int get() { return count; }
+};
+int main() {
+    Counter a, b;
+    a.set(10);
+    b.set(20);
+    cout << a.get() << b.get();
+}`,
+    options: [
+      "Prints 2020 — one shared count",
+      "Prints 1020 — each object has its own count",
+      "Prints 1010 — set() overwrites globally",
+      "Compile error — count is private"
+    ],
+    correct: 1,
+    explain: "Each OBJECT has its own copy of data members, so a.count=10 and b.count=20 are independent. But the FUNCTIONS set()/get() exist once in memory, shared by both — `this` tells each call which object's count to use. Result: 1020. (get() reads private count legally because it's a member function.)"
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div');
+  block.className = 'q-block';
+
+  const qnum = document.createElement('div');
+  qnum.className = 'q-num';
+  qnum.textContent = 'Q' + (qi + 1);
+  block.appendChild(qnum);
+
+  const qtext = document.createElement('div');
+  qtext.className = 'q-text';
+  qtext.textContent = item.q;
+  block.appendChild(qtext);
+
+  if (item.code) {
+    const pre = document.createElement('pre');
+    pre.className = 'q-code';
+    pre.textContent = item.code;
+    block.appendChild(pre);
+  }
+
+  const opts = document.createElement('div');
+  opts.className = 'q-opts';
+
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) {
+        btn.classList.add('correct');
+        score++;
+        document.getElementById('score').textContent = score;
+      } else {
+        btn.classList.add('wrong');
+        allBtns[item.correct].classList.add('correct');
+      }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+
+  block.appendChild(opts);
+  quizEl.appendChild(block);
+});
+</script>
+
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{
+    border:1px solid #e3e0d7;border-radius:10px;
+    padding:18px 18px 20px;margin:18px 0;background:#fff;
+  }
+  .q-num{
+    font-family:'Courier New',monospace;font-size:12px;font-weight:bold;
+    display:inline-block;background:var(--ink);color:var(--paper);
+    padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;
+  }
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{
+    font-family:'Courier New',monospace;font-size:13px;line-height:1.5;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;
+  }
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    font-family:Georgia,serif;font-size:15px;text-align:left;
+    padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;
+    background:#fbfaf7;cursor:pointer;transition:all .12s ease;
+    display:flex;align-items:center;gap:10px;color:var(--ink);
+  }
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{
+    font-family:'Courier New',monospace;font-weight:bold;font-size:13px;
+    background:#e8e5dd;color:var(--ink);border-radius:5px;
+    width:24px;height:24px;flex:0 0 24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{
+    border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;
+  }
+  .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{
+    border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;
+  }
+  .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{
+    margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;
+  }
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);}
+  .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{
+    text-align:center;font-family:'Courier New',monospace;font-weight:bold;
+    font-size:18px;margin-top:20px;padding:12px;
+    background:var(--ink);color:var(--paper);border-radius:8px;
+  }
+  #score{color:#8be0a4;}
+</style>
+
 </body>
 </html>
