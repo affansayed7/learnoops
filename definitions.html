@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OOP & Its Vocabulary — LearnOOPs Note 02</title>
+<style>
+  :root{
+    --paper:#fbfaf7;
+    --ink:#232323;
+    --grid:#e8e5dd;
+    --blue:#2456a6;
+    --red:#c0392b;
+    --green:#1e7a4f;
+    --amber:#b8860b;
+    --purple:#6d4aa0;
+    --soft:#6b6b6b;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    line-height:1.65;
+    padding:40px 16px 80px;
+  }
+  .page{max-width:860px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--blue);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--green);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 6px;}
+  h3 .term{
+    background:#eaf1fb;border:1px solid #bcd0ee;color:var(--blue);
+    padding:2px 10px;border-radius:6px;
+  }
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .rl{
+    font-size:15px;color:var(--soft);margin:4px 0 0 2px;
+  }
+  .rl b{color:var(--purple);}
+  .memory{
+    border-left:4px solid var(--amber);background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  code{
+    font-family:'Courier New',monospace;font-size:14px;
+    background:#f1efe8;padding:1px 6px;border-radius:4px;
+  }
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.5;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{
+    font-family:'Courier New',monospace;font-size:12px;color:var(--soft);
+    margin-top:8px;letter-spacing:.5px;
+  }
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td b{color:var(--blue);}
+  .nav-bottom{
+    display:flex;justify-content:space-between;margin-top:36px;
+    font-family:'Courier New',monospace;font-size:14px;
+  }
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 02</div>
+  <h1>What is OOP? <span class="hl">+ The Vocabulary</span></h1>
+  <p class="subtitle">12 terms that appear in every OOP conversation — each with a real-life hook so they never leave your head.</p>
+
+  <!-- ============ WHAT IS OOP ============ -->
+  <div class="card">
+    <h2><span class="num">A</span> What is Object-Oriented Programming?</h2>
+    <ul>
+      <li>A programming style where a program is organized around <b>objects</b> — units that bundle <b>data + the functions that work on that data</b> together.</li>
+      <li>Instead of asking <i>"what steps should I perform?"</i> (procedural), OOP asks <i>"what <b>things</b> exist in my problem, and what can each thing <b>do</b>?"</i></li>
+      <li>Follows a <b>bottom-up approach</b>: design the objects first, then compose them into the full program.</li>
+      <li>Directly fixes every problem from Note 01: data gets protection, code gets reuse, programs mirror the real world.</li>
+    </ul>
+    <div class="interview">🎯 <b>Interview line:</b> "OOP is a paradigm that models a program as a collection of interacting <b>objects</b>, each combining <b>state (data)</b> and <b>behavior (methods)</b>, giving importance to data rather than functions."</div>
+  </div>
+
+  <!-- ============ CLASS & OBJECT ============ -->
+  <div class="card">
+    <h2><span class="num">B</span> Class &amp; Object — the heart of everything</h2>
+
+    <h3><span class="term">Class</span> — the blueprint</h3>
+    <ul>
+      <li>A <b>template/design</b> that defines what data and behaviors something will have.</li>
+      <li><b>No memory is allocated</b> when a class is defined — it's just a plan.</li>
+    </ul>
+    <p class="rl">🏠 <b>Real life:</b> an architect's <b>house plan</b> — detailed drawing, but you can't live in it.</p>
+
+    <h3><span class="term">Object</span> — the real thing</h3>
+    <ul>
+      <li>A <b>real instance</b> created from the class. <b>Memory is allocated at object creation.</b></li>
+      <li>One class → <b>many objects</b>, each with its <b>own copy of the data</b>.</li>
+    </ul>
+    <p class="rl">🏠 <b>Real life:</b> the <b>actual houses</b> built from that plan — 50 houses, one plan. Painting one house doesn't repaint the others.</p>
+
+    <figure>
+      <svg viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- blueprint -->
+        <rect x="30" y="45" width="180" height="160" rx="10" fill="#eaf1fb" stroke="#2456a6" stroke-width="2.5" stroke-dasharray="7 5"/>
+        <text x="120" y="32" text-anchor="middle" font-size="14" fill="#2456a6" font-weight="bold">CLASS (blueprint)</text>
+        <!-- little house sketch inside -->
+        <g stroke="#2456a6" stroke-width="2" fill="none">
+          <path d="M70 130 L120 85 L170 130"/>
+          <rect x="82" y="130" width="76" height="50"/>
+          <rect x="108" y="150" width="22" height="30"/>
+        </g>
+        <text x="120" y="198" text-anchor="middle" font-size="11" fill="#2456a6" font-style="italic">no memory</text>
+        <!-- arrows -->
+        <g stroke="#6b6b6b" stroke-width="2" fill="none" marker-end="url(#arr2)">
+          <path d="M215 95 C 270 70, 300 70, 340 78"/>
+          <path d="M215 125 L340 125"/>
+          <path d="M215 155 C 270 180, 300 180, 340 172"/>
+        </g>
+        <text x="277" y="115" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">instantiate</text>
+        <defs>
+          <marker id="arr2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto">
+            <path d="M0,0 L8,4 L0,8 z" fill="#6b6b6b"/>
+          </marker>
+        </defs>
+        <!-- three real houses -->
+        <g>
+          <g transform="translate(350,48)">
+            <rect x="0" y="0" width="150" height="52" rx="8" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+            <text x="75" y="22" text-anchor="middle" font-size="13" fill="#1e7a4f" font-weight="bold">Car bmw</text>
+            <text x="75" y="40" text-anchor="middle" font-size="11" fill="#232323">speed=120</text>
+          </g>
+          <g transform="translate(350,99)">
+            <rect x="0" y="0" width="150" height="52" rx="8" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+            <text x="75" y="22" text-anchor="middle" font-size="13" fill="#1e7a4f" font-weight="bold">Car honda</text>
+            <text x="75" y="40" text-anchor="middle" font-size="11" fill="#232323">speed=80</text>
+          </g>
+          <g transform="translate(350,150)">
+            <rect x="0" y="0" width="150" height="52" rx="8" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+            <text x="75" y="22" text-anchor="middle" font-size="13" fill="#1e7a4f" font-weight="bold">Car tesla</text>
+            <text x="75" y="40" text-anchor="middle" font-size="11" fill="#232323">speed=200</text>
+          </g>
+        </g>
+        <text x="560" y="128" font-size="13" fill="#1e7a4f" font-weight="bold">OBJECTS</text>
+        <text x="560" y="146" font-size="11" fill="#6b6b6b" font-style="italic">each has own</text>
+        <text x="560" y="160" font-size="11" fill="#6b6b6b" font-style="italic">memory &amp; data</text>
+      </svg>
+      <figcaption>fig B — one blueprint, many houses; one class, many objects</figcaption>
+    </figure>
+
+    <pre><span class="k">class</span> Car {            <span class="c">// blueprint — nothing exists yet</span>
+    <span class="k">int</span> speed;
+};
+
+Car bmw;               <span class="c">// object — memory allocated NOW ✅</span>
+Car honda;             <span class="c">// another object, separate memory</span></pre>
+
+    <div class="memory">💡 <b>Memory hook:</b> Class = <b>cookie cutter</b> 🍪✂️. Object = the <b>cookies</b>. You can't eat the cutter — and every cookie can have different toppings.</div>
+  </div>
+
+  <!-- ============ STATE & BEHAVIOR ============ -->
+  <div class="card">
+    <h2><span class="num">C</span> What lives inside a class</h2>
+
+    <h3><span class="term">Data member</span> (attribute / property)</h3>
+    <ul>
+      <li>The <b>variables</b> inside a class — they hold the object's <b>state</b>.</li>
+      <li>All three names mean the same thing; interviewers mix them freely.</li>
+    </ul>
+    <p class="rl">📱 <b>Real life:</b> your phone's <b>battery %, brightness, wallpaper</b> — its current state.</p>
+
+    <h3><span class="term">Method</span> (member function / behavior)</h3>
+    <ul>
+      <li>The <b>functions</b> inside a class — what the object can <b>do</b>, usually operating on its own data members.</li>
+    </ul>
+    <p class="rl">📱 <b>Real life:</b> <b>call(), takePhoto(), charge()</b> — the things the phone does.</p>
+
+    <h3><span class="term">Constructor</span> &amp; <span class="term">Destructor</span></h3>
+    <ul>
+      <li><b>Constructor:</b> special method that <b>runs automatically when the object is born</b> — used to initialize it. Same name as the class, no return type.</li>
+      <li><b>Destructor:</b> runs automatically <b>when the object dies</b> — used for cleanup. Written with a tilde: <code>~Car()</code>.</li>
+    </ul>
+    <p class="rl">🏨 <b>Real life:</b> hotel <b>check-in</b> (room prepared for you) and <b>check-out</b> (room cleaned after you).</p>
+
+    <pre><span class="k">class</span> Car {
+<span class="k">public</span>:
+    Car()  { <span class="g">/* check-in: runs at birth  */</span> }
+    ~Car() { <span class="g">/* check-out: runs at death */</span> }
+};</pre>
+
+    <div class="memory">💡 <b>Memory hook:</b> Data = <b>nouns</b>, methods = <b>verbs</b>. Constructor = <b>birth certificate</b> 👶, destructor = <b>farewell party</b> 👋 (tilde ~ looks like a waving hand!).</div>
+  </div>
+
+  <!-- ============ 4 PILLARS ============ -->
+  <div class="card">
+    <h2><span class="num">D</span> The 4 Pillars — quick definitions</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:12px;">(Each gets its own deep-dive note later — for now, own the one-liners.)</p>
+
+    <figure>
+      <svg viewBox="0 0 700 240" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- roof -->
+        <path d="M60 95 L350 25 L640 95 Z" fill="#f1efe8" stroke="#232323" stroke-width="2.5"/>
+        <text x="350" y="75" text-anchor="middle" font-size="18" font-weight="bold" fill="#232323">O O P</text>
+        <!-- pillars -->
+        <g font-size="12.5" font-weight="bold">
+          <rect x="75"  y="100" width="115" height="105" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+          <text x="132" y="145" text-anchor="middle" fill="#2456a6">Encapsu-</text>
+          <text x="132" y="162" text-anchor="middle" fill="#2456a6">lation</text>
+          <text x="132" y="188" text-anchor="middle" font-size="16">🔒</text>
+
+          <rect x="220" y="100" width="115" height="105" rx="4" fill="#fdf6e3" stroke="#b8860b" stroke-width="2"/>
+          <text x="277" y="145" text-anchor="middle" fill="#b8860b">Abstrac-</text>
+          <text x="277" y="162" text-anchor="middle" fill="#b8860b">tion</text>
+          <text x="277" y="188" text-anchor="middle" font-size="16">🎛️</text>
+
+          <rect x="365" y="100" width="115" height="105" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+          <text x="422" y="145" text-anchor="middle" fill="#1e7a4f">Inheri-</text>
+          <text x="422" y="162" text-anchor="middle" fill="#1e7a4f">tance</text>
+          <text x="422" y="188" text-anchor="middle" font-size="16">👪</text>
+
+          <rect x="510" y="100" width="115" height="105" rx="4" fill="#f3edfa" stroke="#6d4aa0" stroke-width="2"/>
+          <text x="567" y="145" text-anchor="middle" fill="#6d4aa0">Polymor-</text>
+          <text x="567" y="162" text-anchor="middle" fill="#6d4aa0">phism</text>
+          <text x="567" y="188" text-anchor="middle" font-size="16">🎭</text>
+        </g>
+        <!-- ground -->
+        <line x1="40" y1="215" x2="660" y2="215" stroke="#232323" stroke-width="2.5"/>
+      </svg>
+      <figcaption>fig D — the temple of OOP stands on 4 pillars</figcaption>
+    </figure>
+
+    <table>
+      <tr><th>Pillar</th><th>One-liner</th><th>Real-life hook</th></tr>
+      <tr>
+        <td><b>Encapsulation</b> 🔒</td>
+        <td>Bundle data + methods together, hide the data from outside access</td>
+        <td>💊 <b>Capsule</b> — medicine sealed inside; you can't touch the powder directly</td>
+      </tr>
+      <tr>
+        <td><b>Abstraction</b> 🎛️</td>
+        <td>Show only the essential interface, hide complex implementation</td>
+        <td>🚗 <b>Car pedal</b> — press to go; fuel injection is not your problem</td>
+      </tr>
+      <tr>
+        <td><b>Inheritance</b> 👪</td>
+        <td>A class acquires the properties of another class</td>
+        <td>🧬 <b>Child &amp; parent</b> — you got your surname &amp; features, then added your own</td>
+      </tr>
+      <tr>
+        <td><b>Polymorphism</b> 🎭</td>
+        <td>One name, many forms — same call, different behavior</td>
+        <td>🗣️ The word <b>"run"</b> — run a race, run a business, run a program</td>
+      </tr>
+    </table>
+
+    <div class="interview">🎯 <b>Interview trap (asked a LOT):</b> Encapsulation vs Abstraction? — "Encapsulation hides <b>data</b> (how it's stored/protected); Abstraction hides <b>complexity</b> (how it works). Encapsulation is about <b>access control</b>, abstraction is about <b>design simplicity</b>."</div>
+    <div class="memory">💡 <b>Mnemonic:</b> <b>A PIE</b> 🥧 — <b>A</b>bstraction, <b>P</b>olymorphism, <b>I</b>nheritance, <b>E</b>ncapsulation.</div>
+  </div>
+
+  <!-- ============ SUPPORTING CAST ============ -->
+  <div class="card">
+    <h2><span class="num">E</span> The supporting cast</h2>
+
+    <h3><span class="term">Access specifiers</span></h3>
+    <ul>
+      <li><code>private</code> — only the class's own methods can access. <b>Default for class.</b></li>
+      <li><code>public</code> — anyone can access.</li>
+      <li><code>protected</code> — the class + its derived (child) classes.</li>
+    </ul>
+    <p class="rl">🏡 <b>Real life:</b> your <b>bedroom</b> (private) · your <b>living room</b> for guests (public) · the <b>family kitchen</b> — family only (protected).</p>
+
+    <h3><span class="term">Base class &amp; Derived class</span></h3>
+    <ul>
+      <li><b>Base</b> (parent / superclass) = the class being inherited <i>from</i>.</li>
+      <li><b>Derived</b> (child / subclass) = the class doing the inheriting.</li>
+    </ul>
+
+    <h3><span class="term">Instance &amp; Instantiation</span></h3>
+    <ul>
+      <li><b>Instance</b> = just another word for object. <b>Instantiation</b> = the act of creating one.</li>
+    </ul>
+
+    <div class="interview">🎯 <b>Bonus interview fact:</b> "What's the difference between <code>class</code> and <code>struct</code> in C++?" — Only the <b>default access</b>: class defaults to <b>private</b>, struct defaults to <b>public</b>. That's it.</div>
+  </div>
+
+  <!-- ============ REVISION TABLE ============ -->
+  <div class="card">
+    <h2><span class="num">★</span> One-glance revision table</h2>
+    <table>
+      <tr><th>Term</th><th>Meaning</th><th>Hook</th></tr>
+      <tr><td><b>Class</b></td><td>Blueprint, no memory</td><td>🍪 cookie cutter</td></tr>
+      <tr><td><b>Object</b></td><td>Real instance, gets memory</td><td>🍪 the cookie</td></tr>
+      <tr><td><b>Data member</b></td><td>Variable = state</td><td>📱 battery %</td></tr>
+      <tr><td><b>Method</b></td><td>Function = behavior</td><td>📱 takePhoto()</td></tr>
+      <tr><td><b>Constructor</b></td><td>Auto-runs at object birth</td><td>🏨 check-in</td></tr>
+      <tr><td><b>Destructor</b></td><td>Auto-runs at object death</td><td>🏨 check-out (~ = 👋)</td></tr>
+      <tr><td><b>Encapsulation</b></td><td>Bundle + hide data</td><td>💊 capsule</td></tr>
+      <tr><td><b>Abstraction</b></td><td>Hide complexity</td><td>🚗 pedal</td></tr>
+      <tr><td><b>Inheritance</b></td><td>Child acquires parent's traits</td><td>🧬 surname</td></tr>
+      <tr><td><b>Polymorphism</b></td><td>One name, many forms</td><td>🎭 "run"</td></tr>
+      <tr><td><b>private/public/protected</b></td><td>Who may touch what</td><td>🏡 bedroom/living room/kitchen</td></tr>
+      <tr><td><b>Instance</b></td><td>Synonym for object</td><td>—</td></tr>
+    </table>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="procedural.html">← Note 01: Procedural's problems</a>
+    <a href="index.html">home ↑</a>
+  </div>
+
+</div>
+</body>
+</html>
