@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Classes & Access Specifiers — LearnOOPs Note 03</title>
+<style>
+  :root{
+    --paper:#fbfaf7;
+    --ink:#232323;
+    --grid:#e8e5dd;
+    --blue:#2456a6;
+    --red:#c0392b;
+    --green:#1e7a4f;
+    --amber:#b8860b;
+    --purple:#6d4aa0;
+    --soft:#6b6b6b;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    line-height:1.65;
+    padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--blue);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .lock{color:var(--red);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .memory{
+    border-left:4px solid var(--amber);background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  .warning{
+    border-left:4px solid var(--red);background:#fdecea;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .warning b{color:var(--red);}
+  code{
+    font-family:'Courier New',monospace;font-size:14px;
+    background:#f1efe8;padding:1px 6px;border-radius:4px;
+  }
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{
+    font-family:'Courier New',monospace;font-size:12px;color:var(--soft);
+    margin-top:8px;letter-spacing:.5px;
+  }
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .nav-bottom{
+    display:flex;justify-content:space-between;margin-top:36px;
+    font-family:'Courier New',monospace;font-size:14px;
+  }
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 03</div>
+  <h1>Classes &amp; Access Specifiers <span class="lock">🔐</span></h1>
+  <p class="subtitle">Who can touch what — the bouncer system of C++, plus the scope resolution operator and the mysterious <code>this</code> pointer.</p>
+
+  <!-- ============ CLASS ANATOMY ============ -->
+  <div class="card">
+    <h2><span class="num">1</span> Anatomy of a class — our lab specimen 🔬</h2>
+    <p>We'll dissect this one program for the whole note. Read it once; every section below explains a piece of it.</p>
+<pre><span class="c">#include &lt;iostream&gt;</span>
+<span class="k">using namespace</span> std;
+
+<span class="k">class</span> <span class="y">emp</span> {
+<span class="r">private:</span>
+    <span class="k">int</span> a, b, c;                    <span class="c">// hidden — VIP room</span>
+<span class="g">public:</span>
+    <span class="k">int</span> d, e;                       <span class="c">// open to all</span>
+    <span class="k">void</span> setData(<span class="k">int</span> a, <span class="k">int</span> b, <span class="k">int</span> c);  <span class="c">// declared only</span>
+    <span class="k">void</span> getData() {                <span class="c">// defined inside class</span>
+        cout &lt;&lt; a &lt;&lt; b &lt;&lt; c &lt;&lt; d &lt;&lt; e;
+    }
+};
+
+<span class="c">// defined OUTSIDE the class using :: </span>
+<span class="k">void</span> <span class="y">emp</span> <span class="g">::</span> setData(<span class="k">int</span> a, <span class="k">int</span> b, <span class="k">int</span> c) {
+    <span class="y">this</span>-&gt;a = a;
+    <span class="y">this</span>-&gt;b = b;
+    <span class="y">this</span>-&gt;c = c;
+}
+
+<span class="k">int</span> main() {
+    <span class="y">emp</span> affan;             <span class="c">// object born — memory allocated</span>
+    affan.setData(9,8,8);  <span class="c">// ✅ public method → sets private a,b,c</span>
+    affan.d = 9;           <span class="c">// ✅ d is public — direct access OK</span>
+    affan.e = 7;           <span class="c">// ✅ e is public too</span>
+    affan.getData();       <span class="c">// prints everything</span>
+    <span class="c">// affan.a = 5;        // ❌ COMPILE ERROR — a is private!</span>
+    <span class="k">return</span> 0;
+}</pre>
+    <ul>
+      <li>The class mixes <b>private data</b> (a,b,c) and <b>public data</b> (d,e) deliberately — so you can feel the difference.</li>
+      <li>Private members aren't unreachable — they're reachable <b>only through public methods</b> (<code>setData</code>/<code>getData</code>). The methods are the <b>official doorway</b>.</li>
+    </ul>
+  </div>
+
+  <!-- ============ ACCESS SPECIFIERS / NIGHTCLUB ============ -->
+  <div class="card">
+    <h2><span class="num">2</span> The 3 access specifiers — the nightclub model 🎟️</h2>
+
+    <figure>
+      <svg viewBox="0 0 700 300" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- building outline -->
+        <rect x="180" y="30" width="340" height="240" rx="12" fill="#fff" stroke="#232323" stroke-width="2.5"/>
+        <text x="350" y="20" text-anchor="middle" font-size="14" font-weight="bold" fill="#232323">CLUB "emp"</text>
+        <!-- public zone -->
+        <rect x="195" y="45" width="310" height="60" rx="8" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+        <text x="350" y="70" text-anchor="middle" font-size="14" fill="#1e7a4f" font-weight="bold">🟢 PUBLIC — dance floor</text>
+        <text x="350" y="90" text-anchor="middle" font-size="12" fill="#1e7a4f">d, e, setData(), getData()</text>
+        <!-- protected zone -->
+        <rect x="195" y="120" width="310" height="60" rx="8" fill="#fdf6e3" stroke="#b8860b" stroke-width="2"/>
+        <text x="350" y="145" text-anchor="middle" font-size="14" fill="#b8860b" font-weight="bold">🟡 PROTECTED — family lounge</text>
+        <text x="350" y="165" text-anchor="middle" font-size="12" fill="#b8860b">this class + its children only</text>
+        <!-- private zone -->
+        <rect x="195" y="195" width="310" height="60" rx="8" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+        <text x="350" y="220" text-anchor="middle" font-size="14" fill="#c0392b" font-weight="bold">🔴 PRIVATE — vault</text>
+        <text x="350" y="240" text-anchor="middle" font-size="12" fill="#c0392b">a, b, c — staff (member functions) only</text>
+        <!-- outsider -->
+        <text x="80" y="75" text-anchor="middle" font-size="30">🧍</text>
+        <text x="80" y="100" text-anchor="middle" font-size="11" fill="#6b6b6b">main()</text>
+        <text x="80" y="114" text-anchor="middle" font-size="11" fill="#6b6b6b">(outsider)</text>
+        <!-- arrows -->
+        <g stroke-width="2.5" fill="none">
+          <path d="M105 70 L188 70" stroke="#1e7a4f" marker-end="url(#ga)"/>
+          <path d="M105 90 C 140 110, 150 140, 188 148" stroke="#b8860b" stroke-dasharray="6 5" marker-end="url(#ya)"/>
+          <path d="M105 100 C 140 150, 140 200, 188 222" stroke="#c0392b" stroke-dasharray="3 5" marker-end="url(#ra)"/>
+        </g>
+        <text x="135" y="60" font-size="12" fill="#1e7a4f">enters ✓</text>
+        <text x="118" y="140" font-size="12" fill="#b8860b">blocked ✗</text>
+        <text x="112" y="190" font-size="12" fill="#c0392b">blocked ✗</text>
+        <defs>
+          <marker id="ga" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1e7a4f"/></marker>
+          <marker id="ya" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#b8860b"/></marker>
+          <marker id="ra" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c0392b"/></marker>
+        </defs>
+      </svg>
+      <figcaption>fig 2 — main() can only reach the green zone; the compiler is the bouncer</figcaption>
+    </figure>
+
+    <table>
+      <tr><th>Accessible from…</th><th>private 🔴</th><th>protected 🟡</th><th>public 🟢</th></tr>
+      <tr><td>Inside the same class (member functions)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td>Derived (child) class</td><td class="no">✗</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td>Outside (e.g. <code>main()</code>, via object)</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td></tr>
+    </table>
+
+    <ul style="margin-top:12px;">
+      <li><b>Access is checked at compile time</b> — <code>affan.a = 5;</code> won't even build. The bouncer works before the party starts.</li>
+      <li><b>Default access in a <code>class</code> is private.</b> Write no specifier → everything is locked.</li>
+      <li><code>protected</code> = private + one exception: <b>children (derived classes) inherit the key</b>. It only matters once inheritance enters (Note on inheritance later).</li>
+    </ul>
+
+    <div class="memory">💡 <b>Memory hook:</b> 🔴 <b>private = vault</b> (staff only) · 🟡 <b>protected = family lounge</b> (family/children allowed) · 🟢 <b>public = dance floor</b> (everyone welcome). The <b>compiler is the bouncer</b> — it stops you at the door (compile time), not inside the club (runtime).</div>
+
+    <div class="interview">🎯 <b>Interview lines:</b><br>
+    ① "Private members are inaccessible outside the class — attempting it gives a <b>compile-time error</b>, since C++ enforces access control at compilation."<br>
+    ② "The only difference between <code>class</code> and <code>struct</code> is default access: class → private, struct → public."</div>
+  </div>
+
+  <!-- ============ WHY PRIVATE + SETTERS ============ -->
+  <div class="card">
+    <h2><span class="num">3</span> Why keep data private at all? (getter/setter pattern)</h2>
+    <ul>
+      <li>If <code>a</code> were public, <b>any code anywhere</b> could set it to garbage (<code>affan.a = -99999;</code>) — and you'd never know who did it.</li>
+      <li>A <b>setter</b> is a checkpoint: it can <b>validate</b> before accepting a value. A <b>getter</b> exposes the value <b>read-only</b>.</li>
+      <li>This is <b>encapsulation in action</b> — not hiding for secrecy, but <b>controlled access</b>.</li>
+    </ul>
+<pre><span class="k">void</span> setSalary(<span class="k">int</span> s) {
+    <span class="k">if</span> (s &gt;= 0)          <span class="c">// the checkpoint 🛂</span>
+        salary = s;      <span class="c">// only sane values get in</span>
+}</pre>
+    <div class="memory">💡 <b>Memory hook:</b> setter = <b>airport security</b> 🛂 — everyone passes through the scanner; no direct jumping onto the plane (the variable).</div>
+  </div>
+
+  <!-- ============ SCOPE RESOLUTION ============ -->
+  <div class="card">
+    <h2><span class="num">4</span> The <code>::</code> scope resolution operator</h2>
+    <ul>
+      <li>Inside the class we only <b>declared</b> <code>setData</code>; we <b>defined</b> it outside using <code>void emp :: setData(...)</code>.</li>
+      <li><code>emp ::</code> tells the compiler: <b>"this function belongs to class emp"</b> — its full address, not just its name.</li>
+      <li>Why define outside? Keeps the class body <b>short and readable</b> (like a table of contents), with implementations elsewhere — the standard style in real projects (declarations in <code>.h</code> files, definitions in <code>.cpp</code> files).</li>
+    </ul>
+    <figure>
+      <svg viewBox="0 0 700 150" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <rect x="40" y="35" width="250" height="80" rx="10" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+        <text x="165" y="65" text-anchor="middle" font-size="14" fill="#2456a6" font-weight="bold">class emp { ... }</text>
+        <text x="165" y="90" text-anchor="middle" font-size="12" fill="#2456a6">void setData(...);  ← promise</text>
+        <rect x="410" y="35" width="250" height="80" rx="10" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+        <text x="535" y="65" text-anchor="middle" font-size="14" fill="#1e7a4f" font-weight="bold">void emp::setData(...)</text>
+        <text x="535" y="90" text-anchor="middle" font-size="12" fill="#1e7a4f">{ ...body... }  ← fulfilment</text>
+        <path d="M295 75 L403 75" stroke="#6b6b6b" stroke-width="2.5" marker-end="url(#arr3)"/>
+        <text x="350" y="65" text-anchor="middle" font-size="13" fill="#6b6b6b" font-weight="bold">::</text>
+        <defs><marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b6b6b"/></marker></defs>
+      </svg>
+      <figcaption>fig 4 — declare inside (promise), define outside (fulfil), :: connects them</figcaption>
+    </figure>
+    <div class="memory">💡 <b>Memory hook:</b> <code>emp::setData</code> reads like a <b>home address</b> — "setData, resident of house emp". <code>::</code> = "belongs to".</div>
+  </div>
+
+  <!-- ============ THIS POINTER ============ -->
+  <div class="card">
+    <h2><span class="num">5</span> The <code>this</code> pointer — "I mean MY variable"</h2>
+    <p>Look at the name clash in our code: the <b>parameters</b> are named <code>a, b, c</code> and the <b>data members</b> are also <code>a, b, c</code>. Inside the function, plain <code>a</code> means the <b>nearest one — the parameter</b>. So how do we reach the member?</p>
+<pre><span class="k">void</span> emp :: setData(<span class="k">int</span> a, <span class="k">int</span> b, <span class="k">int</span> c) {
+    <span class="y">this</span>-&gt;a = a;   <span class="c">// MY a  =  parameter a</span>
+    <span class="y">this</span>-&gt;b = b;   <span class="c">// this → the object that called me</span>
+    <span class="y">this</span>-&gt;c = c;
+}</pre>
+    <ul>
+      <li><code>this</code> is a <b>hidden pointer</b> every (non-static) member function receives automatically — it <b>points to the object that called the function</b>.</li>
+      <li>When <code>affan.setData(9,8,8)</code> runs, <code>this = &amp;affan</code>. If <code>rahul.setData(...)</code> ran, <code>this = &amp;rahul</code>. Same function code, different <code>this</code>.</li>
+      <li>This is also <b>how one copy of a function serves all objects</b>: data members exist per-object, but member functions exist <b>once</b>, and <code>this</code> tells them whose data to work on.</li>
+      <li>Without a name clash, <code>this-&gt;</code> is optional — the compiler adds it silently. With a clash, it's <b>mandatory</b>.</li>
+    </ul>
+    <figure>
+      <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- function box -->
+        <rect x="270" y="20" width="180" height="55" rx="8" fill="#f3edfa" stroke="#6d4aa0" stroke-width="2"/>
+        <text x="360" y="43" text-anchor="middle" font-size="13" fill="#6d4aa0" font-weight="bold">setData()</text>
+        <text x="360" y="62" text-anchor="middle" font-size="11" fill="#6d4aa0">one copy in memory</text>
+        <!-- objects -->
+        <rect x="80" y="120" width="150" height="55" rx="8" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+        <text x="155" y="143" text-anchor="middle" font-size="13" fill="#1e7a4f" font-weight="bold">affan</text>
+        <text x="155" y="162" text-anchor="middle" font-size="11" fill="#232323">a=9 b=8 c=8</text>
+        <rect x="470" y="120" width="150" height="55" rx="8" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+        <text x="545" y="143" text-anchor="middle" font-size="13" fill="#1e7a4f" font-weight="bold">rahul</text>
+        <text x="545" y="162" text-anchor="middle" font-size="11" fill="#232323">a=1 b=2 c=3</text>
+        <!-- this arrows -->
+        <g stroke-width="2.2" fill="none">
+          <path d="M310 80 C 260 100, 210 105, 170 115" stroke="#c0392b" marker-end="url(#ra2)"/>
+          <path d="M410 80 C 460 100, 510 105, 545 115" stroke="#c0392b" stroke-dasharray="6 5" marker-end="url(#ra2)"/>
+        </g>
+        <text x="215" y="93" font-size="12" fill="#c0392b" font-weight="bold">this = &amp;affan</text>
+        <text x="470" y="93" text-anchor="end" font-size="12" fill="#c0392b" font-weight="bold">this = &amp;rahul</text>
+        <defs><marker id="ra2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c0392b"/></marker></defs>
+      </svg>
+      <figcaption>fig 5 — one function, many objects; `this` points at whoever called</figcaption>
+    </figure>
+    <div class="memory">💡 <b>Memory hook:</b> <code>this</code> = the word <b>"my"</b>. <code>this-&gt;a</code> literally reads as <b>"my a"</b>, versus the visitor <code>a</code> that walked in through the parameter door.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "<code>this</code> is an implicit pointer passed to every non-static member function, holding the address of the invoking object. It resolves naming conflicts between parameters and data members, and enables method chaining by returning <code>*this</code>."</div>
+  </div>
+
+  <!-- ============ FLOW OF PROGRAM ============ -->
+  <div class="card">
+    <h2><span class="num">6</span> Trace the program like the machine does 🖥️</h2>
+    <table>
+      <tr><th>Line in main()</th><th>What actually happens</th></tr>
+      <tr><td><code>emp affan;</code></td><td>Object created on the stack — memory for a,b,c,d,e allocated</td></tr>
+      <tr><td><code>affan.setData(9,8,8);</code></td><td>Allowed (public). Inside, <code>this=&amp;affan</code>; private a,b,c get 9,8,8 via the official doorway</td></tr>
+      <tr><td><code>affan.d = 9;</code></td><td>Allowed — d is public, direct access, no checkpoint</td></tr>
+      <tr><td><code>affan.e = 7;</code></td><td>Same — public</td></tr>
+      <tr><td><code>affan.getData();</code></td><td>Public method prints all five — it CAN see private members because it's <i>inside</i> the class (staff)</td></tr>
+      <tr><td><code>affan.a = 5;</code> (if uncommented)</td><td>❌ <b>Compile error:</b> 'a' is private within this context</td></tr>
+    </table>
+    <div class="warning">⚠️ <b>Design note:</b> our specimen makes d,e public just to demonstrate — in <b>real code, data members should almost always be private</b> and reached via methods. Public data = back to procedural chaos (Note 01!).</div>
+  </div>
+
+  <!-- ============ REVISION ============ -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li>🔴 <b>private</b> = vault (class only, <b>the default</b>) · 🟡 <b>protected</b> = family lounge (+ children) · 🟢 <b>public</b> = dance floor (everyone)</li>
+      <li>Access control is enforced by the <b>compiler</b> (compile-time errors) — the bouncer at the door</li>
+      <li><code>emp :: setData</code> — <b>::</b> = "belongs to"; declare inside, define outside</li>
+      <li><code>this</code> = hidden pointer to the calling object = the word <b>"my"</b>; mandatory when parameter names shadow member names</li>
+      <li>One function copy serves all objects — <code>this</code> tells it whose data to touch</li>
+      <li>Real code: <b>data private, interface public</b>. Always.</li>
+    </ul>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="definitions.html">← Note 02: OOP vocabulary</a>
+    <a href="index.html">home ↑</a>
+  </div>
+
+</div>
+</body>
+</html>
