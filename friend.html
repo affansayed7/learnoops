@@ -1,0 +1,635 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Friend Functions & Friend Classes — LearnOOPs Note 05</title>
+<style>
+  :root{
+    --paper:#fbfaf7;
+    --ink:#232323;
+    --grid:#e8e5dd;
+    --blue:#2456a6;
+    --red:#c0392b;
+    --green:#1e7a4f;
+    --amber:#b8860b;
+    --purple:#6d4aa0;
+    --soft:#6b6b6b;
+    --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink);
+    line-height:1.65;
+    padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--blue);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--amber);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .rl{font-size:15px;color:var(--soft);margin:4px 0 0 2px;}
+  .rl b{color:var(--purple);}
+  .memory{
+    border-left:4px solid var(--amber);background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  .warning{
+    border-left:4px solid var(--red);background:#fdecea;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .warning b{color:var(--red);}
+  code{
+    font-family:'Courier New',monospace;font-size:14px;
+    background:#f1efe8;padding:1px 6px;border-radius:4px;
+  }
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{
+    font-family:'Courier New',monospace;font-size:12px;color:var(--soft);
+    margin-top:8px;letter-spacing:.5px;
+  }
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .nav-bottom{
+    display:flex;justify-content:space-between;margin-top:36px;
+    font-family:'Courier New',monospace;font-size:14px;
+  }
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">&larr; LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 05</div>
+  <h1>Friends in C++ <span class="hl">🤝</span></h1>
+  <p class="subtitle">Sometimes an outsider needs the keys to your private room. That trusted outsider is a <code>friend</code> &mdash; functions and classes that break the encapsulation wall, <em>by invitation only</em>.</p>
+
+  <!-- ============ THE PROBLEM ============ -->
+  <div class="card">
+    <h2><span class="num">1</span> The problem friends solve 🚪</h2>
+    <ul>
+      <li>From Note 03: <b>private members are locked</b> — only the class's own methods can touch them. That's encapsulation.</li>
+      <li>But sometimes a <b>function outside the class</b>, or a <b>whole other class</b>, genuinely needs to read those private members &mdash; e.g. a function comparing two objects, or adding two objects together.</li>
+      <li>Making the data <code>public</code> just to allow this would <b>destroy encapsulation</b> for everyone. Too big a hammer.</li>
+      <li>C++'s answer: the class can <b>explicitly grant access</b> to a specific trusted outsider using the <code>friend</code> keyword. Access <b>by invitation only</b>.</li>
+    </ul>
+    <div class="memory">💡 <b>Memory hook:</b> Your house is <b>private</b> 🏠. You don't hand a key to the whole street (public). But you <b>give ONE spare key to a trusted friend</b> 🔑 — that's the <code>friend</code> keyword. <em>You</em> choose who; they can't let themselves in.</div>
+  </div>
+
+  <!-- ============ FRIEND FUNCTION ============ -->
+  <div class="card">
+    <h2><span class="num">2</span> Friend function — an outsider with a key</h2>
+    <ul>
+      <li>A <b>friend function is a non-member function</b> that the class grants access to its <b>private and protected</b> members.</li>
+      <li>You declare it inside the class with the <code>friend</code> keyword — but it is <b>NOT a member</b> of the class. It's defined outside, like a normal global function (no <code>ClassName::</code>).</li>
+      <li>Because it isn't a member, it has <b>NO <code>this</code> pointer</b> — it must receive the object as a <b>parameter</b> to work on it.</li>
+    </ul>
+
+<pre><span class="k">class</span> Employee {
+    <span class="k">int</span> salary;                 <span class="c">// private!</span>
+<span class="k">public</span>:
+    Employee(<span class="k">int</span> s) { salary = s; }
+
+    <span class="y">friend</span> <span class="k">void</span> showSalary(Employee e);  <span class="c">// grant access (declaration)</span>
+};
+
+<span class="c">// definition — NO Employee::, NO friend keyword here, takes object as param</span>
+<span class="k">void</span> showSalary(Employee e) {
+    cout &lt;&lt; <span class="g">"Salary = "</span> &lt;&lt; e.salary;   <span class="c">// ✅ can touch private salary</span>
+}
+
+<span class="k">int</span> main() {
+    Employee affan(50000);
+    showSalary(affan);              <span class="c">// called like a normal function, NOT affan.showSalary()</span>
+}</pre>
+
+    <figure>
+      <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- class box -->
+        <rect x="60" y="35" width="280" height="150" rx="12" fill="#fff" stroke="#232323" stroke-width="2.5"/>
+        <text x="200" y="26" text-anchor="middle" font-size="14" font-weight="bold" fill="#232323">class Employee</text>
+        <rect x="80" y="55" width="240" height="45" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="2"/>
+        <text x="200" y="76" text-anchor="middle" font-size="13" fill="#c0392b" font-weight="bold">🔴 private: salary</text>
+        <text x="200" y="92" text-anchor="middle" font-size="11" fill="#c0392b">normally locked to outsiders</text>
+        <rect x="80" y="115" width="240" height="50" rx="6" fill="#fdf6e3" stroke="#b8860b" stroke-width="2"/>
+        <text x="200" y="137" text-anchor="middle" font-size="12" fill="#b8860b" font-weight="bold">friend void showSalary(Employee);</text>
+        <text x="200" y="154" text-anchor="middle" font-size="11" fill="#b8860b">"I invite this outsider in"</text>
+        <!-- outside function -->
+        <rect x="440" y="80" width="200" height="60" rx="10" fill="#eaf1fb" stroke="#2456a6" stroke-width="2.5"/>
+        <text x="540" y="105" text-anchor="middle" font-size="13" fill="#2456a6" font-weight="bold">showSalary()</text>
+        <text x="540" y="124" text-anchor="middle" font-size="11" fill="#2456a6">lives OUTSIDE the class</text>
+        <!-- key arrow -->
+        <path d="M340 130 L436 115" stroke="#b8860b" stroke-width="2.5" fill="none" marker-end="url(#k5)"/>
+        <text x="388" y="112" text-anchor="middle" font-size="18">🔑</text>
+        <defs><marker id="k5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#b8860b"/></marker></defs>
+      </svg>
+      <figcaption>fig 2 — the class hands a key to an outside function</figcaption>
+    </figure>
+
+    <div class="warning">⚠️ <b>Call it right:</b> a friend function is called like a <b>normal function</b> — <code>showSalary(affan)</code>, NOT <code>affan.showSalary()</code>. It's not a member, so there's no dot-call on the object.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "A friend function is a non-member function granted access to a class's private/protected members. It has no <code>this</code> pointer and takes the object as an explicit parameter."</div>
+  </div>
+
+  <!-- ============ WHY / TWO OBJECTS ============ -->
+  <div class="card">
+    <h2><span class="num">3</span> The classic use — reaching into TWO objects</h2>
+    <ul>
+      <li>A member function has one implicit object (<code>this</code>). But what if you need to peek inside <b>two objects of the class at once</b> — like adding two Complex numbers, or comparing two employees' salaries?</li>
+      <li>A friend function takes <b>both objects as parameters</b> and can open both their private rooms.</li>
+    </ul>
+<pre><span class="k">class</span> Employee {
+    <span class="k">int</span> salary;
+<span class="k">public</span>:
+    Employee(<span class="k">int</span> s) { salary = s; }
+    <span class="y">friend</span> Employee addSalary(Employee, Employee);
+};
+
+Employee addSalary(Employee a, Employee b) {
+    <span class="k">return</span> Employee(a.salary + b.salary);  <span class="c">// reaches into BOTH privates</span>
+}</pre>
+    <div class="memory">💡 <b>Memory hook:</b> A member function is a <b>host inside one house</b>. A friend function is a <b>marriage counsellor</b> 💬 who is trusted to enter <b>both houses</b> and see what's private in each.</div>
+  </div>
+
+  <!-- ============ FRIEND CLASS ============ -->
+  <div class="card">
+    <h2><span class="num">4</span> Friend class — the whole family gets keys 👨‍👩‍👧</h2>
+    <ul>
+      <li>If class <b>B</b> is declared a <code>friend</code> of class <b>A</b>, then <b>every member function of B</b> can access A's private and protected members.</li>
+      <li>Useful when two classes are tightly coupled and one needs deep access to the other (e.g. a <code>LinkedList</code> and its <code>Node</code>).</li>
+    </ul>
+<pre><span class="k">class</span> Engine {
+    <span class="k">int</span> horsepower = 300;
+    <span class="y">friend class</span> Car;        <span class="c">// Car is my friend → all Car methods get in</span>
+};
+
+<span class="k">class</span> Car {
+<span class="k">public</span>:
+    <span class="k">void</span> show(Engine e) {
+        cout &lt;&lt; e.horsepower;   <span class="c">// ✅ allowed: Car is a friend of Engine</span>
+    }
+};</pre>
+
+    <figure>
+      <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <rect x="70" y="45" width="230" height="110" rx="12" fill="#fff" stroke="#c0392b" stroke-width="2.5"/>
+        <text x="185" y="36" text-anchor="middle" font-size="14" font-weight="bold" fill="#c0392b">class Engine</text>
+        <rect x="90" y="62" width="190" height="34" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="1.5"/>
+        <text x="185" y="84" text-anchor="middle" font-size="12" fill="#c0392b">🔴 private: horsepower</text>
+        <rect x="90" y="106" width="190" height="34" rx="6" fill="#fdf6e3" stroke="#b8860b" stroke-width="1.5"/>
+        <text x="185" y="128" text-anchor="middle" font-size="11.5" fill="#b8860b">friend class Car;</text>
+        <!-- car with multiple methods -->
+        <rect x="420" y="30" width="220" height="140" rx="12" fill="#eaf1fb" stroke="#2456a6" stroke-width="2.5"/>
+        <text x="530" y="22" text-anchor="middle" font-size="14" font-weight="bold" fill="#2456a6">class Car (the friend)</text>
+        <rect x="440" y="45" width="180" height="30" rx="5" fill="#fff" stroke="#2456a6"/>
+        <text x="530" y="65" text-anchor="middle" font-size="11.5" fill="#2456a6">show()  🔑</text>
+        <rect x="440" y="82" width="180" height="30" rx="5" fill="#fff" stroke="#2456a6"/>
+        <text x="530" y="102" text-anchor="middle" font-size="11.5" fill="#2456a6">tune()  🔑</text>
+        <rect x="440" y="119" width="180" height="30" rx="5" fill="#fff" stroke="#2456a6"/>
+        <text x="530" y="139" text-anchor="middle" font-size="11.5" fill="#2456a6">start() 🔑</text>
+        <path d="M300 120 C 360 120, 380 95, 418 90" stroke="#b8860b" stroke-width="2.5" fill="none" marker-end="url(#k5b)"/>
+        <text x="360" y="150" text-anchor="middle" font-size="11" fill="#b8860b" font-style="italic">ALL of Car's methods get keys</text>
+        <defs><marker id="k5b" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#b8860b"/></marker></defs>
+      </svg>
+      <figcaption>fig 4 — one "friend class Car;" hands keys to every Car method</figcaption>
+    </figure>
+
+    <div class="memory">💡 <b>Memory hook:</b> A friend function invites <b>one guest</b>. A friend class invites the <b>guest's entire family</b> 👨‍👩‍👧 — every member function of that class walks in freely.</div>
+  </div>
+
+  <!-- ============ MEMBER FRIEND FUNCTION ============ -->
+  <div class="card">
+    <h2><span class="num">5</span> Member function of one class as friend of another</h2>
+    <ul>
+      <li>You don't have to befriend a <b>whole</b> class — you can grant access to just <b>one specific member function</b> of another class.</li>
+      <li>This is the <b>most precise</b> form of friendship: only that single method gets the key, not the entire class.</li>
+      <li>It needs careful ordering (forward declaration), because the compiler must know both classes exist.</li>
+    </ul>
+<pre><span class="k">class</span> Engine;                 <span class="c">// forward declaration</span>
+
+<span class="k">class</span> Car {
+<span class="k">public</span>:
+    <span class="k">void</span> inspect(Engine&amp; e);     <span class="c">// declared now, defined later</span>
+};
+
+<span class="k">class</span> Engine {
+    <span class="k">int</span> horsepower = 300;
+    <span class="y">friend void</span> Car::inspect(Engine&amp; e);  <span class="c">// ONLY this one method is a friend</span>
+};
+
+<span class="c">// define after both classes are fully known</span>
+<span class="k">void</span> Car::inspect(Engine&amp; e) {
+    cout &lt;&lt; e.horsepower;       <span class="c">// ✅ this specific method has access</span>
+}</pre>
+    <div class="memory">💡 <b>Memory hook:</b> Three levels of trust: <b>one function</b> = a single guest 🧍 · <b>one member function of a class</b> = one specific person from a family 👤 · <b>friend class</b> = the whole family 👨‍👩‍👧. Pick the <em>smallest</em> circle that works.</div>
+  </div>
+
+  <!-- ============ PROPERTIES ============ -->
+  <div class="card">
+    <h2><span class="num">6</span> The rules interviewers test 📜</h2>
+    <ul>
+      <li><b>Friendship is granted, not taken.</b> A class chooses its friends from inside; an outsider can't declare itself a friend.</li>
+      <li><b>Not mutual (not symmetric).</b> If A says B is its friend, B can see A's privates — but A <b>cannot</b> see B's, unless B also befriends A.</li>
+      <li><b>Not inherited.</b> If A befriends B, B's <b>children do NOT</b> inherit the friendship. Friends of my parent are not automatically my friends.</li>
+      <li><b>Not transitive.</b> A friend of a friend is not a friend. (A befriends B, B befriends C — A and C are strangers.)</li>
+      <li><b>Can be declared in any section</b> — putting <code>friend</code> under private, public, or protected makes no difference; access specifiers don't apply to friend declarations.</li>
+      <li>A friend function has <b>no <code>this</code></b>; a friend <em>class's</em> methods use their own <code>this</code> as normal.</li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 700 170" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <!-- not mutual -->
+        <circle cx="130" cy="70" r="34" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+        <text x="130" y="76" text-anchor="middle" font-size="16" fill="#2456a6" font-weight="bold">A</text>
+        <circle cx="290" cy="70" r="34" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+        <text x="290" y="76" text-anchor="middle" font-size="16" fill="#1e7a4f" font-weight="bold">B</text>
+        <path d="M164 63 L256 63" stroke="#1e7a4f" stroke-width="2.2" fill="none" marker-end="url(#m5)"/>
+        <text x="210" y="52" text-anchor="middle" font-size="10" fill="#1e7a4f">B sees A ✓</text>
+        <path d="M256 84 L164 84" stroke="#c0392b" stroke-width="2.2" fill="none" stroke-dasharray="5 4" marker-end="url(#m5x)"/>
+        <text x="210" y="104" text-anchor="middle" font-size="10" fill="#c0392b">A sees B ✗</text>
+        <text x="210" y="140" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">not mutual</text>
+        <!-- not transitive -->
+        <circle cx="440" cy="70" r="30" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+        <text x="440" y="76" text-anchor="middle" font-size="15" fill="#2456a6" font-weight="bold">A</text>
+        <circle cx="540" cy="70" r="30" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+        <text x="540" y="76" text-anchor="middle" font-size="15" fill="#1e7a4f" font-weight="bold">B</text>
+        <circle cx="640" cy="70" r="30" fill="#f3edfa" stroke="#6d4aa0" stroke-width="2"/>
+        <text x="640" y="76" text-anchor="middle" font-size="15" fill="#6d4aa0" font-weight="bold">C</text>
+        <path d="M470 70 L510 70" stroke="#1e7a4f" stroke-width="2" fill="none" marker-end="url(#m5)"/>
+        <path d="M570 70 L610 70" stroke="#1e7a4f" stroke-width="2" fill="none" marker-end="url(#m5)"/>
+        <path d="M462 96 Q 540 150 618 96" stroke="#c0392b" stroke-width="2" fill="none" stroke-dasharray="5 4" marker-end="url(#m5x)"/>
+        <text x="540" y="140" text-anchor="middle" font-size="10" fill="#c0392b">A–C strangers ✗</text>
+        <defs>
+          <marker id="m5" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1e7a4f"/></marker>
+          <marker id="m5x" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c0392b"/></marker>
+        </defs>
+      </svg>
+      <figcaption>fig 6 — friendship is one-way and non-transitive</figcaption>
+    </figure>
+
+    <div class="interview">🎯 <b>Interview trap:</b> "Is friendship inherited or mutual?" — "Neither. Friendship is <b>not inherited</b>, <b>not mutual</b>, and <b>not transitive</b>. It must be explicitly granted by the class that owns the private data, each time."</div>
+  </div>
+
+  <!-- ============ PROS CONS ============ -->
+  <div class="card">
+    <h2><span class="num">7</span> Should you use friends? ⚖️</h2>
+    <table>
+      <tr><th>👍 Good reasons</th><th>👎 The cost</th></tr>
+      <tr><td>Operator overloading (e.g. <code>&lt;&lt;</code> for cout) often <b>needs</b> a friend</td><td>It <b>weakens encapsulation</b> — an outsider now depends on your private layout</td></tr>
+      <tr><td>Two classes that are genuinely tightly coupled</td><td>Overuse signals <b>poor design</b> — maybe the classes should be merged or redesigned</td></tr>
+      <tr><td>A function needing private access to <b>two objects</b> at once</td><td>Changes to private members can now <b>break friend code</b> too</td></tr>
+    </table>
+    <div class="warning">⚠️ <b>Rule of thumb:</b> friends are a <b>scalpel, not a default</b>. Use them when a clean design genuinely needs them (like <code>operator&lt;&lt;</code>), not to lazily bypass encapsulation.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "Friend functions are commonly used for operator overloading — especially <code>operator&lt;&lt;</code> and <code>operator&gt;&gt;</code> — where the left operand is a stream, not our class, so a member function won't fit."</div>
+  </div>
+
+  <!-- ============ REVISION ============ -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li><b>friend function</b> = non-member with access to privates · called like <code>f(obj)</code> · <b>no <code>this</code></b> · takes object as param</li>
+      <li><b>friend class</b> = ALL methods of that class get access</li>
+      <li><b>member friend function</b> = only ONE named method of another class gets access (needs forward declaration)</li>
+      <li>Friendship is <b>granted from inside</b>, <b>not mutual</b>, <b>not inherited</b>, <b>not transitive</b></li>
+      <li>Can be declared in <b>any</b> section (private/public/protected — doesn't matter)</li>
+      <li>Main real use: <b>operator overloading</b> &amp; tightly-coupled class pairs</li>
+      <li>🔑 hooks: friend fn = <b>one guest</b> · friend class = <b>whole family</b> · use the <b>smallest circle</b> that works</li>
+    </ul>
+  </div>
+
+  <!-- ============ INTERACTIVE QUIZ ============ -->
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Medium&rarr;hard. Watch for how friends are called, what they can access, and the not-mutual / not-inherited traps. Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="static-members.html">&larr; Note 04: Static members</a>
+    <a href="index.html">home &uarr;</a>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "How should this friend function be called?",
+    code:
+`class Emp {
+    int sal;
+public:
+    Emp(int s){ sal = s; }
+    friend void show(Emp e);
+};
+void show(Emp e){ cout << e.sal; }
+int main() {
+    Emp a(500);
+    // which call is correct?
+}`,
+    options: [
+      "a.show();",
+      "show(a);",
+      "Emp::show(a);",
+      "a->show();"
+    ],
+    correct: 1,
+    explain: "A friend function is NOT a member, so it is called like an ordinary function: show(a). There is no dot-call (a.show()) and no scope-qualified call (Emp::show) because it does not belong to the class — the class merely granted it access."
+  },
+  {
+    q: "What is wrong with this friend function definition?",
+    code:
+`class Emp {
+    int sal;
+public:
+    friend void show(Emp e);
+};
+void Emp::show(Emp e){   // <-- here
+    cout << e.sal;
+}`,
+    options: [
+      "Nothing, it's correct",
+      "The definition must not use Emp:: — a friend is not a member",
+      "friend keyword must be repeated in the definition",
+      "show must return int"
+    ],
+    correct: 1,
+    explain: "A friend function is defined like a normal free function — WITHOUT the ClassName:: qualifier, because it isn't a member of the class. Writing `void Emp::show` wrongly declares it as a member. Also note: the `friend` keyword appears only in the in-class declaration, never in the definition."
+  },
+  {
+    q: "Does this compile, and why?",
+    code:
+`class A {
+    int x = 10;
+    friend class B;
+};
+class B {
+public:
+    void read(A a){ cout << a.x; }
+};
+class C : public B {
+public:
+    void peek(A a){ cout << a.x; }   // (*)
+};`,
+    options: [
+      "Yes — C inherits B's friendship with A",
+      "No — friendship is not inherited, so C can't access a.x at (*)",
+      "Yes — all derived classes get friend access",
+      "No — friend class is illegal syntax"
+    ],
+    correct: 1,
+    explain: "Friendship is NOT inherited. B is a friend of A, so B's methods can see A's private x. But C (a child of B) does NOT inherit that friendship — line (*) trying to read a.x is a compile error. 'Friends of my parent aren't automatically my friends.'"
+  },
+  {
+    q: "Given `friend class B;` inside A, which is TRUE?",
+    code:
+`class A {
+    int secret;
+    friend class B;
+};`,
+    options: [
+      "A can now access B's private members",
+      "B's member functions can access A's private members",
+      "Both A and B can access each other's privates",
+      "Only B's constructor can access A"
+    ],
+    correct: 1,
+    explain: "Friendship is one-directional. `friend class B;` in A means B's methods may access A's privates. It does NOT give A any access to B, and it's not mutual. All of B's member functions (not just the constructor) receive the access."
+  },
+  {
+    q: "Why does a friend function have no `this` pointer?",
+    code: null,
+    options: [
+      "Because it's declared with the friend keyword",
+      "Because it is not a member of the class, so there's no invoking object",
+      "Because it can't access private members",
+      "It actually does have a this pointer"
+    ],
+    correct: 1,
+    explain: "`this` points to the object a member function was called on. A friend function is NOT a member — it's called as a free function and receives objects only as explicit parameters. With no invoking object, there is no `this`. That's exactly why it must take the object as an argument."
+  },
+  {
+    q: "Where can the friend declaration legally go?",
+    code:
+`class Emp {
+private:
+    friend void f(Emp);   // (1)
+public:
+    friend void g(Emp);   // (2)
+};`,
+    options: [
+      "Only (2) is valid — friends must be public",
+      "Only (1) is valid — friends must be private",
+      "Both are valid — section doesn't matter for friends",
+      "Neither compiles"
+    ],
+    correct: 2,
+    explain: "Access specifiers do NOT apply to friend declarations. A friend can be declared in the private, public, or protected section with identical effect. So both (1) and (2) grant the same access. Interviewers love this because it feels like it should matter — it doesn't."
+  },
+  {
+    q: "What does this print?",
+    code:
+`class Box {
+    int w = 4, h = 5;
+public:
+    friend int area(Box);
+};
+int area(Box b){ return b.w * b.h; }
+int main(){
+    Box x;
+    cout << area(x);
+}`,
+    options: ["9", "20", "Compile error — w,h private", "0"],
+    correct: 1,
+    explain: "area() is a friend, so it can read the private w and h. 4 * 5 = 20. The privacy of w and h is no barrier because the class explicitly granted area() access. Output: 20."
+  },
+  {
+    q: "This uses a member function of one class as a friend of another. What's the required first step?",
+    code:
+`// class Meter needs Display::render() as its friend
+class Display {
+public:
+    void render(/*Meter&*/);
+};
+class Meter {
+    int reading = 42;
+    friend void Display::render(Meter&);
+};`,
+    options: [
+      "Nothing extra is needed",
+      "A forward declaration of Meter before Display",
+      "Display must inherit from Meter",
+      "render() must be static"
+    ],
+    correct: 1,
+    explain: "For a specific member function (Display::render) to be named as a friend and take a Meter&, the compiler must already know Meter exists when Display is defined. So you need a forward declaration `class Meter;` before Display. Ordering/forward-declaration is the classic gotcha with member friend functions."
+  },
+  {
+    q: "Which statement about friendship is FALSE?",
+    code: null,
+    options: [
+      "Friendship is not transitive (friend of a friend isn't a friend)",
+      "A friend function can be declared in the private section",
+      "A class can declare another class as its friend to grant access to its own privates",
+      "If A is a friend of B, then B is automatically a friend of A"
+    ],
+    correct: 3,
+    explain: "The FALSE one: friendship is NOT mutual/automatic. If A is granted friendship by B (B says `friend class A;`), that lets A access B — it does NOT make B a friend of A. Mutual access requires each class to declare the other. The other three statements are all true."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div');
+  block.className = 'q-block';
+
+  const qnum = document.createElement('div');
+  qnum.className = 'q-num';
+  qnum.textContent = 'Q' + (qi + 1);
+  block.appendChild(qnum);
+
+  const qtext = document.createElement('div');
+  qtext.className = 'q-text';
+  qtext.textContent = item.q;
+  block.appendChild(qtext);
+
+  if (item.code) {
+    const pre = document.createElement('pre');
+    pre.className = 'q-code';
+    pre.textContent = item.code;
+    block.appendChild(pre);
+  }
+
+  const opts = document.createElement('div');
+  opts.className = 'q-opts';
+
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) {
+        btn.classList.add('correct');
+        score++;
+        document.getElementById('score').textContent = score;
+      } else {
+        btn.classList.add('wrong');
+        allBtns[item.correct].classList.add('correct');
+      }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+
+  block.appendChild(opts);
+  quizEl.appendChild(block);
+});
+</script>
+
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{
+    border:1px solid #e3e0d7;border-radius:10px;
+    padding:18px 18px 20px;margin:18px 0;background:#fff;
+  }
+  .q-num{
+    font-family:'Courier New',monospace;font-size:12px;font-weight:bold;
+    display:inline-block;background:var(--ink);color:var(--paper);
+    padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;
+  }
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{
+    font-family:'Courier New',monospace;font-size:13px;line-height:1.5;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;
+  }
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    font-family:Georgia,serif;font-size:15px;text-align:left;
+    padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;
+    background:#fbfaf7;cursor:pointer;transition:all .12s ease;
+    display:flex;align-items:center;gap:10px;color:var(--ink);
+  }
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{
+    font-family:'Courier New',monospace;font-weight:bold;font-size:13px;
+    background:#e8e5dd;color:var(--ink);border-radius:5px;
+    width:24px;height:24px;flex:0 0 24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{
+    border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;
+  }
+  .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{
+    border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;
+  }
+  .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{
+    margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;
+  }
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);}
+  .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{
+    text-align:center;font-family:'Courier New',monospace;font-weight:bold;
+    font-size:18px;margin-top:20px;padding:12px;
+    background:var(--ink);color:var(--paper);border-radius:8px;
+  }
+  #score{color:#8be0a4;}
+</style>
+
+</body>
+</html>
