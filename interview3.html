@@ -1,0 +1,567 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OOP Interview Crash Course — Part 3 | LearnOOPs</title>
+<style>
+  :root{
+    --paper:#fbfaf7; --ink:#232323; --grid:#e8e5dd;
+    --blue:#2456a6; --red:#c0392b; --green:#1e7a4f;
+    --amber:#b8860b; --purple:#6d4aa0; --soft:#6b6b6b; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink); line-height:1.65; padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--red);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--green);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:20px;font-size:17px;}
+  .partbar{display:flex;gap:10px;margin-bottom:26px;font-family:'Courier New',monospace;font-size:12px;flex-wrap:wrap;}
+  .chip{padding:5px 12px;border-radius:20px;border:1.5px solid #dedbd2;background:#fff;text-decoration:none;color:var(--ink);}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:bold;}
+  .toc{
+    background:#fff;border:1px solid #dedbd2;border-radius:10px;padding:20px 24px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  .toc h3{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px;}
+  .toc ol{padding-left:20px;font-size:15px;columns:2;column-gap:30px;}
+  .toc li{margin-bottom:5px;}
+  .toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted #b9b6ad;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px; box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:13px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:30px;height:30px;flex:0 0 30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  .industry{border-left:4px solid var(--purple);background:#f3edfa;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .industry b{color:var(--purple);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{font-family:'Courier New',monospace;font-size:12px;color:var(--soft);margin-top:8px;letter-spacing:.5px;}
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .solid-row{
+    display:flex;gap:14px;align-items:flex-start;
+    border:1px solid #e3e0d7;border-radius:9px;padding:14px 16px;margin-bottom:11px;background:#fcfbf8;
+  }
+  .solid-letter{
+    font-family:'Courier New',monospace;font-weight:bold;font-size:20px;
+    width:38px;height:38px;flex:0 0 38px;border-radius:8px;
+    display:flex;align-items:center;justify-content:center;color:#fff;
+  }
+  .solid-row h4{font-size:15.5px;margin-bottom:3px;}
+  .solid-row p{font-size:14.5px;color:#444;}
+  .solid-row .ex{font-size:13.5px;color:var(--soft);font-style:italic;margin-top:5px;}
+  .qa{border:1px solid #e3e0d7;border-radius:9px;margin-bottom:10px;background:#fff;overflow:hidden;}
+  .qa summary{cursor:pointer;padding:13px 16px;font-size:15.5px;font-weight:bold;list-style:none;display:flex;gap:10px;align-items:flex-start;}
+  .qa summary::-webkit-details-marker{display:none;}
+  .qa summary::before{
+    content:"Q";font-family:'Courier New',monospace;font-size:12px;
+    background:var(--blue);color:#fff;border-radius:5px;
+    width:22px;height:22px;flex:0 0 22px;display:flex;align-items:center;justify-content:center;margin-top:2px;
+  }
+  .qa[open] summary{background:#f7f5ef;border-bottom:1px solid #e3e0d7;}
+  .qa .ans{padding:14px 16px 16px;font-size:15px;background:#fcfbf8;}
+  .qa .ans .say{border-left:3px solid var(--green);background:#edf7f1;padding:9px 12px;border-radius:0 6px 6px 0;margin-top:8px;}
+  .qa .ans .say b{color:var(--green);}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+  .final{
+    background:linear-gradient(135deg,#232323,#3a3a3a);color:#fff;
+    border-radius:10px;padding:24px 26px;margin-top:26px;
+  }
+  .final h3{font-size:20px;margin-bottom:10px;color:#fff;}
+  .final ul{padding-left:20px;}
+  .final li{margin-bottom:7px;font-size:15px;opacity:.92;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">&larr; LearnOOPs home</a></div>
+  <div class="eyebrow">Interview Crash Course · Part 3 of 3</div>
+  <h1>The Gaps: <span class="hl">Operators, Templates, Smart Pointers &amp; SOLID</span> 🧰</h1>
+  <p class="subtitle">The topics that separate &ldquo;knows OOP theory&rdquo; from &ldquo;writes modern C++&rdquo;. Shorter than Parts 1&ndash;2, but this is where you earn the offer.</p>
+
+  <div class="partbar">
+    <a class="chip" href="interview.html">PART 1 · Foundations</a>
+    <a class="chip" href="interview2.html">PART 2 · Inheritance &rarr; Rule of Five</a>
+    <span class="chip on">PART 3 · Modern C++ &amp; Design</span>
+  </div>
+
+  <div class="toc">
+    <h3>// What's covered in Part 3</h3>
+    <ol>
+      <li><a href="#s1">Operator overloading</a></li>
+      <li><a href="#s2">Templates &amp; generic programming</a></li>
+      <li><a href="#s3">Smart pointers 🧠</a></li>
+      <li><a href="#s4">SOLID principles</a></li>
+      <li><a href="#s5">Design patterns (the big 4)</a></li>
+      <li><a href="#s6">const correctness &amp; explicit</a></li>
+      <li><a href="#s7">Casts &amp; dynamic_cast</a></li>
+      <li><a href="#s8">Exceptions &amp; safety</a></li>
+      <li><a href="#qa">🔥 Most-asked questions</a></li>
+      <li><a href="#final">🎤 Final walk-in kit</a></li>
+    </ol>
+  </div>
+
+  <!-- ========== 1 OPERATOR OVERLOADING ========== -->
+  <div class="card" id="s1">
+    <h2><span class="num">1</span> Operator overloading ➕</h2>
+    <div class="def"><b>Definition:</b> Giving an existing operator (<code>+</code>, <code>==</code>, <code>&lt;&lt;</code>&hellip;) a <b>user-defined meaning</b> for your own types. It's <b>compile-time polymorphism</b> &mdash; just a function with a funny name.</div>
+    <p style="margin-top:8px;"><code>a + b</code> is literally sugar for <code>a.operator+(b)</code> or <code>operator+(a, b)</code>. Nothing magic.</p>
+
+    <h3>Member vs Friend &mdash; the decision that gets asked</h3>
+    <table>
+      <tr><th></th><th>Member function</th><th>Friend / free function</th></tr>
+      <tr><td><b>Left operand</b></td><td>Must be your class (it's <code>this</code>)</td><td>Can be <b>anything</b></td></tr>
+      <tr><td><b>Params</b></td><td>One fewer (left is implicit)</td><td>All operands explicit</td></tr>
+      <tr><td><b>Use for</b></td><td><code>=</code> <code>[]</code> <code>()</code> <code>-&gt;</code> (<b>must</b> be members)</td><td><code>&lt;&lt;</code> <code>&gt;&gt;</code>, symmetric ops</td></tr>
+    </table>
+
+<pre><span class="k">class</span> Complex {
+    <span class="k">double</span> re, im;
+<span class="k">public</span>:
+    Complex(<span class="k">double</span> r = 0, <span class="k">double</span> i = 0) : re(r), im(i) {}
+
+    <span class="c">// MEMBER: left operand is *this</span>
+    Complex <span class="k">operator</span>+(<span class="k">const</span> Complex&amp; o) <span class="k">const</span> {
+        <span class="k">return</span> Complex(re + o.re, im + o.im);
+    }
+    <span class="k">bool</span> <span class="k">operator</span>==(<span class="k">const</span> Complex&amp; o) <span class="k">const</span> {
+        <span class="k">return</span> re == o.re &amp;&amp; im == o.im;
+    }
+
+    <span class="c">// FRIEND: left operand is ostream — CAN'T be a member!</span>
+    <span class="y">friend</span> ostream&amp; <span class="k">operator</span>&lt;&lt;(ostream&amp; os, <span class="k">const</span> Complex&amp; c) {
+        <span class="k">return</span> os &lt;&lt; c.re &lt;&lt; <span class="g">" + "</span> &lt;&lt; c.im &lt;&lt; <span class="g">"i"</span>;
+    }
+};
+
+Complex a(1,2), b(3,4);
+cout &lt;&lt; a + b;        <span class="c">// "4 + 6i"</span></pre>
+
+    <div class="warning">⚠️ <b>Why <code>&lt;&lt;</code> can't be a member:</b> the left operand would have to be <code>this</code> &mdash; but the left operand is <code>cout</code>, an <code>ostream</code>. You don't own <code>ostream</code>, so you can't add members to it. Hence a <b>friend free function</b>. <b>This is THE reason friends exist</b> &mdash; say it exactly like that.</div>
+
+    <h3>Rules &amp; limits</h3>
+    <ul>
+      <li><b>Cannot</b> overload: <code>.</code> &nbsp;<code>::</code> &nbsp;<code>?:</code> &nbsp;<code>sizeof</code> &nbsp;<code>.*</code> &mdash; memorise these five.</li>
+      <li><b>Cannot</b> invent new operators (<code>**</code>), change <b>arity</b>, or change <b>precedence</b>.</li>
+      <li>At least one operand must be a <b>user-defined type</b> &mdash; you can't redefine <code>int + int</code>.</li>
+      <li>Return by <b>value</b> for <code>+</code>; return by <b>reference</b> for <code>=</code>, <code>+=</code>, <code>&lt;&lt;</code> (enables chaining).</li>
+    </ul>
+
+    <h3>Copy assignment &mdash; the one they check</h3>
+<pre>Buffer&amp; <span class="k">operator</span>=(<span class="k">const</span> Buffer&amp; o) {
+    <span class="k">if</span> (<span class="y">this</span> == &amp;o) <span class="k">return</span> *<span class="y">this</span>;   <span class="c">// ① self-assignment guard!</span>
+    <span class="k">delete</span>[] data;                   <span class="c">// ② free old</span>
+    n = o.n;
+    data = <span class="k">new int</span>[n];               <span class="c">// ③ deep copy</span>
+    std::copy(o.data, o.data + n, data);
+    <span class="k">return</span> *<span class="y">this</span>;                    <span class="c">// ④ return ref → chaining a = b = c</span>
+}</pre>
+    <div class="warning">⚠️ <b>Forget the self-assignment check</b> and <code>x = x;</code> deletes the data then copies from the freed buffer. Interviewers <b>look for this line specifically.</b></div>
+    <div class="memory">💡 <b>Hook:</b> <code>a + b</code> = <b>&ldquo;a.operator+(b)&rdquo;</b> in a costume 🎭. Once you see operators as plain functions, everything clicks.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Operator overloading is compile-time polymorphism. I use members when the left operand is my type, and free/friend functions when it isn't &mdash; like <code>operator&lt;&lt;</code>, where the left operand is a stream. And I always guard <code>operator=</code> against self-assignment.&rdquo;</div>
+  </div>
+
+  <!-- ========== 2 TEMPLATES ========== -->
+  <div class="card" id="s2">
+    <h2><span class="num">2</span> Templates &amp; generic programming 🧬</h2>
+    <div class="def"><b>Definition:</b> Blueprints for <b>generating code</b> at compile time. One template &rarr; the compiler stamps out a separate concrete class/function for each type used. This is <b>compile-time polymorphism</b>.</div>
+<pre><span class="k">template</span>&lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> Stack {
+    std::vector&lt;T&gt; items;
+<span class="k">public</span>:
+    <span class="k">void</span> push(<span class="k">const</span> T&amp; x) { items.push_back(x); }
+    T pop() { T t = items.back(); items.pop_back(); <span class="k">return</span> t; }
+    <span class="k">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> items.empty(); }
+};
+
+Stack&lt;<span class="k">int</span>&gt; si;        <span class="c">// compiler generates Stack_int</span>
+Stack&lt;string&gt; ss;     <span class="c">// and a separate Stack_string</span></pre>
+
+    <h3>Templates vs Virtual functions &mdash; the real comparison</h3>
+    <table>
+      <tr><th></th><th>Templates</th><th>Virtual functions</th></tr>
+      <tr><td><b>Binding</b></td><td>Compile time</td><td>Runtime</td></tr>
+      <tr><td><b>Cost</b></td><td><b>Zero</b> &mdash; fully inlinable</td><td>One indirection</td></tr>
+      <tr><td><b>Types known</b></td><td>At build time</td><td>Can arrive later (plugins)</td></tr>
+      <tr><td><b>Code size</b></td><td>Grows (one copy per type)</td><td>One copy</td></tr>
+      <tr><td><b>Needs inheritance?</b></td><td>No &mdash; <b>duck typing</b></td><td>Yes &mdash; common base</td></tr>
+    </table>
+    <div class="memory">💡 <b>Hook:</b> Template = a <b>cookie cutter for cookie cutters</b> 🍪✂️✂️ &mdash; it stamps out classes, not objects.</div>
+    <div class="industry">🏭 <b>Industry framing:</b> The whole <b>STL</b> is templates &mdash; <code>vector&lt;T&gt;</code>, <code>map&lt;K,V&gt;</code>, <code>sort</code>. That's why <code>sort</code> on a <code>vector&lt;int&gt;</code> matches hand-written C speed: it's <b>generated and inlined</b> for <code>int</code>, no runtime dispatch. Java's generics erase to <code>Object</code>; C++ templates don't &mdash; hence the performance difference.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Templates give compile-time polymorphism with zero runtime cost, at the price of code bloat and build time. Virtual functions give runtime flexibility for one indirection. I pick templates when the types are known at compile time, virtual when they aren't &mdash; like a plugin system.&rdquo;</div>
+  </div>
+
+  <!-- ========== 3 SMART POINTERS ========== -->
+  <div class="card" id="s3">
+    <h2><span class="num">3</span> Smart pointers 🧠 &mdash; the modern C++ answer</h2>
+    <div class="def"><b>Definition:</b> RAII wrappers around raw pointers that <b>own</b> the memory and free it automatically in their destructor. This is the <b>Rule of Zero</b> in practice.</div>
+
+    <table>
+      <tr><th>Type</th><th>Ownership</th><th>Cost</th><th>Use when</th></tr>
+      <tr><td><code>unique_ptr&lt;T&gt;</code></td><td><b>Exclusive</b> — one owner, movable, <b>not copyable</b></td><td><b>Zero</b> overhead</td><td><b>Default choice.</b> 90% of cases</td></tr>
+      <tr><td><code>shared_ptr&lt;T&gt;</code></td><td><b>Shared</b> — reference counted, freed at count 0</td><td>Atomic refcount + control block</td><td>Genuinely shared ownership</td></tr>
+      <tr><td><code>weak_ptr&lt;T&gt;</code></td><td><b>None</b> — observes a shared_ptr without owning</td><td>Small</td><td><b>Breaking cycles</b>; caches</td></tr>
+    </table>
+
+<pre><span class="c">// ❌ old way — leaks if anything throws between new and delete</span>
+Shape* s = <span class="k">new</span> Circle();
+<span class="k">delete</span> s;
+
+<span class="c">// ✅ modern — freed automatically, exception-safe</span>
+<span class="k">auto</span> s = std::make_unique&lt;Circle&gt;();
+
+<span class="c">// ✅ polymorphic container — no slicing, no leaks</span>
+std::vector&lt;std::unique_ptr&lt;Shape&gt;&gt; shapes;
+shapes.push_back(std::make_unique&lt;Circle&gt;());
+shapes.push_back(std::make_unique&lt;Square&gt;());
+<span class="k">for</span> (<span class="k">auto</span>&amp; sh : shapes) sh-&gt;draw();   <span class="c">// virtual dispatch ✅</span></pre>
+
+    <h3>The circular reference problem &mdash; why <code>weak_ptr</code> exists</h3>
+    <figure>
+      <svg viewBox="0 0 700 165" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <text x="165" y="16" text-anchor="middle" font-weight="bold" fill="#c0392b" font-size="12">❌ shared ↔ shared</text>
+        <rect x="55" y="40" width="95" height="42" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+        <text x="102" y="58" text-anchor="middle" font-weight="bold">Node A</text>
+        <text x="102" y="73" text-anchor="middle">count = 1</text>
+        <rect x="185" y="40" width="95" height="42" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+        <text x="232" y="58" text-anchor="middle" font-weight="bold">Node B</text>
+        <text x="232" y="73" text-anchor="middle">count = 1</text>
+        <path d="M152 52 L182 52" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#w1)"/>
+        <path d="M182 70 L152 70" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#w1)"/>
+        <text x="165" y="104" text-anchor="middle" font-size="10" fill="#c0392b">each holds the other alive</text>
+        <text x="165" y="120" text-anchor="middle" font-size="10" fill="#c0392b" font-weight="bold">count never hits 0 → LEAK 💧</text>
+        <text x="165" y="140" text-anchor="middle" font-size="10" fill="#c0392b">refcounting can't collect cycles</text>
+        <line x1="350" y1="20" x2="350" y2="150" stroke="#dedbd2" stroke-width="2" stroke-dasharray="6 6"/>
+        <text x="530" y="16" text-anchor="middle" font-weight="bold" fill="#1e7a4f" font-size="12">✅ shared → weak</text>
+        <rect x="420" y="40" width="95" height="42" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="467" y="58" text-anchor="middle" font-weight="bold">Node A</text>
+        <text x="467" y="73" text-anchor="middle">count = 1</text>
+        <rect x="550" y="40" width="95" height="42" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="597" y="58" text-anchor="middle" font-weight="bold">Node B</text>
+        <text x="597" y="73" text-anchor="middle">count = 0 ✓</text>
+        <path d="M517 52 L547 52" stroke="#1e7a4f" stroke-width="1.8" fill="none" marker-end="url(#w2)"/>
+        <text x="532" y="46" text-anchor="middle" font-size="9" fill="#1e7a4f">shared</text>
+        <path d="M547 70 L517 70" stroke="#6d4aa0" stroke-width="1.8" fill="none" stroke-dasharray="4 3" marker-end="url(#w3)"/>
+        <text x="532" y="84" text-anchor="middle" font-size="9" fill="#6d4aa0">weak</text>
+        <text x="530" y="112" text-anchor="middle" font-size="10" fill="#1e7a4f">weak doesn't bump the count</text>
+        <text x="530" y="128" text-anchor="middle" font-size="10" fill="#1e7a4f" font-weight="bold">cycle broken → both freed ✅</text>
+        <defs>
+          <marker id="w1" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#c0392b"/></marker>
+          <marker id="w2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1e7a4f"/></marker>
+          <marker id="w3" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#6d4aa0"/></marker>
+        </defs>
+      </svg>
+      <figcaption>fig 3 — two shared_ptrs pointing at each other never die</figcaption>
+    </figure>
+
+    <div class="warning">⚠️ <b>Always use <code>make_unique</code> / <code>make_shared</code></b>, not <code>new</code>. Reasons: exception safety, and <code>make_shared</code> allocates the object + control block in <b>one</b> allocation instead of two.</div>
+    <div class="memory">💡 <b>Hook:</b> <code>unique_ptr</code> = <b>the only key to a flat</b> 🔑 (you can hand it over, not photocopy it). <code>shared_ptr</code> = <b>flatmates</b> 👥 — last one out turns off the lights. <code>weak_ptr</code> = <b>a visitor</b> 👀 who can look but doesn't pay rent, so they never stop the lease ending.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;I default to <code>unique_ptr</code> — zero overhead and it expresses exclusive ownership. <code>shared_ptr</code> only when ownership is genuinely shared, since the atomic refcount isn't free. <code>weak_ptr</code> to break cycles, because reference counting can't collect them.&rdquo;</div>
+  </div>
+
+  <!-- ========== 4 SOLID ========== -->
+  <div class="card" id="s4">
+    <h2><span class="num">4</span> SOLID principles 🏛️</h2>
+    <p style="margin-bottom:14px;">Five design principles. Asked directly (&ldquo;explain SOLID&rdquo;) <b>and</b> indirectly (&ldquo;how would you design X?&rdquo;). Learn the one-liners cold.</p>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--blue)">S</div>
+      <div>
+        <h4>Single Responsibility</h4>
+        <p>A class should have <b>one reason to change</b> — one job.</p>
+        <p class="ex">❌ <code>Invoice</code> that calculates totals <i>and</i> prints PDFs <i>and</i> emails customers → ✅ split into <code>Invoice</code>, <code>InvoiceRenderer</code>, <code>InvoiceMailer</code>.</p>
+      </div>
+    </div>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--green)">O</div>
+      <div>
+        <h4>Open/Closed</h4>
+        <p><b>Open</b> for extension, <b>closed</b> for modification. Add features by adding code, not editing working code.</p>
+        <p class="ex">❌ a <code>switch</code> on payment type you edit every quarter → ✅ a <code>PaymentMethod</code> interface; add a class, touch nothing.</p>
+      </div>
+    </div>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--amber)">L</div>
+      <div>
+        <h4>Liskov Substitution</h4>
+        <p>A derived object must be usable <b>anywhere</b> its base is expected, <b>without surprises</b>.</p>
+        <p class="ex">❌ the classic: <code>Square : Rectangle</code>. <code>setWidth(5)</code> on a Square also changes height — code written against Rectangle breaks. They're not substitutable.</p>
+      </div>
+    </div>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--purple)">I</div>
+      <div>
+        <h4>Interface Segregation</h4>
+        <p>Many <b>small focused</b> interfaces beat one fat one. Don't force a class to implement methods it doesn't need.</p>
+        <p class="ex">❌ <code>IMachine{print,scan,fax}</code> forcing a simple printer to stub out <code>fax()</code> → ✅ <code>IPrinter</code>, <code>IScanner</code>, <code>IFax</code>.</p>
+      </div>
+    </div>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--red)">D</div>
+      <div>
+        <h4>Dependency Inversion</h4>
+        <p>Depend on <b>abstractions</b>, not concretions. High-level policy shouldn't import low-level details.</p>
+        <p class="ex">❌ <code>OrderService</code> that <code>new</code>s a <code>MySQLDatabase</code> → ✅ it takes an <code>IDatabase&amp;</code>. Now you can inject a mock in tests.</p>
+      </div>
+    </div>
+
+    <div class="industry">🏭 <b>Industry framing:</b> The honest reason SOLID matters: <b>testability</b>. Dependency Inversion is what makes unit testing possible — if <code>OrderService</code> hard-codes a real database, you can't test it without one. Mentioning testing shows you've shipped software, not just read about it.</div>
+    <div class="memory">💡 <b>Hook:</b> <b>S</b>ingle · <b>O</b>pen · <b>L</b>iskov · <b>I</b>nterface · <b>D</b>ependency. If you blank on one, the <b>L</b> is Liskov — remember the <b>square/rectangle</b> story and you'll reconstruct it.</div>
+  </div>
+
+  <!-- ========== 5 PATTERNS ========== -->
+  <div class="card" id="s5">
+    <h2><span class="num">5</span> Design patterns &mdash; the four that get asked 🧩</h2>
+
+    <h3>① Singleton &mdash; exactly one instance</h3>
+<pre><span class="k">class</span> Logger {
+    Logger() = <span class="k">default</span>;                     <span class="c">// private ctor</span>
+<span class="k">public</span>:
+    Logger(<span class="k">const</span> Logger&amp;) = <span class="k">delete</span>;           <span class="c">// no copying</span>
+    Logger&amp; <span class="k">operator</span>=(<span class="k">const</span> Logger&amp;) = <span class="k">delete</span>;
+
+    <span class="k">static</span> Logger&amp; get() {
+        <span class="k">static</span> Logger instance;             <span class="y">// thread-safe since C++11</span>
+        <span class="k">return</span> instance;
+    }
+    <span class="k">void</span> log(<span class="k">const</span> string&amp; m) { cout &lt;&lt; m; }
+};
+Logger::get().log(<span class="g">"started"</span>);</pre>
+    <div class="warning">⚠️ <b>Bonus points:</b> that's the <b>Meyers Singleton</b>. The local <code>static</code> is initialised <b>lazily and thread-safely</b> (guaranteed by C++11). Also mention the criticism: singletons are <b>global state</b> — they hurt testability, which is why many teams avoid them.</div>
+
+    <h3>② Factory &mdash; create without naming the concrete class</h3>
+<pre><span class="k">static</span> std::unique_ptr&lt;Shape&gt; create(<span class="k">const</span> string&amp; type) {
+    <span class="k">if</span> (type == <span class="g">"circle"</span>) <span class="k">return</span> std::make_unique&lt;Circle&gt;();
+    <span class="k">if</span> (type == <span class="g">"square"</span>) <span class="k">return</span> std::make_unique&lt;Square&gt;();
+    <span class="k">return</span> <span class="k">nullptr</span>;
+}</pre>
+    <p style="font-size:15px;">Caller gets a <code>Shape</code> without knowing which subclass exists. Object creation lives in <b>one</b> place.</p>
+
+    <h3>③ Strategy &mdash; swap an algorithm at runtime</h3>
+<pre><span class="k">class</span> Sorter {
+    std::unique_ptr&lt;SortStrategy&gt; strategy;      <span class="c">// composition!</span>
+<span class="k">public</span>:
+    <span class="k">void</span> setStrategy(std::unique_ptr&lt;SortStrategy&gt; s) { strategy = std::move(s); }
+    <span class="k">void</span> run(vector&lt;<span class="k">int</span>&gt;&amp; v) { strategy-&gt;sort(v); }   <span class="c">// behaviour is swappable</span>
+};</pre>
+    <p style="font-size:15px;">This is <b>&ldquo;prefer composition over inheritance&rdquo;</b> made concrete — behaviour is a <i>member you can replace</i>, not a base class you're stuck with.</p>
+
+    <h3>④ Observer &mdash; publish/subscribe</h3>
+<pre><span class="k">class</span> Subject {
+    vector&lt;Observer*&gt; observers;
+<span class="k">public</span>:
+    <span class="k">void</span> attach(Observer* o) { observers.push_back(o); }
+    <span class="k">void</span> notify() { <span class="k">for</span> (<span class="k">auto</span>* o : observers) o-&gt;update(); }
+};</pre>
+    <p style="font-size:15px;">One-to-many: when the subject changes, all subscribers hear about it. Every UI event system and message bus you've used.</p>
+
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Patterns are named solutions to recurring design problems — a shared vocabulary. I use Strategy and Factory routinely; I'm cautious with Singleton because it's global state that makes testing harder.&rdquo;</div>
+  </div>
+
+  <!-- ========== 6 CONST ========== -->
+  <div class="card" id="s6">
+    <h2><span class="num">6</span> <code>const</code> correctness &amp; <code>explicit</code></h2>
+<pre><span class="k">class</span> Account {
+    <span class="k">double</span> balance;
+<span class="k">public</span>:
+    <span class="k">explicit</span> Account(<span class="k">double</span> b) : balance(b) {}   <span class="c">// no implicit conversion</span>
+
+    <span class="k">double</span> get() <span class="k">const</span> { <span class="k">return</span> balance; }        <span class="c">// ✅ won't modify object</span>
+    <span class="k">void</span> deposit(<span class="k">double</span> a) { balance += a; }       <span class="c">// non-const</span>
+};
+
+<span class="k">const</span> Account a(500);
+a.get();        <span class="c">// ✅ const method on const object</span>
+<span class="c">// a.deposit(1); // ❌ error — non-const method on const object</span></pre>
+    <ul>
+      <li><b><code>const</code> after the function</b> = &ldquo;I won't modify <code>*this</code>&rdquo;. Only const methods are callable on const objects.</li>
+      <li>Read pointers <b>right to left</b>: <code>const int* p</code> = pointer to const int (data locked) · <code>int* const p</code> = const pointer (pointer locked) · <code>const int* const p</code> = both.</li>
+      <li><b><code>explicit</code></b> blocks implicit conversions. Without it, <code>Account a = 500;</code> silently compiles — a number becoming an Account. Rule: <b>mark single-argument constructors <code>explicit</code></b>.</li>
+      <li><b><code>mutable</code></b> lets one member change even inside a const method (legit use: a cache or a mutex).</li>
+    </ul>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;const correctness is compiler-enforced documentation. It's easiest to apply from the start — retrofitting it into a codebase is painful, because const propagates.&rdquo;</div>
+  </div>
+
+  <!-- ========== 7 CASTS ========== -->
+  <div class="card" id="s7">
+    <h2><span class="num">7</span> The four casts &amp; <code>dynamic_cast</code> 🎯</h2>
+    <table>
+      <tr><th>Cast</th><th>Purpose</th><th>Checked?</th></tr>
+      <tr><td><code>static_cast</code></td><td>Related types, upcasts, numeric conversions</td><td>Compile time only</td></tr>
+      <tr><td><code>dynamic_cast</code></td><td><b>Safe downcast</b> in a polymorphic hierarchy</td><td class="yes">✓ Runtime (RTTI)</td></tr>
+      <tr><td><code>const_cast</code></td><td>Add/remove <code>const</code></td><td>No</td></tr>
+      <tr><td><code>reinterpret_cast</code></td><td>Bit-level reinterpretation</td><td class="no">✗ Dangerous</td></tr>
+    </table>
+<pre>Base* b = <span class="k">new</span> Derived();
+
+Derived* d = <span class="k">dynamic_cast</span>&lt;Derived*&gt;(b);
+<span class="k">if</span> (d) { <span class="c">/* ✅ it really was a Derived */</span> }
+<span class="k">else</span>   { <span class="c">/* ✅ returns nullptr on failure — SAFE */</span> }
+
+Derived* d2 = <span class="k">static_cast</span>&lt;Derived*&gt;(b);   <span class="r">// ⚠️ no check — UB if wrong</span></pre>
+    <ul>
+      <li><code>dynamic_cast</code> needs a <b>polymorphic type</b> (≥1 virtual function) — it reads RTTI via the vptr.</li>
+      <li>On <b>pointers</b> it returns <code>nullptr</code> on failure; on <b>references</b> it throws <code>std::bad_cast</code>.</li>
+      <li><b>C-style casts are banned</b> in modern code: they silently pick whichever cast fits, and they're ungreppable.</li>
+    </ul>
+    <div class="warning">⚠️ <b>Design smell:</b> reaching for <code>dynamic_cast</code> often means a <b>missing virtual function</b>. If you're asking &ldquo;what type is this?&rdquo;, the object should probably just <i>do</i> the thing polymorphically instead.</div>
+  </div>
+
+  <!-- ========== 8 EXCEPTIONS ========== -->
+  <div class="card" id="s8">
+    <h2><span class="num">8</span> Exceptions &amp; safety 🛡️</h2>
+<pre><span class="k">try</span> {
+    process();
+} <span class="k">catch</span> (<span class="k">const</span> std::runtime_error&amp; e) {   <span class="c">// ✅ catch by const ref</span>
+    cerr &lt;&lt; e.what();
+} <span class="k">catch</span> (...) { <span class="c">/* catch-all */</span> }</pre>
+    <ul>
+      <li><b>Catch by <code>const</code> reference</b> — catching by value <b>slices</b> the exception object (Part 2's slicing, striking again 🔪).</li>
+      <li><b>Never let an exception escape a destructor</b> — during stack unwinding that calls <code>std::terminate</code>. Destructors are implicitly <code>noexcept</code> in C++11.</li>
+      <li>Order <code>catch</code> blocks <b>derived → base</b>; the first match wins, so a base-first order swallows everything.</li>
+      <li><b>RAII is what makes exceptions safe</b> — stack unwinding runs destructors, so resources release themselves. Raw <code>new</code>/<code>delete</code> between a throw and a catch = leak.</li>
+    </ul>
+    <div class="memory">💡 <b>The three guarantees:</b> <b>basic</b> (no leaks, valid state) · <b>strong</b> (commit-or-rollback — the operation either fully succeeds or changes nothing) · <b>nothrow</b> (<code>noexcept</code> — never fails).</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Exception safety and RAII are the same conversation. If every resource is owned by an object, stack unwinding cleans up automatically and I don't need <code>finally</code>.&rdquo;</div>
+  </div>
+
+  <!-- ========== Q&A ========== -->
+  <div class="card" id="qa">
+    <h2><span class="num">🔥</span> Most-asked questions (Part 3 scope)</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:14px;">Answer out loud first — recognition isn't recall.</p>
+
+    <details class="qa"><summary>Why must `operator&lt;&lt;` be a friend/free function and not a member?</summary>
+      <div class="ans">Because for a member operator, the <b>left operand must be the class itself</b> (it becomes <code>this</code>). In <code>cout &lt;&lt; obj</code> the left operand is <code>std::ostream</code> — a type you don't own and can't add members to. So it must be a free function taking <code>(ostream&amp;, const T&amp;)</code>, and it's declared a <b>friend</b> if it needs private access. Return <code>ostream&amp;</code> to allow chaining.
+      <div class="say"><b>Say:</b> &ldquo;This is the canonical legitimate use of friend.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>Which operators cannot be overloaded?</summary>
+      <div class="ans">Five: <code>.</code> (member access), <code>::</code> (scope resolution), <code>?:</code> (ternary), <code>sizeof</code>, and <code>.*</code> (pointer-to-member). Also: you can't invent new operators, change arity, or change precedence/associativity. At least one operand must be a user-defined type.</div>
+    </details>
+
+    <details class="qa"><summary>What's the one line people forget in `operator=`?</summary>
+      <div class="ans">The <b>self-assignment guard</b>: <code>if (this == &amp;other) return *this;</code>. Without it, <code>x = x;</code> deletes the buffer and then copies from the freed memory — undefined behaviour. Also return <code>*this</code> by reference so <code>a = b = c;</code> chains. (The elegant alternative worth naming: the <b>copy-and-swap idiom</b>, which is self-assignment-safe and exception-safe by construction.)</div>
+    </details>
+
+    <details class="qa"><summary>unique_ptr vs shared_ptr — when do you use each?</summary>
+      <div class="ans"><code>unique_ptr</code> is <b>exclusive ownership</b>: movable, not copyable, <b>zero overhead</b> versus a raw pointer. It's the default. <code>shared_ptr</code> is <b>shared ownership</b> via an atomic reference count and a separate control block — real cost, so only use it when ownership is genuinely shared and the last owner is unknown. Rule of thumb: reach for <code>unique_ptr</code> first and only upgrade if you must.</div>
+    </details>
+
+    <details class="qa"><summary>What problem does weak_ptr solve?</summary>
+      <div class="ans"><b>Circular references.</b> Two <code>shared_ptr</code>s pointing at each other keep both counts at 1 forever — the memory never frees, because reference counting can't collect cycles. A <code>weak_ptr</code> observes without incrementing the count, breaking the cycle. To use it you call <code>lock()</code>, which returns a <code>shared_ptr</code> if the object still exists or null if it's gone. Also used for caches.
+      <div class="say"><b>Hook:</b> a visitor who doesn't pay rent, so they can't stop the lease ending.</div></div>
+    </details>
+
+    <details class="qa"><summary>Why prefer make_unique over new?</summary>
+      <div class="ans">Exception safety and clarity — with <code>make_unique</code> there's no window where a raw pointer exists unowned. And <code>make_shared</code> specifically allocates the object and its control block in a <b>single</b> allocation instead of two, which is faster and more cache-friendly. Plus you never write <code>delete</code>, so you can't forget it.</div>
+    </details>
+
+    <details class="qa"><summary>Templates vs virtual functions — how do you choose?</summary>
+      <div class="ans">Templates: compile-time, <b>zero runtime cost</b>, fully inlinable, no inheritance needed (duck typing) — but code bloat and slower builds, and all types must be known at compile time. Virtual: runtime dispatch for one indirection, single code copy, and types can arrive later (plugins, dynamic libraries). <b>Choose templates when types are known at build time; virtual when they're not.</b></div>
+    </details>
+
+    <details class="qa"><summary>Explain SOLID.</summary>
+      <div class="ans"><b>S</b>ingle Responsibility — one reason to change. <b>O</b>pen/Closed — open to extension, closed to modification. <b>L</b>iskov Substitution — a derived object must work anywhere its base does, without surprises. <b>I</b>nterface Segregation — many small interfaces over one fat one. <b>D</b>ependency Inversion — depend on abstractions, not concretions.
+      <div class="say"><b>Add this:</b> &ldquo;The practical payoff is testability — Dependency Inversion is what lets me inject a mock instead of a real database.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>Give a concrete Liskov violation.</summary>
+      <div class="ans">The classic: <code>Square</code> inheriting from <code>Rectangle</code>. Mathematically a square <i>is a</i> rectangle, so it feels right. But <code>rect.setWidth(5)</code> on a Square must also change the height to stay square — so any code written against <code>Rectangle</code> ("set width to 5, height stays 4, area is 20") <b>breaks silently</b>. They're not behaviourally substitutable, so the inheritance is wrong even though the "is-a" sentence sounds true. The lesson: <b>is-a is about behaviour, not vocabulary.</b></div>
+    </details>
+
+    <details class="qa"><summary>How do you implement a thread-safe Singleton in C++?</summary>
+      <div class="ans">The <b>Meyers Singleton</b>: a function-local <code>static</code> instance returned by reference, with the constructor private and copy/assignment <code>= delete</code>d. Since C++11 the standard guarantees function-local static initialisation is <b>thread-safe and lazy</b>, so no manual locking is needed. Worth adding the caveat: singletons are global state and hurt testability — many teams prefer dependency injection.</div>
+    </details>
+
+    <details class="qa"><summary>What does `explicit` do and why does it matter?</summary>
+      <div class="ans">It blocks <b>implicit conversions</b> through a constructor. Without it, a single-argument constructor doubles as a conversion: <code>Account a = 500;</code> compiles, silently turning a number into an Account, and functions taking <code>Account</code> accept raw doubles. That's a bug factory. <b>Rule: mark single-argument constructors explicit</b> unless you deliberately want the conversion.</div>
+    </details>
+
+    <details class="qa"><summary>static_cast vs dynamic_cast?</summary>
+      <div class="ans"><code>static_cast</code> is resolved at <b>compile time</b> with no runtime check — fine for upcasts and numeric conversions, but a wrong downcast is undefined behaviour. <code>dynamic_cast</code> performs a <b>runtime check</b> using RTTI (via the vptr), so it requires a polymorphic type; it returns <code>nullptr</code> for a failed pointer cast or throws <code>std::bad_cast</code> for a reference cast. Use <code>dynamic_cast</code> when a downcast might legitimately fail — but frequent need for it usually signals a missing virtual function.</div>
+    </details>
+
+    <details class="qa"><summary>Why catch exceptions by const reference?</summary>
+      <div class="ans">Catching by <b>value slices</b> the exception — if you catch <code>std::exception</code> by value but a <code>std::runtime_error</code> was thrown, the derived part is cut off and <code>what()</code> loses its message. Catching by reference preserves the dynamic type and polymorphism, and avoids a copy. <code>const</code> because you're inspecting, not modifying. Also order catch blocks derived → base, since the first match wins.</div>
+    </details>
+
+    <details class="qa"><summary>Why must destructors not throw?</summary>
+      <div class="ans">If an exception is already propagating and a destructor throws during stack unwinding, you have <b>two active exceptions</b> and the runtime calls <code>std::terminate</code> — instant crash, no recovery. That's why destructors are implicitly <code>noexcept</code> in C++11. If cleanup can genuinely fail, swallow it or expose a separate <code>close()</code> that callers can check.</div>
+    </details>
+
+    <details class="qa"><summary>What are the exception safety guarantees?</summary>
+      <div class="ans">Three levels: <b>basic</b> — no leaks, object remains valid but possibly changed; <b>strong</b> — commit-or-rollback, the operation either fully succeeds or leaves everything untouched (<code>vector::push_back</code> gives this); <b>nothrow/noexcept</b> — cannot fail (swap, destructors, move operations should be). <b>RAII is how you get the basic guarantee for free</b>, and copy-and-swap is a standard route to the strong one.</div>
+    </details>
+  </div>
+
+  <div class="final" id="final">
+    <h3>🎤 The complete walk-in kit — 3 parts, one page of lines</h3>
+    <ul>
+      <li>&ldquo;OOP gives importance to <b>data over functions</b>&rdquo; — the definition that sounds studied</li>
+      <li>&ldquo;Encapsulation hides <b>data</b>; abstraction hides <b>complexity</b>&rdquo; — the #1 asked distinction</li>
+      <li>&ldquo;Any polymorphic base needs a <b>virtual destructor</b>&rdquo; — the leak everyone's seen</li>
+      <li>&ldquo;<b>Prefer composition over inheritance</b>&rdquo; — interfaces to inherit, composition to reuse</li>
+      <li>&ldquo;I aim for the <b>Rule of Zero</b>&rdquo; — let <code>unique_ptr</code> and <code>vector</code> manage resources</li>
+      <li>&ldquo;<b><code>unique_ptr</code> by default</b>, <code>shared_ptr</code> only for genuine shared ownership&rdquo;</li>
+      <li>&ldquo;I always mark overrides <code>override</code>&rdquo; — silent bugs become compile errors</li>
+      <li>&ldquo;The practical payoff of SOLID is <b>testability</b>&rdquo; — shows you've shipped, not just read</li>
+      <li>&ldquo;Frequent <code>dynamic_cast</code> usually means a <b>missing virtual function</b>&rdquo;</li>
+      <li>Always tie a concept to a <b>real system</b> — payments, plugins, locks, caches</li>
+    </ul>
+    <p style="margin-top:14px;font-size:14.5px;opacity:.8;font-style:italic;">Reading these ≠ saying these. Close the page and explain three of them out loud, right now. That's the actual test.</p>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="interview2.html">&larr; Part 2: Inheritance &rarr; Rule of Five</a>
+    <a href="index.html">home &uarr;</a>
+  </div>
+
+</div>
+</body>
+</html>
