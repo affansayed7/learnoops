@@ -1,0 +1,706 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OOP Interview Crash Course — Part 2 | LearnOOPs</title>
+<style>
+  :root{
+    --paper:#fbfaf7; --ink:#232323; --grid:#e8e5dd;
+    --blue:#2456a6; --red:#c0392b; --green:#1e7a4f;
+    --amber:#b8860b; --purple:#6d4aa0; --soft:#6b6b6b; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink); line-height:1.65; padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--red);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--purple);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:20px;font-size:17px;}
+  .partbar{display:flex;gap:10px;margin-bottom:26px;font-family:'Courier New',monospace;font-size:12px;flex-wrap:wrap;}
+  .chip{padding:5px 12px;border-radius:20px;border:1.5px solid #dedbd2;background:#fff;text-decoration:none;color:var(--ink);}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:bold;}
+  .toc{
+    background:#fff;border:1px solid #dedbd2;border-radius:10px;padding:20px 24px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  .toc h3{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px;}
+  .toc ol{padding-left:20px;font-size:15px;columns:2;column-gap:30px;}
+  .toc li{margin-bottom:5px;}
+  .toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted #b9b6ad;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px; box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:13px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:30px;height:30px;flex:0 0 30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  .industry{border-left:4px solid var(--purple);background:#f3edfa;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .industry b{color:var(--purple);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{font-family:'Courier New',monospace;font-size:12px;color:var(--soft);margin-top:8px;letter-spacing:.5px;}
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .qa{border:1px solid #e3e0d7;border-radius:9px;margin-bottom:10px;background:#fff;overflow:hidden;}
+  .qa summary{cursor:pointer;padding:13px 16px;font-size:15.5px;font-weight:bold;list-style:none;display:flex;gap:10px;align-items:flex-start;}
+  .qa summary::-webkit-details-marker{display:none;}
+  .qa summary::before{
+    content:"Q";font-family:'Courier New',monospace;font-size:12px;
+    background:var(--blue);color:#fff;border-radius:5px;
+    width:22px;height:22px;flex:0 0 22px;display:flex;align-items:center;justify-content:center;margin-top:2px;
+  }
+  .qa[open] summary{background:#f7f5ef;border-bottom:1px solid #e3e0d7;}
+  .qa .ans{padding:14px 16px 16px;font-size:15px;background:#fcfbf8;}
+  .qa .ans .say{border-left:3px solid var(--green);background:#edf7f1;padding:9px 12px;border-radius:0 6px 6px 0;margin-top:8px;}
+  .qa .ans .say b{color:var(--green);}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+  .final{
+    background:linear-gradient(135deg,#1e7a4f,#2d9c68);color:#fff;
+    border-radius:10px;padding:24px 26px;margin-top:26px;
+  }
+  .final h3{font-size:20px;margin-bottom:10px;color:#fff;}
+  .final ul{padding-left:20px;}
+  .final li{margin-bottom:6px;font-size:15px;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">&larr; LearnOOPs home</a></div>
+  <div class="eyebrow">Interview Crash Course · Part 2 of 2</div>
+  <h1>OOP A&ndash;Z: <span class="hl">Inheritance &rarr; Rule of Five</span> 🧬</h1>
+  <p class="subtitle">The half that actually decides the interview. Virtual functions, vtables, slicing, deep copy &mdash; where candidates get separated.</p>
+
+  <div class="partbar">
+    <a class="chip" href="interview.html">PART 1 · Foundations &rarr; Friends</a>
+    <span class="chip on">PART 2 · Inheritance &rarr; Rule of Five</span>
+  </div>
+
+  <div class="toc">
+    <h3>// What's covered in Part 2</h3>
+    <ol>
+      <li><a href="#s1">Inheritance &amp; its types</a></li>
+      <li><a href="#s2">Access modes of inheritance</a></li>
+      <li><a href="#s3">Constructor/destructor order</a></li>
+      <li><a href="#s4">The diamond problem</a></li>
+      <li><a href="#s5">Polymorphism: compile vs runtime</a></li>
+      <li><a href="#s6">Overloading vs Overriding vs Hiding</a></li>
+      <li><a href="#s7">Virtual functions &amp; the vtable</a></li>
+      <li><a href="#s8">Virtual destructors ☠️</a></li>
+      <li><a href="#s9">Object slicing 🔪</a></li>
+      <li><a href="#s10">Abstract classes &amp; interfaces</a></li>
+      <li><a href="#s11">Shallow vs deep copy</a></li>
+      <li><a href="#s12">Rule of Three / Five / Zero</a></li>
+      <li><a href="#qa">🔥 Most-asked questions</a></li>
+    </ol>
+  </div>
+
+  <!-- ========== 1 ========== -->
+  <div class="card" id="s1">
+    <h2><span class="num">1</span> Inheritance 🧬</h2>
+    <div class="def"><b>Definition:</b> A mechanism where a <b>derived class</b> acquires the properties and behaviour of a <b>base class</b>, enabling reuse and expressing an <b>&ldquo;is-a&rdquo;</b> relationship.</div>
+
+    <h3>The 5 types</h3>
+    <figure>
+      <svg viewBox="0 0 700 330" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <!-- single -->
+        <text x="75" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">SINGLE</text>
+        <rect x="40" y="25" width="70" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="75" y="42" text-anchor="middle">A</text>
+        <line x1="75" y1="51" x2="75" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="40" y="75" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="75" y="92" text-anchor="middle">B</text>
+        <!-- multilevel -->
+        <text x="225" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">MULTILEVEL</text>
+        <rect x="190" y="25" width="70" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="225" y="42" text-anchor="middle">A</text>
+        <line x1="225" y1="51" x2="225" y2="68" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="190" y="68" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="225" y="85" text-anchor="middle">B</text>
+        <line x1="225" y1="94" x2="225" y2="111" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="190" y="111" width="70" height="26" rx="4" fill="#f3edfa" stroke="#6d4aa0" stroke-width="1.6"/><text x="225" y="128" text-anchor="middle">C</text>
+        <!-- multiple -->
+        <text x="400" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">MULTIPLE</text>
+        <rect x="330" y="25" width="65" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="362" y="42" text-anchor="middle">A</text>
+        <rect x="410" y="25" width="65" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="442" y="42" text-anchor="middle">B</text>
+        <line x1="362" y1="51" x2="395" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="442" y1="51" x2="410" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="370" y="75" width="65" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="402" y="92" text-anchor="middle">C</text>
+        <!-- hierarchical -->
+        <text x="590" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">HIERARCHICAL</text>
+        <rect x="558" y="25" width="65" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="590" y="42" text-anchor="middle">A</text>
+        <line x1="590" y1="51" x2="545" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="590" y1="51" x2="590" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="590" y1="51" x2="635" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="512" y="75" width="58" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="541" y="92" text-anchor="middle">B</text>
+        <rect x="578" y="75" width="24" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="590" y="92" text-anchor="middle">C</text>
+        <rect x="610" y="75" width="58" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="639" y="92" text-anchor="middle">D</text>
+        <!-- hybrid -->
+        <text x="350" y="180" text-anchor="middle" font-weight="bold" fill="#c0392b">HYBRID (mix — where the 💎 diamond appears)</text>
+        <rect x="315" y="192" width="70" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="350" y="209" text-anchor="middle">A</text>
+        <line x1="335" y1="218" x2="285" y2="245" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="365" y1="218" x2="415" y2="245" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="240" y="245" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="275" y="262" text-anchor="middle">B</text>
+        <rect x="390" y="245" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="425" y="262" text-anchor="middle">C</text>
+        <line x1="285" y1="271" x2="330" y2="298" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="415" y1="271" x2="370" y2="298" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="315" y="298" width="70" height="26" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/><text x="350" y="315" text-anchor="middle">D</text>
+        <defs><marker id="u" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#6b6b6b"/></marker></defs>
+      </svg>
+      <figcaption>fig 1 — single · multilevel · multiple · hierarchical · hybrid</figcaption>
+    </figure>
+
+    <div class="warning">⚠️ <b>&ldquo;is-a&rdquo; vs &ldquo;has-a&rdquo;:</b> Inherit only for a true <b>is-a</b> relationship (a <code>SavingsAccount</code> <i>is an</i> <code>Account</code>). If it's <b>has-a</b>, use <b>composition</b> (a <code>Car</code> <i>has an</i> <code>Engine</code> &mdash; don't inherit Engine!).</div>
+    <div class="industry">🏭 <b>Industry framing:</b> Modern guidance is <b>&ldquo;prefer composition over inheritance&rdquo;</b>. Deep hierarchies are rigid &mdash; a change in the base ripples everywhere, and you can't swap behaviour at runtime. Inheritance for <b>interfaces</b>, composition for <b>reuse</b>. Saying this unprompted signals real experience.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Inheritance models an is-a relationship and enables polymorphism. But I default to composition for code reuse &mdash; inheritance couples the derived class to the base's implementation, so I reserve it for genuine subtyping.&rdquo;</div>
+  </div>
+
+  <!-- ========== 2 ========== -->
+  <div class="card" id="s2">
+    <h2><span class="num">2</span> Access modes &mdash; public / protected / private inheritance</h2>
+    <p>C++ is unusual here: <b>how</b> you inherit changes what the outside world sees.</p>
+    <table>
+      <tr><th>Base member ↓ / Mode →</th><th>public</th><th>protected</th><th>private</th></tr>
+      <tr><td><b>public</b></td><td>public</td><td>protected</td><td>private</td></tr>
+      <tr><td><b>protected</b></td><td>protected</td><td>protected</td><td>private</td></tr>
+      <tr><td><b>private</b></td><td class="no">✗ not accessible</td><td class="no">✗ not accessible</td><td class="no">✗ not accessible</td></tr>
+    </table>
+    <ul style="margin-top:12px;">
+      <li><b>Private members are NEVER inherited-accessible</b> &mdash; they exist in the object, but the derived class can't touch them directly. Use <code>protected</code> if children need access.</li>
+      <li><b>Default mode:</b> <code>class D : B</code> is <b>private</b> inheritance. <code>struct D : B</code> is <b>public</b>. (Another class/struct difference!)</li>
+      <li><b>public</b> = is-a (the only one that models subtyping) · <b>private</b> = implemented-in-terms-of (composition in disguise).</li>
+    </ul>
+    <div class="memory">💡 <b>Hook:</b> The mode is a <b>ceiling, not a floor</b> 🔽 &mdash; it can only make things <i>more</i> restricted, never more open.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Only public inheritance models is-a. Private inheritance means implemented-in-terms-of &mdash; and it's usually better expressed as composition.&rdquo;</div>
+  </div>
+
+  <!-- ========== 3 ========== -->
+  <div class="card" id="s3">
+    <h2><span class="num">3</span> Construction &amp; destruction order 🔄</h2>
+    <div class="def"><b>Rule:</b> Construction goes <b>base &rarr; derived</b>. Destruction goes <b>derived &rarr; base</b>. Always the exact reverse.</div>
+<pre><span class="k">class</span> Base {
+<span class="k">public</span>:
+    Base()  { cout &lt;&lt; <span class="g">"Base ctor\n"</span>; }
+    ~Base() { cout &lt;&lt; <span class="g">"Base dtor\n"</span>; }
+};
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+<span class="k">public</span>:
+    Derived()  { cout &lt;&lt; <span class="g">"Derived ctor\n"</span>; }
+    ~Derived() { cout &lt;&lt; <span class="g">"Derived dtor\n"</span>; }
+};
+<span class="k">int</span> main() { Derived d; }
+
+<span class="c">// Output:
+// Base ctor      ← foundation first
+// Derived ctor
+// Derived dtor   ← reverse
+// Base dtor</span></pre>
+    <div class="memory">💡 <b>Hook:</b> 🏗️ <b>Building a house</b> &mdash; foundation before walls. <b>Demolishing</b> &mdash; roof before foundation. You can't stand on a floor that isn't built yet.</div>
+    <div class="warning">⚠️ <b>Why it matters:</b> the base is fully constructed before the derived constructor body runs &mdash; which is exactly why <b>calling a virtual function in a constructor doesn't dispatch to the derived override</b>. During the base constructor, the object <i>is</i> still a Base.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Base constructs first so the derived class can rely on a fully-initialised base. Destruction reverses it. And that ordering is precisely why virtual dispatch in a constructor resolves to the base version.&rdquo;</div>
+  </div>
+
+  <!-- ========== 4 ========== -->
+  <div class="card" id="s4">
+    <h2><span class="num">4</span> The diamond problem 💎</h2>
+    <div class="def"><b>Problem:</b> In hybrid/multiple inheritance, if B and C both inherit from A, and D inherits from both B and C &mdash; D ends up with <b>two copies of A</b>. Calls become <b>ambiguous</b>.</div>
+
+    <figure>
+      <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="12">
+        <!-- broken -->
+        <text x="175" y="16" text-anchor="middle" font-weight="bold" fill="#c0392b" font-size="12">❌ WITHOUT virtual</text>
+        <rect x="140" y="26" width="70" height="26" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/><text x="175" y="43" text-anchor="middle">A</text>
+        <line x1="155" y1="52" x2="110" y2="82" stroke="#6b6b6b" stroke-width="1.6"/>
+        <line x1="195" y1="52" x2="240" y2="82" stroke="#6b6b6b" stroke-width="1.6"/>
+        <rect x="75" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="110" y="99" text-anchor="middle">B</text>
+        <rect x="205" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="240" y="99" text-anchor="middle">C</text>
+        <line x1="110" y1="108" x2="155" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <line x1="240" y1="108" x2="195" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <rect x="140" y="138" width="70" height="26" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/><text x="175" y="155" text-anchor="middle">D</text>
+        <text x="175" y="186" text-anchor="middle" font-size="10.5" fill="#c0392b">D holds A twice → d.x is ambiguous</text>
+        <text x="175" y="204" text-anchor="middle" font-size="10.5" fill="#c0392b">error: request for 'x' is ambiguous</text>
+        <line x1="350" y1="20" x2="350" y2="215" stroke="#dedbd2" stroke-width="2" stroke-dasharray="6 6"/>
+        <!-- fixed -->
+        <text x="525" y="16" text-anchor="middle" font-weight="bold" fill="#1e7a4f" font-size="12">✅ WITH virtual</text>
+        <rect x="490" y="26" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/><text x="525" y="43" text-anchor="middle">A</text>
+        <line x1="505" y1="52" x2="460" y2="82" stroke="#1e7a4f" stroke-width="1.8" stroke-dasharray="4 3"/>
+        <line x1="545" y1="52" x2="590" y2="82" stroke="#1e7a4f" stroke-width="1.8" stroke-dasharray="4 3"/>
+        <rect x="425" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="460" y="99" text-anchor="middle">B</text>
+        <rect x="555" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="590" y="99" text-anchor="middle">C</text>
+        <line x1="460" y1="108" x2="505" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <line x1="590" y1="108" x2="545" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <rect x="490" y="138" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="525" y="155" text-anchor="middle">D</text>
+        <text x="525" y="186" text-anchor="middle" font-size="10.5" fill="#1e7a4f">ONE shared A → d.x resolves cleanly</text>
+        <text x="525" y="204" text-anchor="middle" font-size="10.5" fill="#1e7a4f">class B : virtual public A</text>
+      </svg>
+      <figcaption>fig 4 — virtual inheritance collapses the duplicate base into one</figcaption>
+    </figure>
+
+<pre><span class="k">class</span> A { <span class="k">public</span>: <span class="k">int</span> x; };
+<span class="k">class</span> B : <span class="y">virtual</span> <span class="k">public</span> A {};   <span class="c">// virtual → share the A</span>
+<span class="k">class</span> C : <span class="y">virtual</span> <span class="k">public</span> A {};
+<span class="k">class</span> D : <span class="k">public</span> B, <span class="k">public</span> C {};
+
+D d;
+d.x = 5;   <span class="c">// ✅ unambiguous — only one A exists</span>
+
+<span class="c">// Without `virtual`: error: request for member 'x' is ambiguous
+// Workaround without virtual: d.B::x = 5;  ← ugly, two separate x's</span></pre>
+    <div class="memory">💡 <b>Hook:</b> 💎 Without virtual, D inherits <b>two grandparents that are the same person</b> &mdash; &ldquo;whose eyes do I have?&rdquo; is genuinely unanswerable. <code>virtual</code> says: <b>there's only one grandpa</b>.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;The diamond problem is ambiguity from a duplicated base in multiple inheritance. C++ solves it with virtual inheritance, which makes derived classes share a single base subobject. Java sidesteps it entirely by banning multiple class inheritance and allowing only multiple interfaces.&rdquo;</div>
+  </div>
+
+  <!-- ========== 5 ========== -->
+  <div class="card" id="s5">
+    <h2><span class="num">5</span> Polymorphism 🎭 &mdash; compile-time vs runtime</h2>
+    <div class="def"><b>Definition:</b> &ldquo;Many forms&rdquo; &mdash; the same interface producing different behaviour depending on the actual type or arguments.</div>
+    <table>
+      <tr><th></th><th>Compile-time (static)</th><th>Runtime (dynamic)</th></tr>
+      <tr><td><b>Achieved by</b></td><td>Function overloading, operator overloading, templates</td><td><b>Virtual functions</b> + base pointer/reference</td></tr>
+      <tr><td><b>Bound when</b></td><td>Compilation (early binding)</td><td>Execution (late binding)</td></tr>
+      <tr><td><b>Mechanism</b></td><td>Name mangling / signature match</td><td><b>vtable + vptr</b> lookup</td></tr>
+      <tr><td><b>Cost</b></td><td>Zero &mdash; it's resolved &amp; inlinable</td><td>One indirection; blocks inlining</td></tr>
+      <tr><td><b>Flexibility</b></td><td>Fixed at build</td><td>Decided by the object at runtime</td></tr>
+    </table>
+    <div class="memory">💡 <b>Hook:</b> Compile-time = choosing your meal from a <b>fixed menu</b> before you arrive 📋. Runtime = the <b>chef's surprise</b> 🍽️ &mdash; you find out what it is when it lands.</div>
+    <div class="industry">🏭 <b>Industry framing:</b> Runtime polymorphism is <b>how plugins work</b>. Your renderer holds <code>vector&lt;Shape*&gt;</code> and calls <code>draw()</code>. Ship a new <code>Hexagon</code> class next year &mdash; the renderer <b>doesn't change one line</b>. That's the Open/Closed Principle in the flesh.</div>
+  </div>
+
+  <!-- ========== 6 ========== -->
+  <div class="card" id="s6">
+    <h2><span class="num">6</span> Overloading vs Overriding vs Hiding ⚠️</h2>
+    <p>The three get confused constantly. Nail the distinction and you look sharp.</p>
+    <table>
+      <tr><th></th><th>Overloading</th><th>Overriding</th><th>Hiding (shadowing)</th></tr>
+      <tr><td><b>Where</b></td><td>Same class</td><td>Base &amp; derived</td><td>Base &amp; derived</td></tr>
+      <tr><td><b>Signature</b></td><td><b>Different</b> params</td><td><b>Identical</b> signature</td><td>Different params, same name</td></tr>
+      <tr><td><b>virtual needed?</b></td><td>No</td><td><b>Yes</b> (in base)</td><td>No</td></tr>
+      <tr><td><b>Binding</b></td><td>Compile-time</td><td><b>Runtime</b></td><td>Compile-time</td></tr>
+    </table>
+<pre><span class="k">class</span> Base {
+<span class="k">public</span>:
+    <span class="k">virtual void</span> speak() { cout &lt;&lt; <span class="g">"Base\n"</span>; }
+    <span class="k">void</span> greet(<span class="k">int</span>) {}
+    <span class="k">void</span> greet(string) {}          <span class="c">// OVERLOADING (same class, diff params)</span>
+};
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+<span class="k">public</span>:
+    <span class="k">void</span> speak() <span class="y">override</span> { cout &lt;&lt; <span class="g">"Derived\n"</span>; }  <span class="c">// OVERRIDING</span>
+    <span class="k">void</span> greet(<span class="k">double</span>) {}    <span class="c">// ⚠️ HIDES both Base::greet overloads!</span>
+};
+
+Derived d;
+d.greet(5);          <span class="c">// ❌ error! Base::greet(int) is HIDDEN, not overloaded</span>
+d.Base::greet(5);    <span class="c">// ✅ works — or add `using Base::greet;` in Derived</span></pre>
+    <div class="warning">⚠️ <b>Name hiding is the trap:</b> declaring <b>any</b> <code>greet</code> in Derived hides <b>every</b> <code>greet</code> from Base &mdash; overload resolution never crosses class scope. Fix with <code>using Base::greet;</code>.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Overloading is compile-time, same scope, different signatures. Overriding is runtime, requires <code>virtual</code> and an identical signature. Name hiding is the accidental one &mdash; any same-named member in the derived class hides the whole base overload set.&rdquo;</div>
+    <div class="memory">💡 <b>Always write <code>override</code></b> (C++11). If your signature doesn't actually match a virtual base function, the compiler <b>errors instead of silently creating a new function</b>. Free bug prevention &mdash; mention this and you sound senior.</div>
+  </div>
+
+  <!-- ========== 7 ========== -->
+  <div class="card" id="s7">
+    <h2><span class="num">7</span> Virtual functions &amp; the vtable ⚙️</h2>
+    <div class="def"><b>Virtual function:</b> a member function declared <code>virtual</code> in the base, allowing a derived class to <b>override</b> it, so the call is resolved by the object's <b>actual (dynamic) type</b> at runtime &mdash; not the pointer's type.</div>
+
+    <h3>How it actually works under the hood</h3>
+    <ul>
+      <li>Any class with ≥1 virtual function gets a <b>vtable</b>: a static, per-class array of function pointers.</li>
+      <li>Every <b>object</b> of that class gets a hidden <b>vptr</b> pointing to its class's vtable. (This is why <code>sizeof</code> grows by a pointer!)</li>
+      <li>A call <code>p-&gt;draw()</code> compiles to: <b>follow vptr &rarr; index into vtable &rarr; call that address</b>. One extra indirection.</li>
+      <li>The vptr is set by the <b>constructor</b> &mdash; hence virtual calls in constructors resolve to the base version.</li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 700 250" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <!-- objects -->
+        <text x="90" y="16" text-anchor="middle" font-weight="bold" fill="#1e7a4f" font-size="12">OBJECTS</text>
+        <rect x="30" y="30" width="120" height="52" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="90" y="48" text-anchor="middle" font-weight="bold">Circle c</text>
+        <rect x="40" y="55" width="100" height="20" rx="3" fill="#fff" stroke="#c0392b"/>
+        <text x="90" y="69" text-anchor="middle" fill="#c0392b">vptr ●</text>
+        <rect x="30" y="120" width="120" height="52" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="90" y="138" text-anchor="middle" font-weight="bold">Square s</text>
+        <rect x="40" y="145" width="100" height="20" rx="3" fill="#fff" stroke="#c0392b"/>
+        <text x="90" y="159" text-anchor="middle" fill="#c0392b">vptr ●</text>
+        <!-- vtables -->
+        <text x="330" y="16" text-anchor="middle" font-weight="bold" fill="#2456a6" font-size="12">VTABLES (one per class)</text>
+        <rect x="240" y="28" width="180" height="60" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.8"/>
+        <text x="330" y="45" text-anchor="middle" font-weight="bold" fill="#2456a6">Circle vtable</text>
+        <rect x="250" y="52" width="160" height="18" rx="3" fill="#fff" stroke="#2456a6"/>
+        <text x="330" y="65" text-anchor="middle">[0] draw → Circle::draw</text>
+        <rect x="250" y="70" width="160" height="16" rx="3" fill="#fff" stroke="#2456a6"/>
+        <text x="330" y="82" text-anchor="middle">[1] area → Circle::area</text>
+        <rect x="240" y="118" width="180" height="60" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.8"/>
+        <text x="330" y="135" text-anchor="middle" font-weight="bold" fill="#2456a6">Square vtable</text>
+        <rect x="250" y="142" width="160" height="18" rx="3" fill="#fff" stroke="#2456a6"/>
+        <text x="330" y="155" text-anchor="middle">[0] draw → Square::draw</text>
+        <rect x="250" y="160" width="160" height="16" rx="3" fill="#fff" stroke="#2456a6"/>
+        <text x="330" y="172" text-anchor="middle">[1] area → Square::area</text>
+        <!-- code -->
+        <rect x="470" y="55" width="205" height="95" rx="6" fill="#232323"/>
+        <text x="485" y="75" fill="#8be0a4" font-size="10.5">Shape* p = &amp;c;</text>
+        <text x="485" y="92" fill="#eee" font-size="10.5">p->draw();  → "Circle"</text>
+        <text x="485" y="115" fill="#8be0a4" font-size="10.5">p = &amp;s;</text>
+        <text x="485" y="132" fill="#eee" font-size="10.5">p->draw();  → "Square"</text>
+        <!-- arrows -->
+        <path d="M140 65 L236 58" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#v)"/>
+        <path d="M140 155 L236 148" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#v)"/>
+        <path d="M425 62 L466 82" stroke="#6b6b6b" stroke-width="1.5" fill="none" stroke-dasharray="3 3" marker-end="url(#v2)"/>
+        <path d="M425 152 L466 125" stroke="#6b6b6b" stroke-width="1.5" fill="none" stroke-dasharray="3 3" marker-end="url(#v2)"/>
+        <text x="350" y="215" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">same pointer type, same call — the OBJECT decides</text>
+        <text x="350" y="233" text-anchor="middle" font-size="10.5" fill="#6d4aa0">vptr → vtable → function address</text>
+        <defs>
+          <marker id="v" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#c0392b"/></marker>
+          <marker id="v2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#6b6b6b"/></marker>
+        </defs>
+      </svg>
+      <figcaption>fig 7 — the vptr/vtable machinery behind one virtual call</figcaption>
+    </figure>
+
+    <div class="warning">⚠️ <b>Rapid-fire facts:</b> Constructors <b>cannot</b> be virtual (no vptr yet). Destructors <b>should</b> be virtual in polymorphic bases. Static functions <b>cannot</b> be virtual (no object). Friends <b>cannot</b> be virtual (not members). <code>virtual</code> is inherited &mdash; once virtual, always virtual, even if you omit the keyword in the derived class.</div>
+    <div class="memory">💡 <b>Hook:</b> vtable = a <b>restaurant's menu</b> 📋 (one per restaurant/class). vptr = <b>the menu in your hand</b> 🤲 (one per customer/object). You say &ldquo;item #3&rdquo;; what arrives depends on <b>which menu you're holding</b>.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Virtual functions give late binding via a vtable per class and a vptr per object. The call costs one indirection and generally can't be inlined &mdash; so it's pay-for-what-you-use, not free, which is exactly C++'s philosophy.&rdquo;</div>
+  </div>
+
+  <!-- ========== 8 ========== -->
+  <div class="card" id="s8">
+    <h2><span class="num">8</span> Virtual destructors ☠️ &mdash; the memory-leak question</h2>
+    <div class="def"><b>Rule:</b> If a class has <b>any</b> virtual function (i.e. it's meant to be a polymorphic base), its destructor <b>must be virtual</b>. Otherwise <code>delete base_ptr</code> is <b>undefined behaviour</b> &mdash; in practice, the derived destructor never runs and its resources leak.</div>
+<pre><span class="k">class</span> Base {
+<span class="k">public</span>:
+    ~Base() { cout &lt;&lt; <span class="g">"~Base\n"</span>; }          <span class="r">// ❌ NOT virtual</span>
+};
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+    <span class="k">int</span>* data;
+<span class="k">public</span>:
+    Derived()  { data = <span class="k">new int</span>[1000]; }
+    ~Derived() { <span class="k">delete</span>[] data; cout &lt;&lt; <span class="g">"~Derived\n"</span>; }
+};
+
+Base* p = <span class="k">new</span> Derived();
+<span class="k">delete</span> p;      <span class="r">// prints only "~Base" → 4000 bytes LEAKED 💧</span>
+
+<span class="c">// FIX — one keyword:</span>
+<span class="k">class</span> Base {
+<span class="k">public</span>:
+    <span class="y">virtual</span> ~Base() { cout &lt;&lt; <span class="g">"~Base\n"</span>; }   <span class="g">// ✅</span>
+};
+<span class="c">// now: "~Derived" then "~Base" — correct, reverse order</span></pre>
+    <div class="industry">🏭 <b>Industry framing:</b> This <b>single missing keyword</b> is one of the most common real leak sources in C++ codebases. Any base class you'd <code>delete</code> through a base pointer needs it. Modern rule: give a polymorphic base either a <b>public virtual destructor</b>, or a <b>protected non-virtual</b> one (if deletion through the base isn't allowed).</div>
+    <div class="memory">💡 <b>Hook:</b> ☠️ Non-virtual destructor = the <b>demolition crew only tears down the ground floor</b> and leaves the upper floors standing. Everything the derived class built stays in memory forever.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Deleting a derived object through a base pointer with a non-virtual destructor is undefined behaviour &mdash; typically the derived destructor is skipped and its resources leak. Any polymorphic base needs a virtual destructor.&rdquo;</div>
+  </div>
+
+  <!-- ========== 9 ========== -->
+  <div class="card" id="s9">
+    <h2><span class="num">9</span> Object slicing 🔪</h2>
+    <div class="def"><b>Definition:</b> When a derived object is assigned or passed <b>by value</b> to a base-type variable, the derived part is <b>&ldquo;sliced off&rdquo;</b> &mdash; only the base subobject is copied. The object loses its derived data <b>and its polymorphic behaviour</b>.</div>
+<pre><span class="k">class</span> Base { <span class="k">public</span>: <span class="k">virtual void</span> id() { cout &lt;&lt; <span class="g">"Base\n"</span>; } };
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+    <span class="k">int</span> extra = 42;
+<span class="k">public</span>: <span class="k">void</span> id() <span class="k">override</span> { cout &lt;&lt; <span class="g">"Derived\n"</span>; }
+};
+
+<span class="k">void</span> byValue(Base b)  { b.id(); }    <span class="r">// 🔪 SLICED → "Base"</span>
+<span class="k">void</span> byRef(Base&amp; b)   { b.id(); }    <span class="g">// ✅ polymorphic → "Derived"</span>
+<span class="k">void</span> byPtr(Base* b)   { b-&gt;id(); }   <span class="g">// ✅ polymorphic → "Derived"</span>
+
+Derived d;
+byValue(d);   <span class="c">// "Base"    ← the trap</span>
+byRef(d);     <span class="c">// "Derived"</span>
+byPtr(&amp;d);    <span class="c">// "Derived"</span>
+
+Base b = d;   <span class="r">// 🔪 sliced: `extra` is gone, vptr is Base's</span></pre>
+
+    <figure>
+      <svg viewBox="0 0 700 145" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <rect x="60" y="30" width="150" height="85" rx="7" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+        <text x="135" y="22" text-anchor="middle" font-weight="bold" fill="#1e7a4f" font-size="12">Derived d</text>
+        <rect x="72" y="42" width="126" height="28" rx="4" fill="#fff" stroke="#2456a6"/>
+        <text x="135" y="60" text-anchor="middle" fill="#2456a6">Base part (vptr)</text>
+        <rect x="72" y="76" width="126" height="28" rx="4" fill="#f3edfa" stroke="#6d4aa0"/>
+        <text x="135" y="94" text-anchor="middle" fill="#6d4aa0">extra = 42</text>
+        <path d="M225 72 L340 72" stroke="#c0392b" stroke-width="2.5" fill="none" marker-end="url(#sl)"/>
+        <text x="282" y="60" text-anchor="middle" font-size="11" fill="#c0392b" font-weight="bold">Base b = d;</text>
+        <text x="282" y="90" text-anchor="middle" font-size="14">🔪</text>
+        <defs><marker id="sl" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c0392b"/></marker></defs>
+        <rect x="355" y="42" width="150" height="40" rx="7" fill="#eaf1fb" stroke="#2456a6" stroke-width="2"/>
+        <text x="430" y="34" text-anchor="middle" font-weight="bold" fill="#2456a6" font-size="12">Base b</text>
+        <text x="430" y="66" text-anchor="middle" fill="#2456a6">Base part only</text>
+        <g opacity="0.4">
+          <rect x="355" y="86" width="150" height="26" rx="4" fill="#fdecea" stroke="#c0392b" stroke-dasharray="4 3"/>
+          <text x="430" y="103" text-anchor="middle" fill="#c0392b">extra — DISCARDED</text>
+        </g>
+        <text x="590" y="60" text-anchor="middle" font-size="10.5" fill="#c0392b">no derived data</text>
+        <text x="590" y="76" text-anchor="middle" font-size="10.5" fill="#c0392b">no virtual dispatch</text>
+        <text x="590" y="92" text-anchor="middle" font-size="10.5" fill="#c0392b">silently compiles!</text>
+      </svg>
+      <figcaption>fig 9 — the derived half is cut away, silently</figcaption>
+    </figure>
+
+    <div class="warning">⚠️ <b>Why it's dangerous:</b> it <b>compiles without a warning</b>. <code>vector&lt;Base&gt;</code> holding derived objects slices every single one. Use <code>vector&lt;unique_ptr&lt;Base&gt;&gt;</code> instead.</div>
+    <div class="memory">💡 <b>Hook:</b> 🔪 Putting a <b>tall person into a short box</b> &mdash; you keep the part that fits and cut off the rest. And nobody warns you.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Slicing happens when you copy a derived object into a base-typed variable by value &mdash; the derived portion is discarded and polymorphism is lost. The fix is to always handle polymorphic objects through references or pointers, ideally smart pointers.&rdquo;</div>
+  </div>
+
+  <!-- ========== 10 ========== -->
+  <div class="card" id="s10">
+    <h2><span class="num">10</span> Abstract classes &amp; interfaces 📐</h2>
+    <div class="def"><b>Pure virtual function:</b> <code>virtual void draw() = 0;</code> &mdash; declared but not (necessarily) defined; derived classes <b>must</b> override it.<br><b>Abstract class:</b> any class with ≥1 pure virtual function. <b>Cannot be instantiated</b> &mdash; only inherited from.<br><b>Interface:</b> (a convention, not a C++ keyword) an abstract class with <b>only</b> pure virtuals and no data.</div>
+<pre><span class="k">class</span> PaymentMethod {                        <span class="c">// abstract — an interface</span>
+<span class="k">public</span>:
+    <span class="k">virtual void</span> pay(<span class="k">double</span> amt) = 0;         <span class="c">// pure virtual</span>
+    <span class="k">virtual</span> string name() <span class="k">const</span> = 0;
+    <span class="k">virtual</span> ~PaymentMethod() = <span class="k">default</span>;      <span class="c">// ✅ virtual dtor</span>
+};
+
+<span class="k">class</span> UPI : <span class="k">public</span> PaymentMethod {
+<span class="k">public</span>:
+    <span class="k">void</span> pay(<span class="k">double</span> amt) <span class="k">override</span> { <span class="c">/* UPI flow */</span> }
+    string name() <span class="k">const override</span> { <span class="k">return</span> <span class="g">"UPI"</span>; }
+};
+<span class="k">class</span> Card : <span class="k">public</span> PaymentMethod { <span class="c">/* ...card flow... */</span> };
+
+<span class="c">// PaymentMethod p;              // ❌ error: abstract, cannot instantiate</span>
+PaymentMethod* p = <span class="k">new</span> UPI();      <span class="c">// ✅ pointer to abstract base is fine</span>
+p-&gt;pay(500);                     <span class="c">// runs UPI::pay</span></pre>
+    <ul>
+      <li>A derived class that <b>doesn't</b> override every pure virtual is <b>itself abstract</b>.</li>
+      <li>A pure virtual function <b>can</b> have a body &mdash; useful as a shared default that derived classes call explicitly.</li>
+      <li>C++ has no <code>interface</code> keyword &mdash; the pattern <b>is</b> an all-pure-virtual abstract class.</li>
+    </ul>
+    <div class="industry">🏭 <b>Industry framing:</b> This is the <b>plugin/strategy pattern</b>, and it's the single most useful OOP idea in production. Checkout code depends on <code>PaymentMethod*</code>. Adding crypto next quarter = one new class, <b>zero changes</b> to checkout. That's <b>Dependency Inversion</b> + <b>Open/Closed</b> in three lines.</div>
+    <div class="memory">💡 <b>Hook:</b> 📐 Abstract class = a <b>job description</b>. You can't hire &ldquo;a Job Description&rdquo; &mdash; you hire a <b>person who fulfils it</b>.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;An abstract class defines a contract via pure virtual functions and can't be instantiated. I use it to program against interfaces rather than concrete types, so new implementations plug in without touching consumers.&rdquo;</div>
+  </div>
+
+  <!-- ========== 11 ========== -->
+  <div class="card" id="s11">
+    <h2><span class="num">11</span> Shallow vs deep copy 💧</h2>
+    <div class="def"><b>Shallow copy:</b> copies member values &mdash; including <b>pointer addresses</b>. Two objects end up pointing at the <b>same</b> heap memory. This is what the <b>compiler-generated</b> copy constructor does.<br><b>Deep copy:</b> allocates <b>new</b> memory and copies the pointed-to <i>contents</i>. Each object owns its own buffer.</div>
+
+    <figure>
+      <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <!-- shallow -->
+        <text x="165" y="16" text-anchor="middle" font-weight="bold" fill="#c0392b" font-size="12">❌ SHALLOW (default)</text>
+        <rect x="45" y="28" width="100" height="38" rx="5" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+        <text x="95" y="44" text-anchor="middle" font-weight="bold">obj a</text>
+        <text x="95" y="59" text-anchor="middle">ptr ●</text>
+        <rect x="185" y="28" width="100" height="38" rx="5" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+        <text x="235" y="44" text-anchor="middle" font-weight="bold">obj b</text>
+        <text x="235" y="59" text-anchor="middle">ptr ●</text>
+        <rect x="110" y="112" width="110" height="34" rx="5" fill="#fff" stroke="#232323" stroke-width="1.8"/>
+        <text x="165" y="133" text-anchor="middle">heap: [data]</text>
+        <path d="M95 66 L155 110" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#d1)"/>
+        <path d="M235 66 L175 110" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#d1)"/>
+        <text x="165" y="90" text-anchor="middle" font-size="10" fill="#c0392b" font-weight="bold">SAME memory!</text>
+        <text x="165" y="165" text-anchor="middle" font-size="10" fill="#c0392b">both destructors delete it →</text>
+        <text x="165" y="180" text-anchor="middle" font-size="10" fill="#c0392b" font-weight="bold">DOUBLE FREE 💥 + dangling</text>
+        <line x1="350" y1="20" x2="350" y2="180" stroke="#dedbd2" stroke-width="2" stroke-dasharray="6 6"/>
+        <!-- deep -->
+        <text x="530" y="16" text-anchor="middle" font-weight="bold" fill="#1e7a4f" font-size="12">✅ DEEP (you write it)</text>
+        <rect x="410" y="28" width="100" height="38" rx="5" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="460" y="44" text-anchor="middle" font-weight="bold">obj a</text>
+        <text x="460" y="59" text-anchor="middle">ptr ●</text>
+        <rect x="550" y="28" width="100" height="38" rx="5" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="600" y="44" text-anchor="middle" font-weight="bold">obj b</text>
+        <text x="600" y="59" text-anchor="middle">ptr ●</text>
+        <rect x="405" y="112" width="105" height="34" rx="5" fill="#fff" stroke="#232323" stroke-width="1.8"/>
+        <text x="457" y="133" text-anchor="middle">heap: [data]</text>
+        <rect x="548" y="112" width="105" height="34" rx="5" fill="#fff" stroke="#232323" stroke-width="1.8"/>
+        <text x="600" y="133" text-anchor="middle">heap: [copy]</text>
+        <path d="M460 66 L458 110" stroke="#1e7a4f" stroke-width="1.8" fill="none" marker-end="url(#d2)"/>
+        <path d="M600 66 L600 110" stroke="#1e7a4f" stroke-width="1.8" fill="none" marker-end="url(#d2)"/>
+        <text x="530" y="90" text-anchor="middle" font-size="10" fill="#1e7a4f" font-weight="bold">separate memory</text>
+        <text x="530" y="172" text-anchor="middle" font-size="10" fill="#1e7a4f">each owns &amp; frees its own ✅</text>
+        <defs>
+          <marker id="d1" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#c0392b"/></marker>
+          <marker id="d2" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#1e7a4f"/></marker>
+        </defs>
+      </svg>
+      <figcaption>fig 11 — the double-free that ends interviews</figcaption>
+    </figure>
+
+<pre><span class="k">class</span> Buffer {
+    <span class="k">int</span>* data; <span class="k">int</span> n;
+<span class="k">public</span>:
+    Buffer(<span class="k">int</span> n) : n(n) { data = <span class="k">new int</span>[n]; }
+
+    <span class="c">// DEEP copy constructor</span>
+    Buffer(<span class="k">const</span> Buffer&amp; o) : n(o.n) {
+        data = <span class="k">new int</span>[n];                    <span class="g">// ✅ own memory</span>
+        std::copy(o.data, o.data + n, data);   <span class="g">// ✅ copy contents</span>
+    }
+    ~Buffer() { <span class="k">delete</span>[] data; }
+};</pre>
+    <div class="warning">⚠️ <b>The failure chain:</b> default shallow copy &rarr; two objects share one pointer &rarr; first destructor frees it &rarr; second object's pointer is now <b>dangling</b> &rarr; second destructor frees it again &rarr; <b>double free</b>, heap corruption, crash.</div>
+    <div class="memory">💡 <b>Hook:</b> Shallow = <b>photocopying a house key</b> 🔑 &mdash; two keys, <b>one house</b>. Deep = <b>building a second house</b> 🏠🏠.</div>
+  </div>
+
+  <!-- ========== 12 ========== -->
+  <div class="card" id="s12">
+    <h2><span class="num">12</span> Rule of Three / Five / Zero ⭐</h2>
+    <div class="def"><b>Rule of Three:</b> if you need <b>any one</b> of: <b>destructor</b>, <b>copy constructor</b>, <b>copy assignment operator</b> &mdash; you almost certainly need <b>all three</b>. (Because needing one means you manage a resource manually.)<br><b>Rule of Five (C++11):</b> add the <b>move constructor</b> and <b>move assignment operator</b>.<br><b>Rule of Zero:</b> ✅ <b>the modern answer</b> &mdash; design so you need <b>none</b> of them, by holding resources in types that already manage themselves (<code>std::vector</code>, <code>std::string</code>, <code>unique_ptr</code>).</div>
+
+    <table>
+      <tr><th>The Five</th><th>Signature</th></tr>
+      <tr><td>Destructor</td><td><code>~T();</code></td></tr>
+      <tr><td>Copy constructor</td><td><code>T(const T&amp;);</code></td></tr>
+      <tr><td>Copy assignment</td><td><code>T&amp; operator=(const T&amp;);</code></td></tr>
+      <tr><td>Move constructor</td><td><code>T(T&amp;&amp;) noexcept;</code></td></tr>
+      <tr><td>Move assignment</td><td><code>T&amp; operator=(T&amp;&amp;) noexcept;</code></td></tr>
+    </table>
+
+<pre><span class="c">// ❌ Rule of Three violated — has a destructor, no copy ops → shallow copy → double free</span>
+<span class="k">class</span> Bad { <span class="k">int</span>* p; <span class="k">public</span>: Bad(){p=<span class="k">new int</span>;} ~Bad(){<span class="k">delete</span> p;} };
+
+<span class="c">// ✅ Rule of ZERO — no destructor, no copy ops, no bugs. vector handles everything.</span>
+<span class="k">class</span> Good { std::vector&lt;<span class="k">int</span>&gt; data; };   <span class="c">// copy, move, destroy all correct for free</span></pre>
+
+    <h3>Copy vs Move &mdash; in one line</h3>
+    <ul>
+      <li><b>Copy</b> = duplicate the resource (expensive). <b>Move</b> = <b>steal</b> the pointer and null out the source (cheap).</li>
+      <li>Move is used when the source is a <b>temporary/rvalue</b> or explicitly <code>std::move</code>d &mdash; because nobody will look at it again.</li>
+    </ul>
+    <div class="memory">💡 <b>Hook:</b> Copy = <b>photocopying a document</b> 📄📄 (slow, two copies). Move = <b>handing the original over</b> 🤝 (instant, you no longer have it).</div>
+    <div class="industry">🏭 <b>Industry framing:</b> Saying <b>&ldquo;I aim for the Rule of Zero&rdquo;</b> is the strongest signal in this whole page. It says: I don't hand-manage memory, I compose RAII types, so copy/move/destroy are correct by construction. That's how modern C++ is actually written.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;If a class manages a resource it needs all five; but I'd rather write none &mdash; the Rule of Zero. Wrap the resource in a <code>unique_ptr</code> or <code>vector</code>, and the compiler-generated operations are already correct and exception-safe.&rdquo;</div>
+  </div>
+
+  <!-- ========== Q&A ========== -->
+  <div class="card" id="qa">
+    <h2><span class="num">🔥</span> Most-asked questions (Part 2 scope)</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:14px;">These are the ones that actually decide the interview. Answer out loud first.</p>
+
+    <details class="qa"><summary>What is a virtual function and how does it work internally?</summary>
+      <div class="ans">A member function declared <code>virtual</code> in the base and overridden in a derived class, so calls dispatch on the object's <b>dynamic type</b>. Internally: each polymorphic class has a <b>vtable</b> (an array of function pointers), and each object carries a hidden <b>vptr</b> to its class's vtable. <code>p-&gt;draw()</code> becomes: dereference vptr, index the vtable, call. One indirection; the vptr is set up by the constructor.
+      <div class="say"><b>Hook:</b> vtable = the restaurant's menu (per class), vptr = the menu in your hand (per object).</div></div>
+    </details>
+
+    <details class="qa"><summary>Why can't a constructor be virtual?</summary>
+      <div class="ans">Virtual dispatch needs the vptr, and the vptr is <b>initialised by the constructor itself</b>. At construction time the object's dynamic type doesn't exist yet, so there's nothing to dispatch on. Related question they may follow with: <i>can a destructor be virtual?</i> Yes — and it usually must be, because by then the object is fully formed.</div>
+    </details>
+
+    <details class="qa"><summary>Why must a base class destructor be virtual? What happens if it isn't?</summary>
+      <div class="ans">If you <code>delete</code> a derived object through a base pointer and the destructor isn't virtual, the behaviour is <b>undefined</b> — in practice only <code>~Base()</code> runs, the derived destructor is skipped, and everything the derived class allocated <b>leaks</b>. Rule: any class intended as a polymorphic base needs a public virtual destructor (or a protected non-virtual one if deletion through the base is disallowed).
+      <div class="say"><b>Say:</b> &ldquo;It's one keyword between correct code and a silent leak.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>What happens if you call a virtual function inside a constructor?</summary>
+      <div class="ans">It does <b>not</b> dispatch to the derived override. During base construction the object <i>is</i> a Base — the vptr still points at the base's vtable, because the derived part isn't constructed yet. So you get the base version, which surprises people badly. Same applies in destructors, in reverse. <b>Never rely on virtual dispatch in constructors or destructors.</b></div>
+    </details>
+
+    <details class="qa"><summary>Difference between overloading and overriding?</summary>
+      <div class="ans"><b>Overloading:</b> same name, <b>different parameters</b>, same scope, resolved at <b>compile time</b>, no <code>virtual</code> needed. <b>Overriding:</b> same name and <b>identical signature</b>, base vs derived, requires <code>virtual</code>, resolved at <b>runtime</b>. Bonus points: mention <b>name hiding</b> — a same-named member in the derived class hides the entire base overload set, fixed with <code>using Base::f;</code>.</div>
+    </details>
+
+    <details class="qa"><summary>What is object slicing?</summary>
+      <div class="ans">Copying a derived object into a base-typed variable <b>by value</b> — the derived portion is discarded, keeping only the base subobject. The object loses its extra data and its polymorphic behaviour (the copy gets the base's vptr). It compiles silently with no warning. Avoid by passing/storing polymorphic objects via <b>references or pointers</b> (<code>vector&lt;unique_ptr&lt;Base&gt;&gt;</code>, not <code>vector&lt;Base&gt;</code>).
+      <div class="say"><b>Hook:</b> Forcing a tall person into a short box — you keep what fits.</div></div>
+    </details>
+
+    <details class="qa"><summary>Compile-time vs runtime polymorphism — with mechanisms.</summary>
+      <div class="ans"><b>Compile-time (static/early binding):</b> function overloading, operator overloading, templates. Resolved by the compiler via signature matching; zero runtime cost and inlinable. <b>Runtime (dynamic/late binding):</b> virtual functions accessed through a base pointer or reference; resolved via vptr→vtable lookup; costs one indirection and typically prevents inlining. Use runtime polymorphism when the set of types isn't known at the call site.</div>
+    </details>
+
+    <details class="qa"><summary>What is the diamond problem and how does C++ solve it?</summary>
+      <div class="ans">With multiple inheritance, if B and C both derive from A and D derives from B and C, D contains <b>two separate A subobjects</b> — so <code>d.x</code> is ambiguous and there's duplicated state. C++ solves it with <b>virtual inheritance</b> (<code>class B : virtual public A</code>), which makes B and C share a <b>single</b> A subobject. Cost: extra indirection, and the <b>most-derived class</b> (D) becomes responsible for constructing the virtual base. Java avoids the problem by disallowing multiple class inheritance.</div>
+    </details>
+
+    <details class="qa"><summary>Shallow vs deep copy — and why does it crash?</summary>
+      <div class="ans">Shallow copy (what the compiler generates) copies the <b>pointer value</b>, so two objects reference the same heap block. Deep copy allocates new memory and copies the contents. The crash chain: first destructor frees the block → the second object's pointer is <b>dangling</b> → second destructor frees it again → <b>double free</b> and heap corruption. Fix: write a deep copy constructor and copy assignment — or better, hold the resource in a <code>vector</code>/<code>unique_ptr</code> and write none.</div>
+    </details>
+
+    <details class="qa"><summary>What is the Rule of Three / Five / Zero?</summary>
+      <div class="ans"><b>Three:</b> if you need a destructor, copy constructor, or copy assignment, you need all three — needing one implies manual resource management. <b>Five (C++11):</b> add move constructor and move assignment. <b>Zero:</b> the modern goal — design classes that need <b>none</b> by holding resources in self-managing types. Then the compiler-generated operations are automatically correct.
+      <div class="say"><b>Say:</b> &ldquo;I aim for the Rule of Zero — let <code>unique_ptr</code> and <code>vector</code> do the managing.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>Copy vs move semantics — what's actually different?</summary>
+      <div class="ans">Copy <b>duplicates</b> the resource — a new allocation plus a content copy. Move <b>transfers ownership</b> — steal the pointer, null out the source, no allocation. Move applies when the source is an rvalue (a temporary) or explicitly <code>std::move</code>d, i.e. when nobody will inspect the source again. Mark move operations <code>noexcept</code>, or <code>std::vector</code> will fall back to copying during reallocation for exception safety.</div>
+    </details>
+
+    <details class="qa"><summary>Abstract class vs interface in C++?</summary>
+      <div class="ans">An <b>abstract class</b> has ≥1 pure virtual function (<code>= 0</code>) and cannot be instantiated; it may also have data members and implemented methods. An <b>interface</b> isn't a C++ keyword — it's the <b>convention</b> of an abstract class containing <i>only</i> pure virtuals and no state. Note: a pure virtual function may still have a definition, which derived classes can call explicitly as a shared default.</div>
+    </details>
+
+    <details class="qa"><summary>Can you instantiate an abstract class? Can you have a pointer to one?</summary>
+      <div class="ans">You <b>cannot instantiate</b> it — <code>Shape s;</code> is an error. You absolutely <b>can</b> have a <code>Shape*</code> or <code>Shape&amp;</code>, and that's the entire point: it's how you hold any concrete subtype behind one contract and get runtime polymorphism.</div>
+    </details>
+
+    <details class="qa"><summary>Is inheritance always good? (the design question)</summary>
+      <div class="ans">No — <b>prefer composition over inheritance</b>. Inheritance couples the derived class to the base's implementation, so base changes ripple; deep hierarchies get rigid; and behaviour can't be swapped at runtime. Use inheritance for a genuine <b>is-a</b> relationship and for defining interfaces; use <b>composition</b> (<b>has-a</b>) for reuse. A <code>Car</code> <i>has an</i> <code>Engine</code> — it doesn't inherit from one.
+      <div class="say"><b>Bringing this up unprompted is a strong senior signal.</b></div></div>
+    </details>
+
+    <details class="qa"><summary>Why does `sizeof` an object grow when you add a virtual function?</summary>
+      <div class="ans">Because the object gains a hidden <b>vptr</b> — typically 8 bytes on a 64-bit build. Note the <b>vtable itself is per class</b>, not per object; only the pointer lives in each object. It's a neat question because it proves you understand the mechanism rather than the slogan.</div>
+    </details>
+
+    <details class="qa"><summary>What does `override` do, and why use it?</summary>
+      <div class="ans">It tells the compiler &ldquo;this is intended to override a base virtual&rdquo;. If the signature doesn't actually match one, you get a <b>compile error</b> instead of silently creating an unrelated new function that never gets called. It's free bug prevention — a subtly wrong signature (a missing <code>const</code>, say) is otherwise a nightmare to spot. Related: <code>final</code> prevents any further overriding.</div>
+    </details>
+
+    <details class="qa"><summary>Does C++ support multiple inheritance? Does Java? Why the difference?</summary>
+      <div class="ans">C++ <b>does</b>; Java does not (for classes) but allows multiple <b>interfaces</b>. The difference is the diamond problem: C++ accepts the complexity and hands you <code>virtual</code> inheritance to manage it; Java chose to eliminate the ambiguity by design, since interfaces carry no state to duplicate.</div>
+    </details>
+
+    <details class="qa"><summary>Three things that can't be virtual?</summary>
+      <div class="ans"><b>Constructors</b> (no vptr yet), <b>static member functions</b> (no object, no <code>this</code>), and <b>friend functions</b> (not members at all). Also worth knowing: virtual-ness <b>is inherited</b> — once a function is virtual in the base, it stays virtual in every derived class even if you omit the keyword.</div>
+    </details>
+  </div>
+
+  <div class="final">
+    <h3>🎤 Walk-in checklist — say these unprompted and you sound senior</h3>
+    <ul>
+      <li>&ldquo;<b>Prefer composition over inheritance</b>&rdquo; — inheritance for interfaces, composition for reuse</li>
+      <li>&ldquo;<b>I aim for the Rule of Zero</b>&rdquo; — let RAII types manage resources</li>
+      <li>&ldquo;Any polymorphic base needs a <b>virtual destructor</b>&rdquo;</li>
+      <li>&ldquo;I always mark overrides <code>override</code>&rdquo; — turns silent bugs into compile errors</li>
+      <li>&ldquo;Store polymorphic objects as <code>vector&lt;unique_ptr&lt;Base&gt;&gt;</code>&rdquo; — no slicing, no leaks</li>
+      <li>Connect a concept to a <b>real system</b> (payments, plugins, locks) — theory + application beats theory</li>
+    </ul>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="interview.html">&larr; Part 1: Foundations</a>
+    <a href="index.html">home &uarr;</a>
+  </div>
+
+</div>
+</body>
+</html>

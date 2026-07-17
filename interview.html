@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OOP Interview Crash Course — Part 1 | LearnOOPs</title>
+<style>
+  :root{
+    --paper:#fbfaf7; --ink:#232323; --grid:#e8e5dd;
+    --blue:#2456a6; --red:#c0392b; --green:#1e7a4f;
+    --amber:#b8860b; --purple:#6d4aa0; --soft:#6b6b6b; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink); line-height:1.65; padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--red);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--red);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:20px;font-size:17px;}
+  .partbar{
+    display:flex;gap:10px;margin-bottom:26px;font-family:'Courier New',monospace;font-size:12px;
+  }
+  .chip{padding:5px 12px;border-radius:20px;border:1.5px solid #dedbd2;background:#fff;}
+  .chip.on{background:var(--ink);color:var(--paper);border-color:var(--ink);font-weight:bold;}
+  .toc{
+    background:#fff;border:1px solid #dedbd2;border-radius:10px;padding:20px 24px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  .toc h3{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:10px;}
+  .toc ol{padding-left:20px;font-size:15px;columns:2;column-gap:30px;}
+  .toc li{margin-bottom:5px;}
+  .toc a{color:var(--ink);text-decoration:none;border-bottom:1px dotted #b9b6ad;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px; box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:13px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:30px;height:30px;flex:0 0 30px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{
+    background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;
+    padding:12px 16px;font-size:15.5px;margin:10px 0;
+  }
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .rl{font-size:15px;color:var(--soft);margin:4px 0 0 2px;}
+  .rl b{color:var(--purple);}
+  .memory{
+    border-left:4px solid var(--amber);background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  .warning{
+    border-left:4px solid var(--red);background:#fdecea;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .warning b{color:var(--red);}
+  .industry{
+    border-left:4px solid var(--purple);background:#f3edfa;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .industry b{color:var(--purple);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{font-family:'Courier New',monospace;font-size:12px;color:var(--soft);margin-top:8px;letter-spacing:.5px;}
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  /* Q&A accordion */
+  .qa{
+    border:1px solid #e3e0d7;border-radius:9px;margin-bottom:10px;background:#fff;overflow:hidden;
+  }
+  .qa summary{
+    cursor:pointer;padding:13px 16px;font-size:15.5px;font-weight:bold;
+    list-style:none;display:flex;gap:10px;align-items:flex-start;
+  }
+  .qa summary::-webkit-details-marker{display:none;}
+  .qa summary::before{
+    content:"Q";font-family:'Courier New',monospace;font-size:12px;
+    background:var(--blue);color:#fff;border-radius:5px;
+    width:22px;height:22px;flex:0 0 22px;display:flex;align-items:center;justify-content:center;margin-top:2px;
+  }
+  .qa[open] summary{background:#f7f5ef;border-bottom:1px solid #e3e0d7;}
+  .qa .ans{padding:14px 16px 16px;font-size:15px;background:#fcfbf8;}
+  .qa .ans .say{
+    border-left:3px solid var(--green);background:#edf7f1;padding:9px 12px;border-radius:0 6px 6px 0;margin-top:8px;
+  }
+  .qa .ans .say b{color:var(--green);}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+  .next-banner{
+    background:linear-gradient(135deg,#232323,#3a3a3a);color:var(--paper);
+    border-radius:10px;padding:22px 26px;text-align:center;margin-top:26px;
+  }
+  .next-banner h3{font-size:19px;margin-bottom:6px;color:#fff;}
+  .next-banner p{font-size:14.5px;opacity:.85;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">&larr; LearnOOPs home</a></div>
+  <div class="eyebrow">Interview Crash Course · Part 1 of 2</div>
+  <h1>OOP A&ndash;Z: <span class="hl">The Interview Page</span> 🎯</h1>
+  <p class="subtitle">Everything from &ldquo;what is OOP&rdquo; to friend classes &mdash; explained the way you should <em>say it out loud</em> in the room.</p>
+
+  <div class="partbar">
+    <span class="chip on">PART 1 · Foundations &rarr; Friends</span>
+    <span class="chip">PART 2 · Inheritance &rarr; Rule of Five (soon)</span>
+  </div>
+
+  <div class="toc">
+    <h3>// What's covered in Part 1</h3>
+    <ol>
+      <li><a href="#s1">What OOP is &amp; why it exists</a></li>
+      <li><a href="#s2">Class vs Object</a></li>
+      <li><a href="#s3">Encapsulation</a></li>
+      <li><a href="#s4">Abstraction</a></li>
+      <li><a href="#s5">Access specifiers</a></li>
+      <li><a href="#s6">Constructors</a></li>
+      <li><a href="#s7">Destructors</a></li>
+      <li><a href="#s8">this pointer</a></li>
+      <li><a href="#s9">Static members</a></li>
+      <li><a href="#s10">Friends</a></li>
+      <li><a href="#qa">🔥 Most-asked questions</a></li>
+    </ol>
+  </div>
+
+  <!-- ========== 1 ========== -->
+  <div class="card" id="s1">
+    <h2><span class="num">1</span> What is OOP &mdash; and why does industry use it?</h2>
+    <div class="def"><b>Definition:</b> Object-Oriented Programming is a paradigm that models a program as a collection of interacting <b>objects</b>, each bundling <b>state (data)</b> and <b>behaviour (methods)</b>. It gives importance to <b>data over functions</b>.</div>
+    <ul>
+      <li>Procedural code asks <i>&ldquo;what steps?&rdquo;</i> &mdash; OOP asks <i>&ldquo;what <b>things</b> exist, and what can each do?&rdquo;</i></li>
+      <li>Procedural pain points OOP fixes: <b>global data with no protection</b>, <b>copy-paste reuse</b>, <b>spaghetti dependencies</b>, <b>poor real-world modelling</b>.</li>
+      <li><b>Bottom-up</b> design: build objects, compose them into a system.</li>
+    </ul>
+    <div class="industry">🏭 <b>Industry framing:</b> Every backend you'll touch is objects. A payments service has <code>Transaction</code>, <code>Account</code>, <code>Ledger</code>. When a new payment method appears, you add a <b>class</b> &mdash; you don't rewrite the engine. That's the business case: <b>change is local, not global.</b></div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;OOP organises a program around objects that combine state and behaviour. Compared to procedural code it gives us encapsulation for data safety, inheritance and polymorphism for reuse and extensibility, and a structure that maps naturally onto real-world entities &mdash; which is why it scales to large teams and codebases.&rdquo;</div>
+  </div>
+
+  <!-- ========== 2 ========== -->
+  <div class="card" id="s2">
+    <h2><span class="num">2</span> Class vs Object</h2>
+    <div class="def"><b>Class</b> = a blueprint/template. Defining it allocates <b>no memory</b>.<br><b>Object</b> = a real instance of that class. Creating it <b>allocates memory</b>.</div>
+
+    <figure>
+      <svg viewBox="0 0 700 200" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <rect x="40" y="40" width="180" height="120" rx="10" fill="#eaf1fb" stroke="#2456a6" stroke-width="2.5" stroke-dasharray="7 5"/>
+        <text x="130" y="30" text-anchor="middle" font-size="13" fill="#2456a6" font-weight="bold">class Account</text>
+        <text x="130" y="80" text-anchor="middle" font-size="12" fill="#2456a6">balance; owner;</text>
+        <text x="130" y="104" text-anchor="middle" font-size="12" fill="#2456a6">deposit(); withdraw();</text>
+        <text x="130" y="140" text-anchor="middle" font-size="11" fill="#2456a6" font-style="italic">blueprint · 0 bytes</text>
+        <g stroke="#6b6b6b" stroke-width="2" fill="none" marker-end="url(#a1)">
+          <path d="M225 75 L330 62"/><path d="M225 100 L330 100"/><path d="M225 125 L330 138"/>
+        </g>
+        <text x="277" y="93" text-anchor="middle" font-size="10" fill="#6b6b6b" font-style="italic">new</text>
+        <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b6b6b"/></marker></defs>
+        <g>
+          <rect x="340" y="42" width="160" height="42" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+          <text x="420" y="60" text-anchor="middle" font-size="12" fill="#1e7a4f" font-weight="bold">acc1 (Affan)</text>
+          <text x="420" y="76" text-anchor="middle" font-size="11">bal = 50,000</text>
+          <rect x="340" y="90" width="160" height="42" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+          <text x="420" y="108" text-anchor="middle" font-size="12" fill="#1e7a4f" font-weight="bold">acc2 (Riya)</text>
+          <text x="420" y="124" text-anchor="middle" font-size="11">bal = 12,300</text>
+          <rect x="340" y="138" width="160" height="42" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/>
+          <text x="420" y="156" text-anchor="middle" font-size="12" fill="#1e7a4f" font-weight="bold">acc3 (Karan)</text>
+          <text x="420" y="172" text-anchor="middle" font-size="11">bal = 8,900</text>
+        </g>
+        <text x="590" y="98" text-anchor="middle" font-size="12" fill="#1e7a4f" font-weight="bold">OBJECTS</text>
+        <text x="590" y="118" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">own memory</text>
+        <text x="590" y="134" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">own data</text>
+      </svg>
+      <figcaption>fig 2 — one class, millions of objects (this is literally your bank)</figcaption>
+    </figure>
+
+    <div class="memory">💡 <b>Hook:</b> Class = <b>cookie cutter</b> 🍪✂️ · Object = <b>the cookie</b>. You can't eat the cutter.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;A class is a blueprint that defines structure and behaviour but occupies no memory; an object is an instance of it, and memory is allocated per object for its non-static data members.&rdquo;</div>
+  </div>
+
+  <!-- ========== 3 ========== -->
+  <div class="card" id="s3">
+    <h2><span class="num">3</span> Encapsulation 🔒</h2>
+    <div class="def"><b>Definition:</b> Bundling data and the methods that operate on it into a single unit (the class), and <b>restricting direct access</b> to that data from outside &mdash; forcing access through a controlled interface.</div>
+    <ul>
+      <li>It is <b>not secrecy</b> &mdash; it's <b>controlled access</b>. The setter is a checkpoint that can <b>validate</b>.</li>
+      <li>Without it you're back to Note 01's global-data chaos: anyone can write garbage into your state and you can't find who.</li>
+    </ul>
+<pre><span class="k">class</span> Account {
+    <span class="k">double</span> balance;                 <span class="c">// 🔒 nobody touches this directly</span>
+<span class="k">public</span>:
+    <span class="k">void</span> deposit(<span class="k">double</span> amt) {
+        <span class="k">if</span> (amt &lt;= 0) <span class="k">return</span>;        <span class="c">// 🛂 the checkpoint</span>
+        balance += amt;
+    }
+    <span class="k">double</span> getBalance() <span class="k">const</span> { <span class="k">return</span> balance; }  <span class="c">// read-only view</span>
+};</pre>
+    <div class="industry">🏭 <b>Industry framing:</b> This is why <code>balance</code> is never public in a real banking system. Every mutation goes through a method that can <b>validate, log, and audit</b>. Public data = no audit trail = failed compliance review.</div>
+    <div class="memory">💡 <b>Hook:</b> 💊 <b>Capsule</b> &mdash; the medicine is sealed; you swallow it whole, you don't touch the powder.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Encapsulation binds data and methods together and hides internal state behind a public interface, so invariants can be enforced in one place instead of trusting every caller.&rdquo;</div>
+  </div>
+
+  <!-- ========== 4 ========== -->
+  <div class="card" id="s4">
+    <h2><span class="num">4</span> Abstraction 🎛️</h2>
+    <div class="def"><b>Definition:</b> Exposing only the <b>essential interface</b> and hiding the <b>implementation complexity</b> behind it.</div>
+
+    <figure>
+      <svg viewBox="0 0 700 175" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <rect x="55" y="35" width="240" height="105" rx="10" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2.5"/>
+        <text x="175" y="26" text-anchor="middle" font-size="13" fill="#1e7a4f" font-weight="bold">WHAT YOU SEE</text>
+        <rect x="80" y="58" width="190" height="30" rx="6" fill="#fff" stroke="#1e7a4f"/>
+        <text x="175" y="78" text-anchor="middle" font-size="12">pay(amount)</text>
+        <rect x="80" y="96" width="190" height="30" rx="6" fill="#fff" stroke="#1e7a4f"/>
+        <text x="175" y="116" text-anchor="middle" font-size="12">refund(txnId)</text>
+        <path d="M300 88 L400 88" stroke="#6b6b6b" stroke-width="2.5" fill="none" marker-end="url(#a2)"/>
+        <text x="350" y="78" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">hides</text>
+        <defs><marker id="a2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b6b6b"/></marker></defs>
+        <rect x="410" y="25" width="245" height="125" rx="10" fill="#fdecea" stroke="#c0392b" stroke-width="2.5"/>
+        <text x="532" y="16" text-anchor="middle" font-size="13" fill="#c0392b" font-weight="bold">WHAT'S HIDDEN</text>
+        <g font-size="10.5" fill="#c0392b">
+          <text x="432" y="48">· tokenize card · fraud score</text>
+          <text x="432" y="68">· call bank API · retry logic</text>
+          <text x="432" y="88">· currency convert · idempotency</text>
+          <text x="432" y="108">· write ledger · emit events</text>
+          <text x="432" y="128">· reconcile · handle timeouts</text>
+        </g>
+      </svg>
+      <figcaption>fig 4 — a payment SDK: two methods you see, a thousand lines you don't</figcaption>
+    </figure>
+
+    <div class="warning">⚠️ <b>The #1 asked distinction:</b> Encapsulation hides <b>DATA</b> (access control, the <i>how it's stored</i>). Abstraction hides <b>COMPLEXITY</b> (design, the <i>how it works</i>). Encapsulation is implementation-level; abstraction is design-level. They travel together but answer different questions.</div>
+    <div class="memory">💡 <b>Hook:</b> 🚗 <b>Accelerator pedal</b> &mdash; press to go. Fuel injection is not your problem.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Abstraction is about <i>what</i> an object does; encapsulation is about <i>how</i> its data is protected. In C++, abstraction is achieved via abstract classes and interfaces, encapsulation via access specifiers.&rdquo;</div>
+  </div>
+
+  <!-- ========== 5 ========== -->
+  <div class="card" id="s5">
+    <h2><span class="num">5</span> Access specifiers &mdash; the bouncer 🎟️</h2>
+    <table>
+      <tr><th>Accessible from</th><th>private 🔴</th><th>protected 🟡</th><th>public 🟢</th></tr>
+      <tr><td>Same class (its own methods)</td><td class="yes">✓</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td>Derived (child) class</td><td class="no">✗</td><td class="yes">✓</td><td class="yes">✓</td></tr>
+      <tr><td>Outside (main, via object)</td><td class="no">✗</td><td class="no">✗</td><td class="yes">✓</td></tr>
+    </table>
+    <ul style="margin-top:12px;">
+      <li>Enforced at <b>compile time</b> &mdash; the bouncer stops you at the door, not inside.</li>
+      <li><b>Default in a <code>class</code> is private</b>; default in a <code>struct</code> is <b>public</b>. That is the <b>only</b> difference between them in C++.</li>
+    </ul>
+    <div class="memory">💡 <b>Hook:</b> 🔴 vault (staff) · 🟡 family lounge (family + children) · 🟢 dance floor (everyone).</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Access control in C++ is a compile-time mechanism. <code>protected</code> exists specifically to give derived classes access while still denying the outside world.&rdquo;</div>
+  </div>
+
+  <!-- ========== 6 ========== -->
+  <div class="card" id="s6">
+    <h2><span class="num">6</span> Constructors 👶</h2>
+    <div class="def"><b>Definition:</b> A special member function that runs <b>automatically when an object is created</b>, used to initialise it. <b>Same name as the class</b>, <b>no return type</b> (not even void).</div>
+
+    <h3>The four you must know</h3>
+    <table>
+      <tr><th>Type</th><th>Signature</th><th>When it runs</th></tr>
+      <tr><td><b>Default</b></td><td><code>Account()</code></td><td><code>Account a;</code> &mdash; no args</td></tr>
+      <tr><td><b>Parameterised</b></td><td><code>Account(double b)</code></td><td><code>Account a(500);</code></td></tr>
+      <tr><td><b>Copy</b></td><td><code>Account(const Account&amp;)</code></td><td><code>Account b = a;</code> · pass/return by value</td></tr>
+      <tr><td><b>Move</b> <span style="color:var(--soft);font-size:12px;">(C++11)</span></td><td><code>Account(Account&amp;&amp;)</code></td><td><code>Account b = std::move(a);</code></td></tr>
+    </table>
+
+<pre><span class="k">class</span> Account {
+    <span class="k">double</span> balance;
+    string owner;
+<span class="k">public</span>:
+    Account() : balance(0), owner(<span class="g">"unknown"</span>) {}            <span class="c">// default</span>
+    Account(<span class="k">double</span> b, string o) : balance(b), owner(o) {}   <span class="c">// parameterised</span>
+    Account(<span class="k">const</span> Account&amp; other)                          <span class="c">// copy</span>
+        : balance(other.balance), owner(other.owner) {}
+};</pre>
+
+    <h3>Member initialiser list &mdash; <code>: balance(b)</code></h3>
+    <ul>
+      <li>Initialises members <b>before</b> the constructor body runs &mdash; it's <b>initialisation</b>, not assignment.</li>
+      <li><b>Mandatory</b> for: <code>const</code> members, reference members, and base-class / member objects without a default constructor.</li>
+      <li>More efficient: assignment in the body would <b>default-construct then overwrite</b>.</li>
+    </ul>
+    <div class="warning">⚠️ <b>Classic trap:</b> members are initialised in the order they are <b>declared in the class</b>, NOT the order in the initialiser list. Write them in declaration order or the compiler warns.</div>
+    <div class="warning">⚠️ <b>Second trap:</b> if you define <b>any</b> constructor, the compiler <b>stops</b> generating the implicit default one. <code>Account a;</code> then fails to compile.</div>
+    <div class="memory">💡 <b>Hook:</b> 🏨 <b>Hotel check-in</b> &mdash; the room is prepared the moment you arrive, automatically.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;A constructor initialises an object at creation. I prefer the member initialiser list because it initialises directly rather than default-constructing then assigning, and it's required for const and reference members.&rdquo;</div>
+  </div>
+
+  <!-- ========== 7 ========== -->
+  <div class="card" id="s7">
+    <h2><span class="num">7</span> Destructors 👋</h2>
+    <div class="def"><b>Definition:</b> <code>~Account()</code> &mdash; runs <b>automatically when an object is destroyed</b> (goes out of scope, or <code>delete</code> is called). Used to release resources. <b>No arguments, no return type, cannot be overloaded</b> &mdash; exactly one per class.</div>
+    <ul>
+      <li>Order: objects are destroyed in <b>reverse order of creation</b> (stack discipline &mdash; last in, first out).</li>
+      <li>This is the engine of <b>RAII</b>: acquire in the constructor, release in the destructor &mdash; and cleanup happens even if an exception is thrown.</li>
+    </ul>
+
+    <figure>
+      <svg viewBox="0 0 700 165" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <text x="150" y="22" text-anchor="middle" font-size="12" fill="#1e7a4f" font-weight="bold">CREATED ↓</text>
+        <rect x="70" y="35" width="160" height="28" rx="5" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/>
+        <text x="150" y="54" text-anchor="middle" font-size="11">Account a;   (1st)</text>
+        <rect x="70" y="70" width="160" height="28" rx="5" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/>
+        <text x="150" y="89" text-anchor="middle" font-size="11">Account b;   (2nd)</text>
+        <rect x="70" y="105" width="160" height="28" rx="5" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/>
+        <text x="150" y="124" text-anchor="middle" font-size="11">Account c;   (3rd)</text>
+        <path d="M260 84 L420 84" stroke="#6b6b6b" stroke-width="2.5" fill="none" marker-end="url(#a3)"/>
+        <text x="340" y="74" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">scope ends }</text>
+        <defs><marker id="a3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b6b6b"/></marker></defs>
+        <text x="560" y="22" text-anchor="middle" font-size="12" fill="#c0392b" font-weight="bold">DESTROYED ↓</text>
+        <rect x="480" y="35" width="160" height="28" rx="5" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/>
+        <text x="560" y="54" text-anchor="middle" font-size="11">~c()   (1st to die)</text>
+        <rect x="480" y="70" width="160" height="28" rx="5" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/>
+        <text x="560" y="89" text-anchor="middle" font-size="11">~b()</text>
+        <rect x="480" y="105" width="160" height="28" rx="5" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/>
+        <text x="560" y="124" text-anchor="middle" font-size="11">~a()   (last)</text>
+        <text x="350" y="152" text-anchor="middle" font-size="11" fill="#6b6b6b" font-style="italic">reverse order — LIFO, like a stack of plates</text>
+      </svg>
+      <figcaption>fig 7 — last created, first destroyed</figcaption>
+    </figure>
+
+    <div class="industry">🏭 <b>Industry framing:</b> RAII is why C++ doesn't need <code>finally</code>. A <code>lock_guard</code> takes a mutex in its constructor and releases it in its destructor &mdash; so the lock is released even if the function throws. Same for file handles, DB connections, sockets.</div>
+    <div class="memory">💡 <b>Hook:</b> 🏨 <b>Check-out</b> &mdash; the room is cleaned after you leave. The tilde <code>~</code> is a <b>waving hand</b> 👋.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Destructors give deterministic cleanup. That's the basis of RAII &mdash; tie a resource's lifetime to an object's lifetime, and the language guarantees release, exception-safe, in reverse construction order.&rdquo;</div>
+  </div>
+
+  <!-- ========== 8 ========== -->
+  <div class="card" id="s8">
+    <h2><span class="num">8</span> The <code>this</code> pointer</h2>
+    <div class="def"><b>Definition:</b> An <b>implicit pointer</b> passed to every <b>non-static</b> member function, holding the <b>address of the object that invoked it</b>.</div>
+    <ul>
+      <li>Resolves shadowing: <code>this-&gt;balance = balance;</code> when the parameter has the same name.</li>
+      <li>Enables <b>method chaining</b>: return <code>*this</code> by reference &rarr; <code>obj.setA(1).setB(2).setC(3);</code></li>
+      <li><b>Static functions have NO <code>this</code></b> &mdash; there's no invoking object.</li>
+      <li>Explains the memory model: <b>data is per-object, member functions exist once</b> &mdash; <code>this</code> tells the shared function whose data to touch.</li>
+    </ul>
+<pre><span class="k">class</span> Builder {
+    <span class="k">int</span> w, h;
+<span class="k">public</span>:
+    Builder&amp; setW(<span class="k">int</span> w) { <span class="y">this</span>-&gt;w = w; <span class="k">return</span> *<span class="y">this</span>; }  <span class="c">// chaining</span>
+    Builder&amp; setH(<span class="k">int</span> h) { <span class="y">this</span>-&gt;h = h; <span class="k">return</span> *<span class="y">this</span>; }
+};
+Builder b;
+b.setW(10).setH(20);      <span class="c">// ← this is why fluent APIs work</span></pre>
+    <div class="memory">💡 <b>Hook:</b> <code>this</code> = the word <b>&ldquo;my&rdquo;</b>. <code>this-&gt;balance</code> reads as <b>&ldquo;my balance&rdquo;</b>.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;<code>this</code> is an implicit parameter to every non-static member function. It disambiguates shadowed names and, returned as <code>*this</code>, enables fluent interfaces.&rdquo;</div>
+  </div>
+
+  <!-- ========== 9 ========== -->
+  <div class="card" id="s9">
+    <h2><span class="num">9</span> Static members 📋</h2>
+    <div class="def"><b>Static data member:</b> <b>one copy shared by the whole class</b>, not one per object. Exists before any object is created.<br><b>Static member function:</b> belongs to the class, callable as <code>Class::fn()</code> with <b>no object</b>, has <b>no <code>this</code></b>, and can therefore access <b>only static members</b>.</div>
+<pre><span class="k">class</span> Account {
+    <span class="k">int</span> id;
+<span class="k">public</span>:
+    <span class="k">static int</span> count;                  <span class="c">// declaration only</span>
+    Account() { count++; id = count; }
+    <span class="k">static void</span> total() {              <span class="c">// no `this`</span>
+        cout &lt;&lt; count;                  <span class="c">// ✅ static</span>
+        <span class="c">// cout &lt;&lt; id;                  // ❌ which object's id?!</span>
+    }
+};
+<span class="k">int</span> Account::count = 0;                <span class="y">// definition — REQUIRED, once, outside</span></pre>
+    <div class="warning">⚠️ <b>The trap:</b> forget <code>int Account::count = 0;</code> and you get a <b>linker error</b>, not a compile error. The in-class line only <i>declares</i>; it allocates no storage.</div>
+    <div class="industry">🏭 <b>Industry framing:</b> Static members back <b>counters, caches, config, and the Singleton pattern</b> &mdash; anything that's genuinely one-per-process rather than one-per-object.</div>
+    <div class="memory">💡 <b>Hook:</b> Your own desk 🗄️ = normal data · the <b>shared whiteboard</b> 📋 on the wall = static data.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;A static member belongs to the class, not to any instance. A static member function has no <code>this</code> pointer, which is exactly why it can only touch static members &mdash; and why it can't be <code>const</code>.&rdquo;</div>
+  </div>
+
+  <!-- ========== 10 ========== -->
+  <div class="card" id="s10">
+    <h2><span class="num">10</span> Friends 🤝</h2>
+    <div class="def"><b>Friend function:</b> a <b>non-member</b> function granted access to a class's private/protected members. <b>No <code>this</code></b>; takes the object as a parameter; called as <code>f(obj)</code>, not <code>obj.f()</code>.<br><b>Friend class:</b> <b>all</b> member functions of that class get access.<br><b>Member friend function:</b> only <b>one named method</b> of another class gets access.</div>
+    <ul>
+      <li><b>Granted, not taken</b> &mdash; the class chooses, from inside.</li>
+      <li><b>Not mutual · not inherited · not transitive.</b></li>
+      <li>Can be declared in <b>any</b> section &mdash; access specifiers don't apply to friend declarations.</li>
+    </ul>
+    <div class="industry">🏭 <b>Industry framing:</b> The honest reason friends exist: <code>operator&lt;&lt;</code>. The left operand is <code>ostream</code>, not your class, so it <b>can't</b> be a member function &mdash; but it needs your privates to print them. That's the canonical legitimate use.</div>
+<pre><span class="k">class</span> Account {
+    <span class="k">double</span> balance;
+<span class="k">public</span>:
+    <span class="y">friend</span> ostream&amp; <span class="k">operator</span>&lt;&lt;(ostream&amp; os, <span class="k">const</span> Account&amp; a);
+};
+ostream&amp; <span class="k">operator</span>&lt;&lt;(ostream&amp; os, <span class="k">const</span> Account&amp; a) {
+    <span class="k">return</span> os &lt;&lt; <span class="g">"₹"</span> &lt;&lt; a.balance;   <span class="c">// reaches private balance</span>
+}
+cout &lt;&lt; myAccount;                    <span class="c">// clean call site</span></pre>
+    <div class="warning">⚠️ <b>Use sparingly:</b> a friend is a <b>scalpel, not a default</b>. Every friend is code outside the class that now depends on its private layout.</div>
+    <div class="memory">💡 <b>Hook:</b> friend fn = <b>one guest with a spare key</b> 🔑 · friend class = <b>the whole family</b> 👨‍👩‍👧. Pick the smallest circle that works.</div>
+    <div class="interview">🎯 <b>Say this:</b> &ldquo;Friendship is an explicit, one-directional grant of access. It's not inherited, not mutual, not transitive. I'd reach for it mainly for operator overloading like <code>operator&lt;&lt;</code>, where a member function isn't an option.&rdquo;</div>
+  </div>
+
+  <!-- ========== Q&A ========== -->
+  <div class="card" id="qa">
+    <h2><span class="num">🔥</span> Most-asked questions (Part 1 scope)</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:14px;">Click to reveal. Try answering out loud <em>first</em> &mdash; speaking is the skill being tested, not recognition.</p>
+
+    <details class="qa"><summary>What is the difference between a class and an object?</summary>
+      <div class="ans">A class is a blueprint defining structure and behaviour; it occupies no memory. An object is an instance of that class; memory is allocated per object for its non-static data members. One class, many objects, each with independent state.
+      <div class="say"><b>One-liner:</b> Class = cookie cutter, object = the cookie.</div></div>
+    </details>
+
+    <details class="qa"><summary>Encapsulation vs Abstraction — the #1 asked distinction</summary>
+      <div class="ans">Encapsulation hides <b>data</b> — it's access control, an implementation-level concern, achieved with access specifiers. Abstraction hides <b>complexity</b> — it's design-level, exposing only the essential interface, achieved with abstract classes/interfaces. Encapsulation asks <i>how is the data protected</i>; abstraction asks <i>what does this thing do</i>. They usually appear together, which is why people conflate them.
+      <div class="say"><b>Say:</b> &ldquo;A car's pedal is abstraction — I press to go. The engine being sealed under the hood so I can't yank a wire is encapsulation.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>What's the only difference between class and struct in C++?</summary>
+      <div class="ans">Default access. In a <code>class</code>, members and base classes default to <b>private</b>; in a <code>struct</code>, they default to <b>public</b>. Everything else — constructors, destructors, inheritance, virtual functions, access specifiers — works identically. (Convention, not language rule: <code>struct</code> for passive data aggregates, <code>class</code> for types with invariants.)</div>
+    </details>
+
+    <details class="qa"><summary>Why keep data private and expose getters/setters? Isn't that just extra typing?</summary>
+      <div class="ans">Because a setter is a <b>checkpoint</b>. It can validate (reject a negative deposit), log, fire an event, or later change the internal representation without breaking a single caller. Public data gives up all of that permanently — once callers touch the field directly, you can never change how it's stored.
+      <div class="say"><b>Say:</b> &ldquo;It's not about secrecy, it's about being able to enforce invariants in one place.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>Is an access violation on a private member a compile-time or runtime error?</summary>
+      <div class="ans"><b>Compile-time.</b> C++ access control is enforced entirely by the compiler; the program never builds, so nothing runs. It's a language-level check, not a security mechanism — with casts and pointer tricks the bytes are still reachable at runtime.</div>
+    </details>
+
+    <details class="qa"><summary>What is a constructor? Can it be virtual?</summary>
+      <div class="ans">A constructor initialises an object at creation: same name as the class, no return type, runs automatically. It <b>cannot be virtual</b> — virtual dispatch needs a vtable pointer, and that pointer is set up <i>by</i> the constructor. The object's dynamic type doesn't exist yet, so there's nothing to dispatch on.
+      <div class="say"><b>Say:</b> &ldquo;You can't dispatch on a type that isn't constructed yet — the vptr is initialised during construction.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>Why use a member initialiser list instead of assigning in the constructor body?</summary>
+      <div class="ans">Three reasons: (1) It <b>initialises</b> rather than default-constructs-then-assigns — cheaper for non-trivial members. (2) It's <b>mandatory</b> for <code>const</code> members, reference members, and base/member objects lacking a default constructor. (3) It expresses intent. Trap to mention: members initialise in <b>declaration order</b>, not list order.</div>
+    </details>
+
+    <details class="qa"><summary>If I write a parameterised constructor, can I still do `Account a;`?</summary>
+      <div class="ans">No. Defining <b>any</b> constructor suppresses the compiler-generated default constructor, so <code>Account a;</code> fails to compile. You must write your own default constructor, or <code>Account() = default;</code> in C++11.</div>
+    </details>
+
+    <details class="qa"><summary>Can a destructor be overloaded? Can it take arguments?</summary>
+      <div class="ans">No to both. A class has <b>exactly one</b> destructor — no arguments, no return type, no overloading. Reason: destruction is invoked implicitly by the compiler when scope ends or <code>delete</code> is called, so there's no call site to pass arguments at, and no signature to select between.</div>
+    </details>
+
+    <details class="qa"><summary>In what order are objects destroyed?</summary>
+      <div class="ans"><b>Reverse order of construction</b> — LIFO, like a stack of plates. Within an object: the destructor body runs first, then members are destroyed in reverse declaration order, then base classes. This is what makes RAII composable and exception-safe.</div>
+    </details>
+
+    <details class="qa"><summary>What is RAII and why does C++ not need `finally`?</summary>
+      <div class="ans">Resource Acquisition Is Initialisation: bind a resource's lifetime to an object's lifetime. Acquire in the constructor, release in the destructor. Because destructors run deterministically — including during stack unwinding when an exception propagates — cleanup is guaranteed without a <code>finally</code> block. <code>std::lock_guard</code>, <code>std::unique_ptr</code>, and <code>std::fstream</code> are all RAII types.
+      <div class="say"><b>Industry:</b> &ldquo;A <code>lock_guard</code> releases the mutex even if the function throws — that's RAII paying rent.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>What is the `this` pointer? Do static functions have one?</summary>
+      <div class="ans"><code>this</code> is an implicit pointer to the invoking object, passed to every <b>non-static</b> member function. It disambiguates shadowed parameter names and enables method chaining via <code>return *this</code>. Static functions have <b>no</b> <code>this</code> — they belong to the class, not an instance.</div>
+    </details>
+
+    <details class="qa"><summary>Why can't a static member function be `const`?</summary>
+      <div class="ans">Because <code>const</code> on a member function is a promise about <code>this</code> — that the function won't modify the object it was called on. A static function has no <code>this</code>, so the qualifier has nothing to qualify. The compiler rejects it.
+      <div class="say"><b>This is a favourite</b> because it tests whether you understand <i>why</i> rather than memorised a rule.</div></div>
+    </details>
+
+    <details class="qa"><summary>Why must a static data member be defined outside the class?</summary>
+      <div class="ans">The in-class line is only a <b>declaration</b> — it allocates no storage. Since the header may be included in many translation units, defining it in-class would create multiple definitions. The out-of-class definition (<code>int Account::count = 0;</code>) gives it storage exactly once. Forget it and you get a <b>linker</b> error, not a compiler error. (C++17's <code>inline static</code> lets you skip this.)</div>
+    </details>
+
+    <details class="qa"><summary>Can a static member function access non-static data members?</summary>
+      <div class="ans">No. Without a <code>this</code> pointer it has no idea <i>which object's</i> data you'd mean. It can access only static data members and other static functions — unless you explicitly hand it an object as a parameter, in which case it can use that object's members through it.</div>
+    </details>
+
+    <details class="qa"><summary>What is a friend function? Doesn't it break encapsulation?</summary>
+      <div class="ans">A non-member function explicitly granted access to a class's private members. It has no <code>this</code> and takes the object as a parameter. It's <b>controlled</b> weakening, not a break: the class chooses its friends from inside, so the interface is still deliberate. Overuse is a design smell; the canonical legitimate use is <code>operator&lt;&lt;</code>, where the left operand is a stream so a member function isn't possible.</div>
+    </details>
+
+    <details class="qa"><summary>Is friendship inherited, mutual, or transitive?</summary>
+      <div class="ans">None of the three. If A grants friendship to B: B is <b>not</b> automatically A's friend in reverse (not mutual); B's <b>derived classes</b> don't inherit the access (not inherited); and a friend of B gains nothing on A (not transitive). Each grant is explicit and one-directional.
+      <div class="say"><b>One-liner:</b> &ldquo;My friend's children aren't my friends, and neither are my friend's friends.&rdquo;</div></div>
+    </details>
+
+    <details class="qa"><summary>Does it matter which section a friend declaration goes in?</summary>
+      <div class="ans">No. Access specifiers don't apply to friend declarations — <code>friend void f(X);</code> grants identical access whether it sits under <code>private:</code>, <code>protected:</code>, or <code>public:</code>. It feels like it should matter, which is exactly why it's asked.</div>
+    </details>
+
+    <details class="qa"><summary>How is an object laid out in memory? Does each object store its own copy of the methods?</summary>
+      <div class="ans">No. Each object stores its own <b>non-static data members</b> (plus padding, plus a vptr if the class has virtual functions). <b>Member functions exist once</b> in a shared code section — the <code>this</code> pointer tells the shared function which object's data to operate on. Static data members are stored once for the whole class, outside any object.</div>
+    </details>
+
+    <details class="qa"><summary>Why is OOP better than procedural for a large system? (the "so what" question)</summary>
+      <div class="ans">Because <b>change stays local</b>. In procedural code, global data plus tangled function dependencies mean one edit ripples unpredictably — the bug's symptom and cause live in different files. OOP gives ownership boundaries: state is private behind an interface, so invariants are enforced in one place; inheritance and polymorphism let you add a new type without touching the code that consumes it. That's what makes it survive large teams.
+      <div class="say"><b>Say:</b> &ldquo;Add a payment method by adding a class — not by editing a 400-line switch statement.&rdquo;</div></div>
+    </details>
+  </div>
+
+  <div class="next-banner">
+    <h3>📌 Part 2 coming next</h3>
+    <p>Inheritance &amp; its types · the diamond problem &amp; virtual inheritance · compile-time vs runtime polymorphism · virtual functions &amp; the vtable · virtual destructors · object slicing · abstract classes · shallow vs deep copy · Rule of Three/Five/Zero</p>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="friend.html">&larr; Note 05: Friends</a>
+    <a href="index.html">home &uarr;</a>
+  </div>
+
+</div>
+</body>
+</html>
