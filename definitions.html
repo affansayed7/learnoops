@@ -316,7 +316,7 @@ Car honda;             <span class="c">// another object, separate memory</span>
       <li><b>Instance</b> = just another word for object. <b>Instantiation</b> = the act of creating one.</li>
     </ul>
 
-    <div class="interview">🎯 <b>Bonus interview fact:</b> "What's the difference between <code>class</code> and <code>struct</code> in C++?" — Only the <b>default access</b>: class defaults to <b>private</b>, struct defaults to <b>public</b>. That's it.</div>
+    <div class="interview">🎯 <b>Bonus interview fact:</b> "What's the difference between <code>class</code> and <code>struct</code> in C++?" — Only the <b>defaults</b>, and there are actually <b>two</b> of them: <b>① member access</b> (class → private, struct → public) AND <b>② inheritance access</b> (<code>class D : Base</code> inherits <code>Base</code> as private by default; <code>struct D : Base</code> inherits it as public by default). Both flip the same way — private for class, public for struct.</div>
   </div>
 
   <!-- ============ REVISION TABLE ============ -->
