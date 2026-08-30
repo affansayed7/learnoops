@@ -271,7 +271,7 @@
 
     <div class="interview">🎯 <b>Interview lines:</b><br>
     ① "Private members are inaccessible outside the class — attempting it gives a <b>compile-time error</b>, since C++ enforces access control at compilation."<br>
-    ② "The only difference between <code>class</code> and <code>struct</code> is default access: class → private, struct → public."</div>
+    ② "Class and struct differ only in their defaults — and there are two of them: <b>member access</b> (class → private, struct → public) and <b>inheritance access</b> (<code>class D : Base</code> → private inheritance; <code>struct D : Base</code> → public inheritance). Everything else — constructors, virtual functions, templates — works identically on both."</div>
   </div>
 
   <!-- ============ WHY PRIVATE + SETTERS ============ -->
