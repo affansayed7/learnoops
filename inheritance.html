@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inheritance — LearnOOPs Note 08</title>
+<style>
+  :root{
+    --paper:#fbfaf7; --ink:#232323; --grid:#e8e5dd;
+    --blue:#2456a6; --red:#c0392b; --green:#1e7a4f;
+    --amber:#b8860b; --purple:#6d4aa0; --soft:#6b6b6b; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink); line-height:1.65; padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--blue);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--purple);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .memory{
+    border-left:4px solid var(--amber);background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  .warning{
+    border-left:4px solid var(--red);background:#fdecea;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .warning b{color:var(--red);}
+  code{
+    font-family:'Courier New',monospace;font-size:14px;
+    background:#f1efe8;padding:1px 6px;border-radius:4px;
+  }
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{
+    font-family:'Courier New',monospace;font-size:12px;color:var(--soft);
+    margin-top:8px;letter-spacing:.5px;
+  }
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .nav-bottom{
+    display:flex;justify-content:space-between;margin-top:36px;
+    font-family:'Courier New',monospace;font-size:14px;
+  }
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 08</div>
+  <h1>Inheritance <span class="hl">🧬</span></h1>
+  <p class="subtitle">The mechanism, the five shapes it comes in, the order things get built and torn down, and the diamond that breaks all of it.</p>
+
+  <!-- ============ WHAT IS INHERITANCE ============ -->
+  <div class="card">
+    <h2><span class="num">1</span> What inheritance actually is</h2>
+    <div class="def"><b>Definition:</b> A mechanism where a <b>derived class</b> acquires the members of a <b>base class</b>, modeling an <b>"is-a"</b> relationship (a <code>Dog</code> <i>is an</i> <code>Animal</code>).</div>
+    <ul>
+      <li>The derived class gets everything the base has, <b>plus</b> whatever new members it adds.</li>
+      <li><b>Every member is inherited</b> — including private ones. The catch: private members are still physically part of the derived object, but the derived class's own code <b>cannot touch them directly</b>. They're only reachable through the base's own public/protected methods.</li>
+    </ul>
+<pre><span class="k">class</span> Animal {
+    <span class="k">int</span> age;              <span class="c">// private — exists in every Dog object too, but Dog can't touch it directly</span>
+<span class="k">public</span>:
+    <span class="k">void</span> setAge(<span class="k">int</span> a) { age = a; }
+    <span class="k">int</span> getAge() <span class="k">const</span> { <span class="k">return</span> age; }
+};
+<span class="k">class</span> Dog : <span class="k">public</span> Animal {
+<span class="k">public</span>:
+    <span class="k">void</span> bark() { <span class="c">// cout << age;   // ❌ error: age is private in Animal</span> }
+};</pre>
+    <div class="memory">💡 <b>Common misconception, corrected:</b> "private members aren't inherited" is <b>wrong</b>. They ARE inherited (they exist in memory) — they're just <b>inaccessible</b> to the derived class's own code.</div>
+  </div>
+
+  <!-- ============ THE 5 TYPES ============ -->
+  <div class="card">
+    <h2><span class="num">2</span> The five shapes of inheritance</h2>
+    <figure>
+      <svg viewBox="0 0 700 330" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <text x="75" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">SINGLE</text>
+        <rect x="40" y="25" width="70" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="75" y="42" text-anchor="middle">A</text>
+        <line x1="75" y1="51" x2="75" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="40" y="75" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="75" y="92" text-anchor="middle">B</text>
+
+        <text x="225" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">MULTILEVEL</text>
+        <rect x="190" y="25" width="70" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="225" y="42" text-anchor="middle">A</text>
+        <line x1="225" y1="51" x2="225" y2="68" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="190" y="68" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="225" y="85" text-anchor="middle">B</text>
+        <line x1="225" y1="94" x2="225" y2="111" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="190" y="111" width="70" height="26" rx="4" fill="#f3edfa" stroke="#6d4aa0" stroke-width="1.6"/><text x="225" y="128" text-anchor="middle">C</text>
+
+        <text x="400" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">MULTIPLE</text>
+        <rect x="330" y="25" width="65" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="362" y="42" text-anchor="middle">A</text>
+        <rect x="410" y="25" width="65" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="442" y="42" text-anchor="middle">B</text>
+        <line x1="362" y1="51" x2="395" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="442" y1="51" x2="410" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="370" y="75" width="65" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="402" y="92" text-anchor="middle">C</text>
+
+        <text x="590" y="15" text-anchor="middle" font-weight="bold" fill="#2456a6">HIERARCHICAL</text>
+        <rect x="558" y="25" width="65" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="590" y="42" text-anchor="middle">A</text>
+        <line x1="590" y1="51" x2="545" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="590" y1="51" x2="590" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="590" y1="51" x2="635" y2="75" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="512" y="75" width="58" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="541" y="92" text-anchor="middle">B</text>
+        <rect x="578" y="75" width="24" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="590" y="92" text-anchor="middle">C</text>
+        <rect x="610" y="75" width="58" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="639" y="92" text-anchor="middle">D</text>
+
+        <text x="350" y="180" text-anchor="middle" font-weight="bold" fill="#c0392b">HYBRID (mix — where the 💎 diamond appears)</text>
+        <rect x="315" y="192" width="70" height="26" rx="4" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.6"/><text x="350" y="209" text-anchor="middle">A</text>
+        <line x1="335" y1="218" x2="285" y2="245" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="365" y1="218" x2="415" y2="245" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="240" y="245" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="275" y="262" text-anchor="middle">B</text>
+        <rect x="390" y="245" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="425" y="262" text-anchor="middle">C</text>
+        <line x1="285" y1="271" x2="330" y2="298" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <line x1="415" y1="271" x2="370" y2="298" stroke="#6b6b6b" stroke-width="1.6" marker-end="url(#u)"/>
+        <rect x="315" y="298" width="70" height="26" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/><text x="350" y="315" text-anchor="middle">D</text>
+        <defs><marker id="u" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#6b6b6b"/></marker></defs>
+      </svg>
+      <figcaption>fig 2 — single · multilevel · multiple · hierarchical · hybrid</figcaption>
+    </figure>
+    <table>
+      <tr><th>Type</th><th>Shape</th><th>Real example</th></tr>
+      <tr><td><b>Single</b></td><td>A → B</td><td><code>Animal → Dog</code></td></tr>
+      <tr><td><b>Multilevel</b></td><td>A → B → C</td><td><code>Animal → Mammal → Dog</code></td></tr>
+      <tr><td><b>Multiple</b></td><td>A + B → C</td><td><code>FlyingRobot : Robot, Flyable</code></td></tr>
+      <tr><td><b>Hierarchical</b></td><td>A → B, C, D</td><td><code>Shape → Circle, Square, Triangle</code></td></tr>
+      <tr><td><b>Hybrid</b></td><td>Mix of the above</td><td>Where the diamond problem shows up (Section 6)</td></tr>
+    </table>
+  </div>
+
+  <!-- ============ ACCESS MODES ============ -->
+  <div class="card">
+    <h2><span class="num">3</span> Access modes — public / protected / private inheritance</h2>
+    <p>C++ is unusual: <b>how</b> you inherit changes what the outside world can see through the derived class.</p>
+    <table>
+      <tr><th>Base member ↓ / Mode →</th><th><code>public</code> inheritance</th><th><code>protected</code> inheritance</th><th><code>private</code> inheritance</th></tr>
+      <tr><td><b>public</b></td><td>stays public</td><td>becomes protected</td><td>becomes private</td></tr>
+      <tr><td><b>protected</b></td><td>stays protected</td><td>stays protected</td><td>becomes private</td></tr>
+      <tr><td><b>private</b></td><td class="no">✗ never accessible</td><td class="no">✗ never accessible</td><td class="no">✗ never accessible</td></tr>
+    </table>
+    <ul style="margin-top:12px;">
+      <li>The inheritance mode is a <b>ceiling, not a floor</b> — it can only make access <i>more</i> restricted, never less.</li>
+      <li><b>Default mode:</b> <code>class D : B</code> is <b>private</b> inheritance. <code>struct D : B</code> is <b>public</b> inheritance. (Yet another class/struct default — same family as member-access defaults.)</li>
+      <li>Only <b>public</b> inheritance models a true <b>is-a</b> relationship. <b>Private</b> inheritance means "implemented in terms of" — usually better expressed as composition instead.</li>
+    </ul>
+    <div class="memory">💡 <b>Memory hook:</b> Private base members are a <b>locked room in the house you inherited</b> — you own the house, but you never get that key, no matter how you inherited it.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "Only public inheritance genuinely models is-a. Private and protected inheritance restrict what the outside world can see through the derived class — they're implementation techniques, not subtyping."</div>
+  </div>
+
+  <!-- ============ CONSTRUCTION ORDER ============ -->
+  <div class="card">
+    <h2><span class="num">4</span> Construction &amp; destruction order</h2>
+    <div class="def"><b>Rule:</b> Construction goes <b>base → derived</b>. Destruction goes <b>derived → base</b> — always the exact reverse.</div>
+<pre><span class="k">class</span> Animal {
+    string name;
+<span class="k">public</span>:
+    Animal(string n) : name(n) { cout &lt;&lt; <span class="g">"Animal ctor: "</span> &lt;&lt; name &lt;&lt; <span class="g">"\n"</span>; }
+    ~Animal() { cout &lt;&lt; <span class="g">"Animal dtor: "</span> &lt;&lt; name &lt;&lt; <span class="g">"\n"</span>; }
+};
+<span class="k">class</span> Dog : <span class="k">public</span> Animal {
+    string breed;
+<span class="k">public</span>:
+    Dog(string n, string b) : Animal(n), breed(b) { cout &lt;&lt; <span class="g">"Dog ctor\n"</span>; }
+    ~Dog() { cout &lt;&lt; <span class="g">"Dog dtor\n"</span>; }
+};
+<span class="k">int</span> main() { Dog d(<span class="g">"Rex"</span>, <span class="g">"Labrador"</span>); }
+
+<span class="c">// Output:
+// Animal ctor: Rex   ← base finishes completely first
+// Dog ctor
+// Dog dtor           ← derived torn down first
+// Animal dtor: Rex</span></pre>
+    <ul>
+      <li><code>Dog(n)</code> passes <code>n</code> to <code>Animal</code>'s constructor via <b>the member initializer list</b> — <code>: Animal(n), breed(b)</code>.</li>
+      <li>If you <b>don't</b> mention the base in the initializer list, the compiler tries to call the base's <b>default</b> constructor automatically. If <code>Animal</code> has <b>no</b> default constructor (because it only has the parameterized one above), that's a <b>compile error</b>.</li>
+    </ul>
+    <div class="warning">⚠️ <b>Why virtual calls in constructors don't dispatch to derived overrides:</b> the base constructor runs to completion <b>before</b> the derived part exists — during that window, the object genuinely <i>is</i> just a Base. (Full mechanics live in the Polymorphism note.)</div>
+    <div class="memory">💡 <b>Hook:</b> 🏗️ Foundation before walls (construction). 💥 Roof comes down before the foundation (destruction). You can't build on a floor that doesn't exist yet.</div>
+  </div>
+
+  <!-- ============ NAME HIDING PREVIEW ============ -->
+  <div class="card">
+    <h2><span class="num">5</span> A trap that lives here, not in polymorphism: name hiding</h2>
+<pre><span class="k">class</span> Base {
+<span class="k">public</span>:
+    <span class="k">void</span> show(<span class="k">int</span> x) { cout &lt;&lt; <span class="g">"Base::show(int)\n"</span>; }
+};
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+<span class="k">public</span>:
+    <span class="k">void</span> show(<span class="k">double</span> x) { cout &lt;&lt; <span class="g">"Derived::show(double)\n"</span>; }
+};
+<span class="k">int</span> main() {
+    Derived d;
+    d.show(5);   <span class="r">// prints "Derived::show(double)" — NOT Base::show(int)!</span>
+}</pre>
+    <ul>
+      <li>C++ name lookup is <b>scope-based</b>: once the compiler finds <b>any</b> <code>show</code> in <code>Derived</code>'s scope, it <b>stops looking</b> in <code>Base</code> entirely — even though <code>Base::show(int)</code> would be an exact-type match.</li>
+      <li>This has nothing to do with <code>virtual</code> — it's pure name hiding from inheritance's scoping rules.</li>
+      <li><b>Fix:</b> add <code>using Base::show;</code> inside <code>Derived</code> to pull the base overloads back into scope alongside the new one.</li>
+    </ul>
+    <div class="warning">⚠️ This is one of the most surprising things about C++ inheritance for people coming from languages with different overload rules. Declaring <b>any</b> same-named member in a derived class hides <b>the entire base overload set</b> for that name.</div>
+  </div>
+
+  <!-- ============ DIAMOND PROBLEM ============ -->
+  <div class="card">
+    <h2><span class="num">6</span> The diamond problem 💎</h2>
+    <div class="def"><b>Problem:</b> In hybrid/multiple inheritance, if B and C both inherit from A, and D inherits from both B and C — D ends up with <b>two separate copies</b> of A. Any access to A's members through D becomes <b>ambiguous</b>.</div>
+
+<pre><span class="k">class</span> Person { <span class="k">public</span>: string name; };
+<span class="k">class</span> Student  : <span class="k">public</span> Person {};
+<span class="k">class</span> Employee : <span class="k">public</span> Person {};
+<span class="k">class</span> TA : <span class="k">public</span> Student, <span class="k">public</span> Employee {};
+
+TA t;
+t.name = <span class="g">"Alex"</span>;   <span class="r">// ❌ error: request for member 'name' is ambiguous</span>
+<span class="c">// t has TWO Person subobjects — one via Student, one via Employee</span>
+<span class="c">// workaround without fixing the design: t.Student::name = "Alex";  ← ugly</span></pre>
+
+    <figure>
+      <svg viewBox="0 0 700 230" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="12">
+        <text x="175" y="16" text-anchor="middle" font-weight="bold" fill="#c0392b" font-size="12">❌ WITHOUT virtual</text>
+        <rect x="140" y="26" width="70" height="26" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/><text x="175" y="43" text-anchor="middle">Person</text>
+        <line x1="155" y1="52" x2="110" y2="82" stroke="#6b6b6b" stroke-width="1.6"/>
+        <line x1="195" y1="52" x2="240" y2="82" stroke="#6b6b6b" stroke-width="1.6"/>
+        <rect x="75" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="110" y="99" text-anchor="middle">Student</text>
+        <rect x="205" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="240" y="99" text-anchor="middle">Employee</text>
+        <line x1="110" y1="108" x2="155" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <line x1="240" y1="108" x2="195" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <rect x="140" y="138" width="70" height="26" rx="4" fill="#fdecea" stroke="#c0392b" stroke-width="1.6"/><text x="175" y="155" text-anchor="middle">TA</text>
+        <text x="175" y="186" text-anchor="middle" font-size="10.5" fill="#c0392b">TA holds Person TWICE</text>
+        <text x="175" y="204" text-anchor="middle" font-size="10.5" fill="#c0392b">t.name is ambiguous</text>
+        <line x1="350" y1="20" x2="350" y2="215" stroke="#dedbd2" stroke-width="2" stroke-dasharray="6 6"/>
+        <text x="525" y="16" text-anchor="middle" font-weight="bold" fill="#1e7a4f" font-size="12">✅ WITH virtual</text>
+        <rect x="490" y="26" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="2"/><text x="525" y="43" text-anchor="middle">Person</text>
+        <line x1="505" y1="52" x2="460" y2="82" stroke="#1e7a4f" stroke-width="1.8" stroke-dasharray="4 3"/>
+        <line x1="545" y1="52" x2="590" y2="82" stroke="#1e7a4f" stroke-width="1.8" stroke-dasharray="4 3"/>
+        <rect x="425" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="460" y="99" text-anchor="middle">Student</text>
+        <rect x="555" y="82" width="70" height="26" rx="4" fill="#fff" stroke="#232323" stroke-width="1.6"/><text x="590" y="99" text-anchor="middle">Employee</text>
+        <line x1="460" y1="108" x2="505" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <line x1="590" y1="108" x2="545" y2="138" stroke="#6b6b6b" stroke-width="1.6"/>
+        <rect x="490" y="138" width="70" height="26" rx="4" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.6"/><text x="525" y="155" text-anchor="middle">TA</text>
+        <text x="525" y="186" text-anchor="middle" font-size="10.5" fill="#1e7a4f">ONE shared Person</text>
+        <text x="525" y="204" text-anchor="middle" font-size="10.5" fill="#1e7a4f">t.name resolves cleanly</text>
+      </svg>
+      <figcaption>fig 6 — virtual inheritance collapses the duplicate base into one</figcaption>
+    </figure>
+
+<pre><span class="k">class</span> Person { <span class="k">public</span>: string name; };
+<span class="k">class</span> Student  : <span class="y">virtual</span> <span class="k">public</span> Person {};   <span class="c">// virtual → share the Person</span>
+<span class="k">class</span> Employee : <span class="y">virtual</span> <span class="k">public</span> Person {};
+<span class="k">class</span> TA : <span class="k">public</span> Student, <span class="k">public</span> Employee {};
+
+TA t;
+t.name = <span class="g">"Alex"</span>;   <span class="g">// ✅ unambiguous — only one Person exists</span></pre>
+
+    <div class="memory">💡 <b>Hook:</b> 💎 Without virtual, TA inherits <b>two grandparents who happen to be the same person</b> — "whose surname do I use?" is genuinely unanswerable. <code>virtual</code> says: <b>there's only one grandparent</b>.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "The diamond problem is a duplicated base subobject from multiple inheritance. C++ fixes it with virtual inheritance, making derived classes share one base subobject. Java sidesteps the whole issue by disallowing multiple class inheritance — only multiple interfaces, which carry no state to duplicate."</div>
+  </div>
+
+  <!-- ============ BONUS: VIRTUAL BASE CONSTRUCTION ============ -->
+  <div class="card">
+    <h2><span class="num">7</span> Bonus trap: who constructs the shared virtual base?</h2>
+    <p>This one genuinely surprises people, and it's an excellent differentiator in an interview:</p>
+<pre><span class="k">class</span> Person {
+<span class="k">public</span>:
+    string name;
+    Person(string n) : name(n) { cout &lt;&lt; <span class="g">"Person ctor\n"</span>; }
+};
+<span class="k">class</span> Student : <span class="y">virtual public</span> Person {
+<span class="k">public</span>:
+    Student(string n) : Person(n) { cout &lt;&lt; <span class="g">"Student ctor\n"</span>; }
+};
+<span class="k">class</span> Employee : <span class="y">virtual public</span> Person {
+<span class="k">public</span>:
+    Employee(string n) : Person(n) { cout &lt;&lt; <span class="g">"Employee ctor\n"</span>; }
+};
+<span class="k">class</span> TA : <span class="k">public</span> Student, <span class="k">public</span> Employee {
+<span class="k">public</span>:
+    <span class="c">// The MOST-DERIVED class must initialize the virtual base directly —</span>
+    <span class="c">// Student's and Employee's own "Person(n)" calls are IGNORED here!</span>
+    TA(string n) : Person(n), Student(n), Employee(n) { cout &lt;&lt; <span class="g">"TA ctor\n"</span>; }
+};</pre>
+    <ul>
+      <li>Because there's only <b>one</b> <code>Person</code> subobject, only <b>one</b> piece of code can be responsible for constructing it — and the C++ standard makes that the <b>most-derived class</b>, always.</li>
+      <li><code>Student</code>'s and <code>Employee</code>'s own <code>Person(n)</code> calls in their initializer lists are <b>silently ignored</b> when they're not the most-derived class being built. <code>TA</code> <b>must</b> mention <code>Person</code> explicitly in its own initializer list, even though <code>Person</code> isn't its direct base.</li>
+      <li>Forget it, and <code>Person</code> gets built with whatever its <b>default constructor</b> would do — a compile error here, since <code>Person</code> has none.</li>
+    </ul>
+    <div class="warning">⚠️ Most people writing virtual inheritance for the first time get bitten by this exact thing. It's a genuinely strong "I know this cold" signal if you bring it up unprompted.</div>
+  </div>
+
+  <!-- ============ COMPOSITION VS INHERITANCE ============ -->
+  <div class="card">
+    <h2><span class="num">8</span> Composition vs inheritance — the design judgment call</h2>
+    <ul>
+      <li><b>is-a</b> → inheritance. A <code>SportsCar</code> <i>is a</i> <code>Car</code>.</li>
+      <li><b>has-a</b> → composition. A <code>Car</code> <i>has an</i> <code>Engine</code> — <b>don't</b> make <code>Car</code> inherit from <code>Engine</code>.</li>
+    </ul>
+<pre><span class="c">// ❌ wrong relationship — a Car is not a kind of Engine</span>
+<span class="k">class</span> Car : <span class="k">public</span> Engine { };
+
+<span class="c">// ✅ composition — a Car HAS an Engine</span>
+<span class="k">class</span> Car {
+    Engine engine;    <span class="c">// member, not base class</span>
+<span class="k">public</span>:
+    <span class="k">void</span> start() { engine.ignite(); }
+};</pre>
+    <div class="warning">⚠️ <b>Modern guidance: "prefer composition over inheritance."</b> Inheritance couples the derived class tightly to the base's implementation — a base change ripples everywhere, and you can't swap behavior at runtime. Composition keeps things swappable and testable.</div>
+    <div class="memory">💡 <b>Hook:</b> Inheritance is a <b>birth certificate</b> — permanent, fixed at creation. Composition is a <b>toolbox</b> — you can swap tools in and out.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "I default to composition for reuse and reserve inheritance for genuine is-a subtyping — inheritance couples you to the base's implementation in a way that's hard to undo later."</div>
+  </div>
+
+  <!-- ============ REVISION ============ -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li>5 types: <b>single, multilevel, multiple, hierarchical, hybrid</b></li>
+      <li>Private base members ARE inherited (they exist), just <b>not directly accessible</b></li>
+      <li>Access mode is a <b>ceiling</b>: public → stays same, protected → caps at protected, private → caps at private. Base private members: never accessible regardless.</li>
+      <li>Default: <code>class D : B</code> → private inheritance. <code>struct D : B</code> → public inheritance.</li>
+      <li>Construction: <b>base → derived</b>. Destruction: <b>derived → base</b>. Reverse, always.</li>
+      <li><b>Name hiding:</b> any same-named member in Derived hides ALL of Base's overloads for that name — fix with <code>using Base::name;</code></li>
+      <li><b>Diamond problem:</b> duplicated base via multiple inheritance → ambiguous access. Fixed with <code>virtual</code> inheritance.</li>
+      <li><b>Virtual base construction:</b> the <b>most-derived class</b> is always responsible for it directly, even through intermediate classes</li>
+      <li><b>Prefer composition</b> (has-a) over inheritance (is-a) for reuse</li>
+    </ul>
+  </div>
+
+  <!-- ============ INTERACTIVE QUIZ ============ -->
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Medium→hard. Watch for access-mode traps, construction order, and the diamond. Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="encapsulation-abstraction.html">← Note 07: Encapsulation &amp; Abstraction</a>
+    <a href="index.html">home ↑</a>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "What access level does a protected base member have in the derived class, under PRIVATE inheritance?",
+    code:
+`class Base {
+protected:
+    int x;
+};
+class Derived : private Base {
+    // what is x's access level here?
+};`,
+    options: ["public", "protected", "private", "not accessible at all"],
+    correct: 2,
+    explain: "The inheritance mode is a ceiling on access. Under private inheritance, a protected base member becomes PRIVATE in the derived class — still accessible inside Derived's own methods, but not exposed to anything outside Derived (including further-derived classes)."
+  },
+  {
+    q: "Can Derived's own code directly access `secret` here?",
+    code:
+`class Base {
+    int secret;
+public:
+    Base(int s) : secret(s) {}
+};
+class Derived : public Base {
+public:
+    Derived(int s) : Base(s) {}
+    void show() { cout << secret; }   // <-- here
+};`,
+    options: [
+      "Yes — public inheritance exposes everything",
+      "No — secret is private in Base, so it's never accessible in Derived's own code, regardless of inheritance mode",
+      "Yes, but only inside the constructor",
+      "No — Derived needs to redeclare secret itself"
+    ],
+    correct: 1,
+    explain: "Private members of a base are NEVER directly accessible in a derived class's code, no matter which inheritance mode is used. `secret` still exists inside every Derived object (Base's constructor sets it), but Derived's own methods can't read or write it directly — only Base's own methods can."
+  },
+  {
+    q: "What does this print?",
+    code:
+`class A {
+public:
+    A() { cout << "A "; }
+    ~A() { cout << "~A "; }
+};
+class B : public A {
+public:
+    B() { cout << "B "; }
+    ~B() { cout << "~B "; }
+};
+int main() { B b; }`,
+    options: ["A B ~B ~A", "B A ~A ~B", "A B ~A ~B", "~A ~B A B"],
+    correct: 0,
+    explain: "Construction: base first, then derived → 'A B'. Destruction at end of main: reverse order, derived first, then base → '~B ~A'. Full output: 'A B ~B ~A'."
+  },
+  {
+    q: "Why does this fail to compile?",
+    code:
+`class Base {
+public:
+    Base(int x) {}   // only a parameterized constructor exists
+};
+class Derived : public Base {
+public:
+    Derived() {}   // <-- error happens because of this line
+};`,
+    options: [
+      "Derived needs a destructor first",
+      "Derived's constructor doesn't mention Base in its initializer list, so the compiler tries to call Base's default constructor — which doesn't exist",
+      "You can't inherit from a class with a parameterized constructor",
+      "Base(int x) must be virtual"
+    ],
+    correct: 1,
+    explain: "If a derived constructor's initializer list doesn't explicitly call a base constructor, the compiler inserts an implicit call to the base's DEFAULT constructor. Base only has Base(int) — no default constructor exists — so this fails. Fix: `Derived() : Base(0) {}` or add a default constructor to Base."
+  },
+  {
+    q: "What does `d.show(5)` print?",
+    code:
+`class Base {
+public:
+    void show(int x) { cout << "Base::show(int)"; }
+};
+class Derived : public Base {
+public:
+    void show(double x) { cout << "Derived::show(double)"; }
+};
+int main() {
+    Derived d;
+    d.show(5);
+}`,
+    options: [
+      "Base::show(int) — it's an exact type match",
+      "Derived::show(double) — name hiding blocks Base's overload entirely",
+      "Compile error — ambiguous call",
+      "Both functions run"
+    ],
+    correct: 1,
+    explain: "C++ name lookup stops at the first scope where it finds a matching name. Derived::show hides ALL of Base's show overloads — including show(int), even though it would be a better type match. The int 5 is converted to double, and Derived::show(double) runs."
+  },
+  {
+    q: "Without virtual inheritance, what happens here?",
+    code:
+`class Person { public: string name; };
+class Student : public Person {};
+class Employee : public Person {};
+class TA : public Student, public Employee {};
+
+int main() {
+    TA t;
+    t.name = "Alex";   // <-- here
+}`,
+    options: [
+      "Works fine — name is inherited once",
+      "Compile error — ambiguous, because TA contains TWO separate Person subobjects",
+      "Works, but only sets Student's copy",
+      "Runtime error — undefined behavior"
+    ],
+    correct: 1,
+    explain: "TA inherits Person via both Student and Employee, creating two independent Person subobjects. `t.name` doesn't know which one you mean — compile-time ambiguity error. Fix: either disambiguate with `t.Student::name`, or use virtual inheritance so only one Person exists."
+  },
+  {
+    q: "After fixing the diamond with `virtual public Person` in both Student and Employee, who is responsible for constructing the shared Person subobject?",
+    code:
+`class Person { public: Person(string n) {} };
+class Student : virtual public Person {
+public: Student(string n) : Person(n) {}
+};
+class Employee : virtual public Person {
+public: Employee(string n) : Person(n) {}
+};
+class TA : public Student, public Employee {
+public:
+    TA(string n) : /* ??? */ {}
+};`,
+    options: [
+      "Student's Person(n) call — it's listed first",
+      "Employee's Person(n) call",
+      "TA itself — the most-derived class must call Person(n) directly, or it silently uses Person's default constructor",
+      "Both Student and Employee's calls run, in order"
+    ],
+    correct: 2,
+    explain: "With a virtual base, only ONE subobject exists, so only ONE place can construct it — the standard makes that the MOST-DERIVED class, always. Student's and Employee's own Person(n) calls are ignored when they aren't the most-derived class being built. TA must write `TA(string n) : Person(n), Student(n), Employee(n) {}` explicitly."
+  },
+  {
+    q: "Which relationship should use composition, NOT inheritance?",
+    code: null,
+    options: [
+      "A SportsCar is a kind of Car",
+      "A Square is a kind of Shape",
+      "A Car has an Engine",
+      "A Manager is a kind of Employee"
+    ],
+    correct: 2,
+    explain: "'Car has an Engine' is a has-a relationship — composition (Engine as a member of Car). The other three are genuine is-a relationships suited to inheritance. Making Car inherit from Engine would be a classic inheritance-vs-composition mistake."
+  },
+  {
+    q: "What is the default inheritance mode in `class Derived : Base {};` (no keyword specified)?",
+    code: null,
+    options: [
+      "public",
+      "protected",
+      "private — this is the class default, same family as class defaulting to private member access",
+      "It's a compile error to omit the mode"
+    ],
+    correct: 2,
+    explain: "Just like class members default to private, class inheritance with no explicit specifier defaults to PRIVATE. (`struct Derived : Base {};` would default to public instead — the same class/struct default pattern applies to both member access and inheritance access.)"
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div');
+  block.className = 'q-block';
+
+  const qnum = document.createElement('div');
+  qnum.className = 'q-num';
+  qnum.textContent = 'Q' + (qi + 1);
+  block.appendChild(qnum);
+
+  const qtext = document.createElement('div');
+  qtext.className = 'q-text';
+  qtext.textContent = item.q;
+  block.appendChild(qtext);
+
+  if (item.code) {
+    const pre = document.createElement('pre');
+    pre.className = 'q-code';
+    pre.textContent = item.code;
+    block.appendChild(pre);
+  }
+
+  const opts = document.createElement('div');
+  opts.className = 'q-opts';
+
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) {
+        btn.classList.add('correct');
+        score++;
+        document.getElementById('score').textContent = score;
+      } else {
+        btn.classList.add('wrong');
+        allBtns[item.correct].classList.add('correct');
+      }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+
+  block.appendChild(opts);
+  quizEl.appendChild(block);
+});
+</script>
+
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{
+    border:1px solid #e3e0d7;border-radius:10px;
+    padding:18px 18px 20px;margin:18px 0;background:#fff;
+  }
+  .q-num{
+    font-family:'Courier New',monospace;font-size:12px;font-weight:bold;
+    display:inline-block;background:var(--ink);color:var(--paper);
+    padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;
+  }
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{
+    font-family:'Courier New',monospace;font-size:13px;line-height:1.5;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;
+  }
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    font-family:Georgia,serif;font-size:15px;text-align:left;
+    padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;
+    background:#fbfaf7;cursor:pointer;transition:all .12s ease;
+    display:flex;align-items:center;gap:10px;color:var(--ink);
+  }
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{
+    font-family:'Courier New',monospace;font-weight:bold;font-size:13px;
+    background:#e8e5dd;color:var(--ink);border-radius:5px;
+    width:24px;height:24px;flex:0 0 24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{
+    border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;
+  }
+  .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{
+    border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;
+  }
+  .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{
+    margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;
+  }
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);}
+  .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{
+    text-align:center;font-family:'Courier New',monospace;font-weight:bold;
+    font-size:18px;margin-top:20px;padding:12px;
+    background:var(--ink);color:var(--paper);border-radius:8px;
+  }
+  #score{color:#8be0a4;}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Pointers & Modern C++ — LearnOOPs Note 14</title>
+<style>
+  :root{--paper:#fbfaf7;--ink:#232323;--grid:#e8e5dd;--blue:#2456a6;--red:#c0392b;--green:#1e7a4f;--amber:#b8860b;--purple:#6d4aa0;--soft:#6b6b6b;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:28px 28px;color:var(--ink);line-height:1.65;padding:40px 16px 80px;}
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--purple);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{background:var(--card);border:1px solid #dedbd2;border-radius:10px;padding:26px 28px;margin-bottom:26px;box-shadow:2px 3px 0 rgba(35,35,35,.07);}
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{font-family:'Courier New',monospace;font-size:14px;font-weight:bold;background:var(--ink);color:var(--paper);border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;}
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;} li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;}
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;} pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{font-family:'Courier New',monospace;font-size:12px;color:var(--soft);margin-top:8px;letter-spacing:.5px;}
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 14</div>
+  <h1>Smart Pointers <span class="hl">🧠</span></h1>
+  <p class="subtitle">The Rule of Zero in practice — RAII wrappers that make manual new/delete almost entirely unnecessary in modern C++.</p>
+
+  <!-- 1 -->
+  <div class="card">
+    <h2><span class="num">1</span> The problem they solve</h2>
+<pre>Shape* s = <span class="k">new</span> Circle();
+doSomethingRisky();   <span class="c">// if this throws, `delete s;` below never runs → LEAK</span>
+<span class="k">delete</span> s;</pre>
+    <div class="def"><b>Smart pointer:</b> an RAII wrapper around a raw pointer that <b>owns</b> the memory and frees it automatically in its own destructor — exception-safe by construction, exactly like the Rule of Zero from Note 11.</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <h2><span class="num">2</span> <code>unique_ptr</code> — exclusive ownership, the default choice</h2>
+<pre><span class="k">auto</span> e = std::make_unique&lt;Employee&gt;(<span class="g">"Alex"</span>);
+e-&gt;raiseSalary();
+<span class="c">// automatically deleted when e goes out of scope — no manual delete, ever</span></pre>
+    <ul>
+      <li><b>Exactly one owner</b> at a time. <b>Copying is disabled</b> — the copy constructor and copy assignment are <code>= delete</code>d.</li>
+      <li>Ownership can only be <b>transferred</b> via move.</li>
+      <li><b>Zero runtime overhead</b> compared to a raw pointer — no reference counting.</li>
+    </ul>
+<pre>std::unique_ptr&lt;Employee&gt; e1 = std::make_unique&lt;Employee&gt;(<span class="g">"Alex"</span>);
+std::unique_ptr&lt;Employee&gt; e2 = e1;              <span class="r">// ❌ compile error — copy constructor is deleted</span>
+std::unique_ptr&lt;Employee&gt; e3 = std::move(e1);   <span class="g">// ✅ ownership transferred — e1 is now nullptr</span></pre>
+    <div class="memory">💡 <b>Hook:</b> <code>unique_ptr</code> = the <b>only key to a flat</b> 🔑 — you can hand it to someone else, but you can't photocopy it.</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <h2><span class="num">3</span> <code>shared_ptr</code> — reference-counted shared ownership</h2>
+<pre>std::shared_ptr&lt;Employee&gt; a = std::make_shared&lt;Employee&gt;(<span class="g">"Alex"</span>);
+std::shared_ptr&lt;Employee&gt; b = a;    <span class="c">// ✅ allowed — refcount becomes 2</span>
+cout &lt;&lt; a.use_count();               <span class="c">// 2</span>
+b.reset();                           <span class="c">// refcount drops to 1</span>
+<span class="c">// object is destroyed only when the LAST shared_ptr pointing to it is gone (refcount hits 0)</span></pre>
+    <div class="warning">⚠️ <b>Classic mistake — constructing two independent shared_ptrs from the same raw pointer:</b></div>
+<pre>Employee* raw = <span class="k">new</span> Employee(<span class="g">"Alex"</span>);
+std::shared_ptr&lt;Employee&gt; a(raw);
+std::shared_ptr&lt;Employee&gt; b(raw);   <span class="r">// ❌ WRONG — creates a SECOND, independent control block</span>
+<span class="c">// a and b each think their own refcount is 1, unaware of each other</span>
+<span class="c">// both will eventually try to delete raw → DOUBLE FREE</span>
+<span class="c">// correct way: std::shared_ptr<Employee> b = a;  (copy the shared_ptr, not the raw pointer)</span></pre>
+    <div class="memory">💡 <b>Hook:</b> <code>shared_ptr</code> = <b>flatmates</b> 👥 — the last one to move out turns off the lights (frees the memory).</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <h2><span class="num">4</span> <code>weak_ptr</code> — breaking reference cycles</h2>
+    <p>Two <code>shared_ptr</code>s pointing at each other never reach a refcount of zero — the classic memory leak reference counting can't solve on its own:</p>
+    <figure>
+      <svg viewBox="0 0 700 130" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <rect x="55" y="30" width="95" height="42" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+        <text x="102" y="48" text-anchor="middle" font-weight="bold">Node A</text><text x="102" y="63" text-anchor="middle">count=1</text>
+        <rect x="230" y="30" width="95" height="42" rx="6" fill="#fdecea" stroke="#c0392b" stroke-width="1.8"/>
+        <text x="277" y="48" text-anchor="middle" font-weight="bold">Node B</text><text x="277" y="63" text-anchor="middle">count=1</text>
+        <path d="M152 42 L228 42" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#w1)"/>
+        <path d="M228 60 L152 60" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#w1)"/>
+        <text x="190" y="90" text-anchor="middle" font-size="10" fill="#c0392b" font-weight="bold">each holds the other alive → neither hits 0 → LEAK 💧</text>
+        <defs><marker id="w1" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#c0392b"/></marker></defs>
+      </svg>
+      <figcaption>fig 4 — two shared_ptrs pointing at each other never die</figcaption>
+    </figure>
+<pre><span class="k">class</span> Node {
+<span class="k">public</span>:
+    std::shared_ptr&lt;Node&gt; next;    <span class="c">// owns the next node</span>
+    std::<span class="y">weak_ptr</span>&lt;Node&gt; prev;      <span class="c">// OBSERVES the previous node — doesn't bump its refcount</span>
+};</pre>
+    <ul>
+      <li><code>weak_ptr</code> holds a <b>non-owning</b> reference — it doesn't increment the refcount, so it can't keep an object alive by itself.</li>
+      <li>To actually use it, call <code>.lock()</code>, which returns a <code>shared_ptr</code> if the object still exists, or an <b>empty</b> one if it's already been destroyed.</li>
+    </ul>
+    <div class="memory">💡 <b>Hook:</b> <code>weak_ptr</code> = a <b>visitor</b> 👀 who can look in, but doesn't pay rent — so they never stop the lease from ending.</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="card">
+    <h2><span class="num">5</span> Two more traps</h2>
+<pre><span class="k">std::unique_ptr</span>&lt;<span class="k">int</span>&gt; p = std::make_unique&lt;<span class="k">int</span>&gt;(5);
+<span class="k">int</span>* raw = p.get();     <span class="c">// exposes the raw pointer — does NOT transfer ownership</span>
+<span class="k">delete</span> raw;              <span class="r">// ❌ DANGER — p still thinks it owns this memory</span>
+<span class="c">// when p's own destructor runs later, it deletes the SAME memory again → double free</span></pre>
+    <div class="warning">⚠️ <code>.get()</code> is for <b>passing the raw pointer to an API that needs one</b> (e.g. a C library) — never for manually managing its lifetime yourself. The smart pointer still believes it owns that memory.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "I default to unique_ptr — it's zero-overhead and expresses exclusive ownership clearly. I only reach for shared_ptr when ownership is genuinely shared, since the atomic refcount isn't free, and I use weak_ptr specifically to break cycles that reference counting can't collect on its own."</div>
+  </div>
+
+  <!-- 6 -->
+  <div class="card">
+    <h2><span class="num">6</span> Custom deleters &amp; why <code>make_unique</code>/<code>make_shared</code></h2>
+<pre><span class="c">// wrapping a C API that needs its own cleanup function</span>
+std::unique_ptr&lt;FILE, <span class="k">decltype</span>(&amp;fclose)&gt; file(fopen(<span class="g">"data.txt"</span>, <span class="g">"r"</span>), &amp;fclose);
+<span class="c">// file automatically calls fclose() on the FILE* when it goes out of scope</span></pre>
+    <ul>
+      <li>Always prefer <code>make_unique</code>/<code>make_shared</code> over raw <code>new</code>: they're <b>exception-safe</b> (no window where a raw pointer exists briefly unowned), and <code>make_shared</code> specifically allocates the object <b>and</b> its control block in <b>one</b> allocation instead of two.</li>
+    </ul>
+  </div>
+
+  <!-- REVISION -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li><code>unique_ptr</code>: exclusive owner, move-only, zero overhead. <b>Default choice.</b></li>
+      <li><code>shared_ptr</code>: reference-counted shared ownership. Never construct two directly from the same raw pointer — always copy an existing <code>shared_ptr</code>.</li>
+      <li><code>weak_ptr</code>: non-owning observer, breaks reference cycles, use <code>.lock()</code> to access</li>
+      <li><code>.get()</code> exposes the raw pointer without transferring ownership — never manually <code>delete</code> it</li>
+      <li>Prefer <code>make_unique</code>/<code>make_shared</code> over raw <code>new</code> — exception safety + (for shared) one allocation instead of two</li>
+    </ul>
+  </div>
+
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="exception-handling.html">← Note 13: Exception Handling</a>
+    <a href="index.html">home ↑</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "Why does this fail to compile?",
+    code:
+`std::unique_ptr<Employee> e1 = std::make_unique<Employee>("Alex");
+std::unique_ptr<Employee> e2 = e1;`,
+    options: [
+      "unique_ptr doesn't exist in standard C++",
+      "unique_ptr's copy constructor is explicitly deleted — only move is allowed, to enforce exclusive ownership",
+      "Employee needs a copy constructor first",
+      "You can't use make_unique with custom classes"
+    ],
+    correct: 1,
+    explain: "unique_ptr enforces exclusive ownership by deleting its copy constructor and copy assignment operator. `e2 = e1` tries to copy, which fails to compile. Use `std::move(e1)` to transfer ownership instead."
+  },
+  {
+    q: "What is a.use_count() after this?",
+    code:
+`std::shared_ptr<int> a = std::make_shared<int>(5);
+std::shared_ptr<int> b = a;
+std::shared_ptr<int> c = b;
+c.reset();
+cout << a.use_count();`,
+    options: ["1", "2", "3", "0"],
+    correct: 1,
+    explain: "a, b, c all share ONE control block. Creating b and c from a/b brings the count to 3. c.reset() releases c's ownership, dropping the count to 2. a and b still share ownership."
+  },
+  {
+    q: "What's wrong with this shared_ptr usage?",
+    code:
+`Employee* raw = new Employee("Alex");
+std::shared_ptr<Employee> a(raw);
+std::shared_ptr<Employee> b(raw);`,
+    options: [
+      "Nothing — a and b correctly share ownership",
+      "a and b get SEPARATE, independent control blocks — each thinks its refcount is 1, and both will eventually delete raw, causing a double free",
+      "This is a compile error",
+      "raw must be a smart pointer type first"
+    ],
+    correct: 1,
+    explain: "Constructing a shared_ptr directly from a raw pointer creates a NEW control block each time. a and b don't know about each other — each has its own refcount of 1. When both eventually go out of scope, each independently calls delete on the SAME raw pointer — double free. Correct approach: `shared_ptr<Employee> b = a;` (copy the shared_ptr itself)."
+  },
+  {
+    q: "What problem does weak_ptr solve that shared_ptr alone cannot?",
+    code: null,
+    options: [
+      "It makes shared_ptr faster",
+      "It breaks reference cycles — two shared_ptrs pointing at each other never reach refcount 0, but a weak_ptr doesn't add to the count, so the cycle can be broken",
+      "It replaces unique_ptr entirely",
+      "It automatically detects memory leaks at compile time"
+    ],
+    correct: 1,
+    explain: "Reference counting can't collect cycles: if A holds a shared_ptr to B and B holds a shared_ptr to A, neither refcount ever hits zero. Replacing one direction with a weak_ptr (which doesn't increment the count) breaks the cycle, allowing proper cleanup."
+  },
+  {
+    q: "What's dangerous about this code?",
+    code:
+`std::unique_ptr<int> p = std::make_unique<int>(5);
+int* raw = p.get();
+delete raw;
+// ... later, p goes out of scope`,
+    options: [
+      "Nothing — get() transfers ownership to raw",
+      "get() does NOT transfer ownership — p still believes it owns the memory, so when p's destructor runs, it deletes the SAME memory again (double free)",
+      "get() is illegal to call on a unique_ptr",
+      "raw becomes a unique_ptr automatically"
+    ],
+    correct: 1,
+    explain: "get() just exposes the underlying raw pointer for read-only inspection or passing to APIs — it does NOT relinquish ownership. p still thinks it owns that int. Manually deleting raw, then letting p's destructor also run, is a double free."
+  },
+  {
+    q: "How do you actually access the object a weak_ptr refers to?",
+    code:
+`std::weak_ptr<Node> wp = someSharedPtr;
+// how do you use wp to access the Node?`,
+    options: [
+      "wp->someMethod(); directly, like a raw pointer",
+      "Call wp.lock(), which returns a shared_ptr — either valid (if the object still exists) or empty (if it's already been destroyed)",
+      "weak_ptr can never be dereferenced under any circumstances",
+      "wp.get() returns the object directly, guaranteed valid"
+    ],
+    correct: 1,
+    explain: "weak_ptr has no operator-> or operator* of its own precisely because the object might no longer exist. .lock() safely checks and returns a shared_ptr you can then use — empty if the object is gone, letting you check before accessing."
+  },
+  {
+    q: "Why prefer make_unique/make_shared over raw `new`?",
+    code: null,
+    options: [
+      "They are purely stylistic with no functional benefit",
+      "They're exception-safe (no window with an unowned raw pointer), and make_shared specifically combines the object + control block into ONE allocation instead of two",
+      "new is deprecated in C++ and no longer works",
+      "make_unique is required syntax — new cannot be used with smart pointers at all"
+    ],
+    correct: 1,
+    explain: "With `unique_ptr<T> p(new T());`, if something throws between the `new` and the constructor call finishing, you could leak. make_unique avoids that window entirely. make_shared also allocates the managed object and its control block together — one allocation instead of two, which is faster."
+  },
+  {
+    q: "Which smart pointer should be your default choice for owning a dynamically allocated object?",
+    code: null,
+    options: [
+      "shared_ptr — always default to reference counting for safety",
+      "unique_ptr — zero overhead, expresses exclusive ownership clearly; only upgrade to shared_ptr if ownership is genuinely shared",
+      "weak_ptr — it's the most memory-efficient",
+      "Raw pointers with manual new/delete — smart pointers add unnecessary overhead"
+    ],
+    correct: 1,
+    explain: "unique_ptr has essentially zero overhead compared to a raw pointer and clearly communicates single ownership. shared_ptr's atomic reference counting has real (if often small) cost, so it should be reserved for cases where ownership is genuinely shared among multiple owners."
+  },
+  {
+    q: "What happens to `e1` after this line runs?",
+    code:
+`std::unique_ptr<Employee> e1 = std::make_unique<Employee>("Alex");
+std::unique_ptr<Employee> e2 = std::move(e1);`,
+    options: [
+      "e1 still owns the Employee object, just like e2",
+      "e1 becomes nullptr — ownership has been fully transferred to e2, and e1 no longer owns anything",
+      "This is a compile error — you can't move a unique_ptr",
+      "Both e1 and e2 now own the object jointly"
+    ],
+    correct: 1,
+    explain: "std::move(e1) casts e1 to an rvalue reference, triggering unique_ptr's move constructor for e2. That move constructor steals e1's internal pointer and sets e1's own pointer to nullptr. e1 is left in a valid but empty state — using it (other than checking if it's null or reassigning it) would be meaningless since it owns nothing."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div'); block.className = 'q-block';
+  const qnum = document.createElement('div'); qnum.className = 'q-num'; qnum.textContent = 'Q' + (qi + 1); block.appendChild(qnum);
+  const qtext = document.createElement('div'); qtext.className = 'q-text'; qtext.textContent = item.q; block.appendChild(qtext);
+  if (item.code) { const pre = document.createElement('pre'); pre.className = 'q-code'; pre.textContent = item.code; block.appendChild(pre); }
+  const opts = document.createElement('div'); opts.className = 'q-opts';
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button'); btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) { btn.classList.add('correct'); score++; document.getElementById('score').textContent = score; }
+      else { btn.classList.add('wrong'); allBtns[item.correct].classList.add('correct'); }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+  block.appendChild(opts); quizEl.appendChild(block);
+});
+</script>
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{border:1px solid #e3e0d7;border-radius:10px;padding:18px 18px 20px;margin:18px 0;background:#fff;}
+  .q-num{font-family:'Courier New',monospace;font-size:12px;font-weight:bold;display:inline-block;background:var(--ink);color:var(--paper);padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;}
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{font-family:'Courier New',monospace;font-size:13px;line-height:1.5;background:#232323;color:#eee;border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;}
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{font-family:Georgia,serif;font-size:15px;text-align:left;padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;background:#fbfaf7;cursor:pointer;transition:all .12s ease;display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{font-family:'Courier New',monospace;font-weight:bold;font-size:13px;background:#e8e5dd;color:var(--ink);border-radius:5px;width:24px;height:24px;flex:0 0 24px;display:flex;align-items:center;justify-content:center;}
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;} .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;} .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;}
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);} .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{text-align:center;font-family:'Courier New',monospace;font-weight:bold;font-size:18px;margin-top:20px;padding:12px;background:var(--ink);color:var(--paper);border-radius:8px;}
+  #score{color:#8be0a4;}
+</style>
+</body>
+</html>

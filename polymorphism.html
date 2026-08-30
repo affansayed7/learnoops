@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Polymorphism — LearnOOPs Note 09</title>
+<style>
+  :root{--paper:#fbfaf7;--ink:#232323;--grid:#e8e5dd;--blue:#2456a6;--red:#c0392b;--green:#1e7a4f;--amber:#b8860b;--purple:#6d4aa0;--soft:#6b6b6b;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:28px 28px;color:var(--ink);line-height:1.65;padding:40px 16px 80px;}
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--red);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{background:var(--card);border:1px solid #dedbd2;border-radius:10px;padding:26px 28px;margin-bottom:26px;box-shadow:2px 3px 0 rgba(35,35,35,.07);}
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{font-family:'Courier New',monospace;font-size:14px;font-weight:bold;background:var(--ink);color:var(--paper);border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;}
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;} li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;}
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;} pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{font-family:'Courier New',monospace;font-size:12px;color:var(--soft);margin-top:8px;letter-spacing:.5px;}
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;} td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 09</div>
+  <h1>Polymorphism <span class="hl">🎭</span></h1>
+  <p class="subtitle">Many forms, one interface — compile-time overloading, runtime virtual dispatch, the vtable underneath it, and the two mistakes that leak memory or silently lose data.</p>
+
+  <!-- 1 -->
+  <div class="card">
+    <h2><span class="num">1</span> Compile-time vs runtime polymorphism</h2>
+    <div class="def"><b>Polymorphism:</b> "many forms" — the same interface (function name, operator) producing different behavior depending on type or context.</div>
+    <table>
+      <tr><th></th><th>Compile-time (static)</th><th>Runtime (dynamic)</th></tr>
+      <tr><td><b>Achieved by</b></td><td>Function overloading, operator overloading, templates</td><td><b>Virtual functions</b> through a base pointer/reference</td></tr>
+      <tr><td><b>Resolved</b></td><td>At compilation (early binding)</td><td>At execution (late binding)</td></tr>
+      <tr><td><b>Mechanism</b></td><td>Signature matching</td><td>vtable + vptr lookup</td></tr>
+      <tr><td><b>Cost</b></td><td>Zero — fully inlinable</td><td>One indirection; usually blocks inlining</td></tr>
+    </table>
+    <div class="memory">💡 <b>Hook:</b> Compile-time = choosing from a <b>fixed menu</b> 📋 before arriving. Runtime = the <b>chef's surprise</b> 🍽️ — decided when the dish actually arrives.</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <h2><span class="num">2</span> Runtime polymorphism in action</h2>
+<pre><span class="k">class</span> Shape {
+<span class="k">public</span>:
+    <span class="k">virtual void</span> draw() { cout &lt;&lt; <span class="g">"Shape\n"</span>; }
+    <span class="k">virtual</span> ~Shape() = <span class="k">default</span>;
+};
+<span class="k">class</span> Circle : <span class="k">public</span> Shape {
+<span class="k">public</span>:
+    <span class="k">void</span> draw() <span class="k">override</span> { cout &lt;&lt; <span class="g">"Circle\n"</span>; }
+};
+<span class="k">class</span> Square : <span class="k">public</span> Shape {
+<span class="k">public</span>:
+    <span class="k">void</span> draw() <span class="k">override</span> { cout &lt;&lt; <span class="g">"Square\n"</span>; }
+};
+<span class="k">void</span> render(Shape* s) { s-&gt;draw(); }   <span class="c">// doesn't know or care which subtype</span>
+
+<span class="k">int</span> main() {
+    Circle c; Square sq;
+    render(&amp;c);    <span class="c">// "Circle"</span>
+    render(&amp;sq);   <span class="c">// "Square" — SAME call, different behavior</span>
+}</pre>
+    <div class="interview">🎯 <b>Interview line:</b> "Runtime polymorphism means the same call site (`s->draw()`) dispatches differently depending on the object's actual dynamic type, decided at runtime through the vtable."</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <h2><span class="num">3</span> Overriding vs Overloading vs Hiding — the final word</h2>
+    <table>
+      <tr><th></th><th>Overloading</th><th>Overriding</th><th>Hiding (shadowing)</th></tr>
+      <tr><td><b>Where</b></td><td>Same class</td><td>Base &amp; derived</td><td>Base &amp; derived</td></tr>
+      <tr><td><b>Signature</b></td><td>Different params</td><td>Identical signature</td><td>Different params, same name</td></tr>
+      <tr><td><b><code>virtual</code> needed?</b></td><td>No</td><td><b>Yes</b> (in base)</td><td>No</td></tr>
+      <tr><td><b>Binding</b></td><td>Compile-time</td><td><b>Runtime</b></td><td>Compile-time</td></tr>
+    </table>
+    <div class="warning">⚠️ Without <code>virtual</code>, calling a same-signature function through a base pointer is <b>static binding</b> — it always calls the BASE version, regardless of the actual object type:</div>
+<pre><span class="k">class</span> Base {
+<span class="k">public</span>:
+    <span class="k">void</span> speak() { cout &lt;&lt; <span class="g">"Base\n"</span>; }   <span class="c">// NOT virtual</span>
+};
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+<span class="k">public</span>:
+    <span class="k">void</span> speak() { cout &lt;&lt; <span class="g">"Derived\n"</span>; }
+};
+Base* p = <span class="k">new</span> Derived();
+p-&gt;speak();   <span class="r">// prints "Base" — no virtual, no dispatch, decided at compile time by pointer TYPE</span></pre>
+    <div class="memory">💡 <b>Always write <code>override</code></b> — if your signature doesn't actually match a virtual base function, the compiler <b>errors</b> instead of silently creating an unrelated new function.</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <h2><span class="num">4</span> The vtable/vptr mechanism</h2>
+    <ul>
+      <li>Any class with ≥1 virtual function gets a <b>vtable</b>: one array of function pointers, shared by the whole class.</li>
+      <li>Every <b>object</b> of that class carries a hidden <b>vptr</b> pointing to its class's vtable — this is why <code>sizeof</code> grows (typically +8 bytes on 64-bit) the moment a class gains its first virtual function.</li>
+      <li>A call <code>p-&gt;draw()</code> compiles to: follow vptr → index into vtable → call that address. <b>One indirection.</b></li>
+      <li>The vptr is set up <b>during construction</b> — which is exactly why constructors can never be virtual, and why calling a virtual function inside a constructor resolves to the base version (the derived vptr isn't wired up yet).</li>
+    </ul>
+    <figure>
+      <svg viewBox="0 0 700 220" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace" font-size="11">
+        <rect x="30" y="30" width="120" height="52" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="90" y="48" text-anchor="middle" font-weight="bold">Circle c</text>
+        <rect x="40" y="55" width="100" height="20" rx="3" fill="#fff" stroke="#c0392b"/><text x="90" y="69" text-anchor="middle" fill="#c0392b">vptr ●</text>
+        <rect x="30" y="120" width="120" height="52" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="90" y="138" text-anchor="middle" font-weight="bold">Square s</text>
+        <rect x="40" y="145" width="100" height="20" rx="3" fill="#fff" stroke="#c0392b"/><text x="90" y="159" text-anchor="middle" fill="#c0392b">vptr ●</text>
+        <rect x="240" y="28" width="180" height="60" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.8"/>
+        <text x="330" y="45" text-anchor="middle" font-weight="bold" fill="#2456a6">Circle vtable</text>
+        <text x="330" y="65" text-anchor="middle">[0] draw → Circle::draw</text>
+        <rect x="240" y="118" width="180" height="60" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.8"/>
+        <text x="330" y="135" text-anchor="middle" font-weight="bold" fill="#2456a6">Square vtable</text>
+        <text x="330" y="155" text-anchor="middle">[0] draw → Square::draw</text>
+        <path d="M140 65 L236 58" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#v)"/>
+        <path d="M140 155 L236 148" stroke="#c0392b" stroke-width="1.8" fill="none" marker-end="url(#v)"/>
+        <text x="500" y="60" font-size="11" fill="#6b6b6b">p->draw() with p pointing at c</text>
+        <text x="500" y="78" font-size="11" fill="#1e7a4f" font-weight="bold">→ prints "Circle"</text>
+        <text x="500" y="150" font-size="11" fill="#6b6b6b">same p pointing at s</text>
+        <text x="500" y="168" font-size="11" fill="#1e7a4f" font-weight="bold">→ prints "Square"</text>
+        <defs><marker id="v" markerWidth="7" markerHeight="7" refX="5" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 z" fill="#c0392b"/></marker></defs>
+      </svg>
+      <figcaption>fig 4 — one vtable per class, one vptr per object</figcaption>
+    </figure>
+    <div class="memory">💡 <b>Hook:</b> vtable = a <b>restaurant's menu</b> (one per restaurant/class). vptr = <b>the menu in your hand</b> (one per customer/object). Say "item #1" — what arrives depends on which menu you're holding.</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="card">
+    <h2><span class="num">5</span> Virtual destructors — the leak everyone eventually causes</h2>
+<pre><span class="k">class</span> Base {
+<span class="k">public</span>:
+    ~Base() { cout &lt;&lt; <span class="g">"~Base\n"</span>; }        <span class="r">// ❌ NOT virtual</span>
+};
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+    <span class="k">int</span>* data;
+<span class="k">public</span>:
+    Derived()  { data = <span class="k">new int</span>[1000]; }
+    ~Derived() { <span class="k">delete</span>[] data; cout &lt;&lt; <span class="g">"~Derived\n"</span>; }
+};
+Base* p = <span class="k">new</span> Derived();
+<span class="k">delete</span> p;   <span class="r">// UNDEFINED BEHAVIOR — typically only "~Base" prints, Derived's dtor is skipped, 4000 bytes leak</span>
+
+<span class="c">// FIX — one keyword:</span>
+<span class="k">class</span> Base {
+<span class="k">public</span>: <span class="y">virtual</span> ~Base() { cout &lt;&lt; <span class="g">"~Base\n"</span>; }
+};
+<span class="c">// now: "~Derived" then "~Base" — correct, via the vtable, reverse order</span></pre>
+    <div class="warning">⚠️ Deleting a derived object through a base pointer with a <b>non-virtual</b> destructor is technically <b>undefined behavior</b> — in practice, most compilers simply skip the derived destructor, silently leaking whatever it owned.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "Any class meant to be used polymorphically — deleted through a base pointer — needs a virtual destructor. Without it, only the base's destructor runs, and the derived part's resources leak."</div>
+    <div class="memory">💡 <b>Hook:</b> ☠️ A non-virtual destructor is a <b>demolition crew that only tears down the ground floor</b>, leaving everything the derived class built standing in memory forever.</div>
+  </div>
+
+  <!-- 6 -->
+  <div class="card">
+    <h2><span class="num">6</span> Pure virtual functions &amp; abstract classes</h2>
+    <div class="def"><b>Pure virtual function:</b> <code>virtual void draw() = 0;</code> — derived classes <b>must</b> override it.<br><b>Abstract class:</b> any class with ≥1 pure virtual function. <b>Cannot be instantiated</b> directly.</div>
+<pre><span class="k">class</span> Shape {
+<span class="k">public</span>:
+    <span class="k">virtual double</span> area() <span class="k">const</span> = 0;     <span class="c">// pure virtual</span>
+    <span class="k">virtual</span> ~Shape() = <span class="k">default</span>;
+};
+<span class="c">// Shape s;               // ❌ error: cannot instantiate abstract class</span>
+<span class="k">class</span> Circle : <span class="k">public</span> Shape {
+    <span class="k">double</span> r;
+<span class="k">public</span>:
+    Circle(<span class="k">double</span> r) : r(r) {}
+    <span class="k">double</span> area() <span class="k">const override</span> { <span class="k">return</span> 3.14159 * r * r; }
+};
+Shape* s = <span class="k">new</span> Circle(2);
+cout &lt;&lt; s-&gt;area();   <span class="c">// 12.566...</span>
+<span class="k">delete</span> s;</pre>
+    <ul>
+      <li>A derived class that doesn't override <b>every</b> pure virtual function is <b>itself still abstract</b>.</li>
+      <li><b>Surprising but true:</b> a pure virtual function <i>can</i> have a body — useful as a shared default that derived classes call explicitly via <code>Base::func()</code>. <code>= 0</code> only means "must be overridden," not "has no implementation."</li>
+      <li>C++ has no <code>interface</code> keyword — the pattern <b>is</b> an abstract class with only pure virtuals and no data.</li>
+    </ul>
+    <div class="interview">🎯 <b>Interview line:</b> "An abstract class defines a contract via pure virtual functions and can't be instantiated — but a pointer or reference to it is exactly how polymorphism works: hold any concrete subtype behind one interface."</div>
+  </div>
+
+  <!-- 7 -->
+  <div class="card">
+    <h2><span class="num">7</span> Object slicing 🔪</h2>
+    <div class="def"><b>Slicing:</b> assigning or passing a derived object <b>by value</b> to a base-typed variable discards the derived part — only the base subobject survives, and polymorphism is lost.</div>
+<pre><span class="k">class</span> Base { <span class="k">public</span>: <span class="k">virtual void</span> id() { cout &lt;&lt; <span class="g">"Base\n"</span>; } };
+<span class="k">class</span> Derived : <span class="k">public</span> Base {
+    <span class="k">int</span> extra = 42;
+<span class="k">public</span>: <span class="k">void</span> id() <span class="k">override</span> { cout &lt;&lt; <span class="g">"Derived\n"</span>; }
+};
+
+<span class="k">void</span> byValue(Base b)  { b.id(); }    <span class="r">// 🔪 SLICED → "Base"</span>
+<span class="k">void</span> byRef(Base&amp; b)   { b.id(); }    <span class="g">// ✅ polymorphic → "Derived"</span>
+
+Derived d;
+byValue(d);    <span class="c">// "Base"    — the trap</span>
+byRef(d);      <span class="c">// "Derived"</span>
+Base b2 = d;   <span class="r">// 🔪 sliced: extra discarded, b2's vptr is Base's</span></pre>
+    <div class="warning">⚠️ It <b>compiles without warning</b>. <code>vector&lt;Base&gt;</code> holding "derived" objects slices every single one on insertion. Fix: store <code>vector&lt;unique_ptr&lt;Base&gt;&gt;</code> instead, and always pass polymorphic types by reference or pointer.</div>
+    <div class="memory">💡 <b>Hook:</b> 🔪 Forcing a <b>tall person into a short box</b> — you keep what fits, and nobody warns you what got cut off.</div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li>Compile-time poly: overloading/templates, zero cost. Runtime poly: virtual functions, one indirection via vtable/vptr.</li>
+      <li>No <code>virtual</code> + same signature in derived → <b>hiding</b>, static binding, always calls base through a base pointer.</li>
+      <li>vptr set up during construction → constructors can't be virtual, virtual calls in ctors resolve to base.</li>
+      <li>Polymorphic base classes → <b>always</b> need a virtual destructor, or deleting through the base leaks.</li>
+      <li>Pure virtual (<code>=0</code>) → class is abstract, can't instantiate. It CAN still have a body.</li>
+      <li>Object slicing: passing/assigning derived objects <b>by value</b> to base types discards the derived part — always use reference/pointer for polymorphic types.</li>
+    </ul>
+  </div>
+
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Medium→hard. Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="inheritance.html">← Note 08: Inheritance</a>
+    <a href="index.html">home ↑</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "What does this print?",
+    code:
+`class Base {
+public:
+    void speak() { cout << "Base\\n"; }
+};
+class Derived : public Base {
+public:
+    void speak() { cout << "Derived\\n"; }
+};
+int main() {
+    Base* p = new Derived();
+    p->speak();
+}`,
+    options: ["Base", "Derived", "Compile error", "Undefined behavior"],
+    correct: 0,
+    explain: "speak() is NOT virtual, so this is static binding: the compiler decides which function to call based on the POINTER's type (Base*), not the object's actual type. Prints 'Base', regardless of what p actually points to."
+  },
+  {
+    q: "What is the output?",
+    code:
+`class Base {
+public:
+    virtual void speak() { cout << "Base\\n"; }
+};
+class Derived : public Base {
+public:
+    void speak() override { cout << "Derived\\n"; }
+};
+int main() {
+    Base* p = new Derived();
+    p->speak();
+}`,
+    options: ["Base", "Derived", "Compile error", "Both print"],
+    correct: 1,
+    explain: "Now speak() IS virtual. Dispatch happens through the vtable based on the OBJECT's actual dynamic type (Derived), not the pointer's static type (Base*). Prints 'Derived'."
+  },
+  {
+    q: "Why can't a constructor be declared virtual?",
+    code: null,
+    options: [
+      "Constructors can't return a value, and virtual functions must return something",
+      "The vptr is set up DURING construction, so there's no complete dynamic type to dispatch on yet",
+      "It's just a language restriction with no technical reason",
+      "Constructors are already virtual by default"
+    ],
+    correct: 1,
+    explain: "Virtual dispatch relies on the vptr, and the vptr itself gets wired up as part of construction. At the moment a constructor runs, the object's final dynamic type isn't established — there's nothing valid to dispatch on."
+  },
+  {
+    q: "What leaks here, and why?",
+    code:
+`class Base {
+public:
+    ~Base() { cout << "~Base\\n"; }
+};
+class Derived : public Base {
+    int* buf;
+public:
+    Derived() { buf = new int[1000]; }
+    ~Derived() { delete[] buf; }
+};
+int main() {
+    Base* p = new Derived();
+    delete p;
+}`,
+    options: [
+      "Nothing leaks — both destructors always run",
+      "Derived's buf leaks — Base's destructor isn't virtual, so ~Derived is skipped",
+      "Base itself leaks",
+      "This is a compile error"
+    ],
+    correct: 1,
+    explain: "delete p where p is Base* and ~Base() is non-virtual only calls ~Base(). ~Derived() (and its delete[] buf) never runs — buf's 1000 ints leak. Fix: make ~Base() virtual."
+  },
+  {
+    q: "What's wrong with this attempt at an abstract class?",
+    code:
+`class Shape {
+public:
+    virtual double area() const = 0;
+};
+int main() {
+    Shape s;   // <-- here
+    cout << s.area();
+}`,
+    options: [
+      "Nothing — this is valid",
+      "Shape has a pure virtual function, so it's abstract and cannot be instantiated",
+      "area() needs a default implementation first",
+      "Shape needs a constructor"
+    ],
+    correct: 1,
+    explain: "Any class with at least one pure virtual function (=0) is abstract. `Shape s;` tries to create a standalone Shape object, which is illegal — abstract classes can only be used through pointers or references to a concrete derived type."
+  },
+  {
+    q: "Can a pure virtual function have an implementation?",
+    code:
+`class Shape {
+public:
+    virtual void draw() const = 0;   // pure virtual — declared here
+};
+void Shape::draw() const {            // defined OUTSIDE the class
+    cout << "default drawing setup\\n";
+}`,
+    options: [
+      "No — this fails to compile, pure virtual functions can never have a body",
+      "Yes — this is valid. `= 0` only forces overriding; derived classes can still call Shape::draw() explicitly for shared logic",
+      "Yes, but only the derived class's body counts, this one is ignored",
+      "No — this would make the class non-abstract"
+    ],
+    correct: 1,
+    explain: "A pure virtual function CAN have a definition — but it must be written OUTSIDE the class body, never inline with `= 0 { ... }` (that combination is invalid syntax). `= 0` only enforces that derived classes must override it; it doesn't forbid Shape from having its own implementation that a derived override can call via `Shape::draw()`. Shape remains abstract either way."
+  },
+  {
+    q: "What does this print?",
+    code:
+`class Base {
+public:
+    virtual void id() { cout << "Base\\n"; }
+};
+class Derived : public Base {
+public:
+    void id() override { cout << "Derived\\n"; }
+};
+void show(Base b) { b.id(); }
+int main() {
+    Derived d;
+    show(d);
+}`,
+    options: ["Base", "Derived", "Compile error", "Nothing prints"],
+    correct: 0,
+    explain: "show(Base b) takes Base BY VALUE — this slices d when it's passed in. Only the Base part survives, complete with Base's own vptr. id() resolves to Base::id() → prints 'Base'. Passing by reference (Base&) would have preserved polymorphism."
+  },
+  {
+    q: "Which fix avoids slicing when storing shapes polymorphically?",
+    code:
+`// Goal: store a mix of Circle and Square objects and call draw() polymorphically`,
+    options: [
+      "std::vector<Shape> shapes;",
+      "std::vector<Shape*> shapes; or std::vector<unique_ptr<Shape>> shapes;",
+      "Shape shapes[10];",
+      "Any of the above work identically"
+    ],
+    correct: 1,
+    explain: "A vector<Shape> stores Shape objects BY VALUE — inserting a Circle or Square slices it down to just the Shape part immediately. Storing pointers (raw or, better, smart pointers) preserves the full derived object and its vtable."
+  },
+  {
+    q: "sizeof(Circle) is larger than expected. Why, if Circle only added one virtual function `draw()` and no new data members?",
+    code: null,
+    options: [
+      "It shouldn't change at all",
+      "Adding the first virtual function anywhere in the hierarchy adds a hidden vptr to every object of that type",
+      "virtual functions are stored inside the object itself",
+      "This only happens with multiple inheritance"
+    ],
+    correct: 1,
+    explain: "The vtable itself is per-CLASS (one shared table), but each OBJECT needs a vptr (typically 8 bytes on 64-bit) pointing to it. The moment a class has any virtual function, every instance grows by that pointer's size — even though no new data members were added."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div'); block.className = 'q-block';
+  const qnum = document.createElement('div'); qnum.className = 'q-num'; qnum.textContent = 'Q' + (qi + 1); block.appendChild(qnum);
+  const qtext = document.createElement('div'); qtext.className = 'q-text'; qtext.textContent = item.q; block.appendChild(qtext);
+  if (item.code) { const pre = document.createElement('pre'); pre.className = 'q-code'; pre.textContent = item.code; block.appendChild(pre); }
+  const opts = document.createElement('div'); opts.className = 'q-opts';
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button'); btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) { btn.classList.add('correct'); score++; document.getElementById('score').textContent = score; }
+      else { btn.classList.add('wrong'); allBtns[item.correct].classList.add('correct'); }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+  block.appendChild(opts); quizEl.appendChild(block);
+});
+</script>
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{border:1px solid #e3e0d7;border-radius:10px;padding:18px 18px 20px;margin:18px 0;background:#fff;}
+  .q-num{font-family:'Courier New',monospace;font-size:12px;font-weight:bold;display:inline-block;background:var(--ink);color:var(--paper);padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;}
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{font-family:'Courier New',monospace;font-size:13px;line-height:1.5;background:#232323;color:#eee;border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;}
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{font-family:Georgia,serif;font-size:15px;text-align:left;padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;background:#fbfaf7;cursor:pointer;transition:all .12s ease;display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{font-family:'Courier New',monospace;font-weight:bold;font-size:13px;background:#e8e5dd;color:var(--ink);border-radius:5px;width:24px;height:24px;flex:0 0 24px;display:flex;align-items:center;justify-content:center;}
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;} .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;} .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;}
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);} .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{text-align:center;font-family:'Courier New',monospace;font-weight:bold;font-size:18px;margin-top:20px;padding:12px;background:var(--ink);color:var(--paper);border-radius:8px;}
+  #score{color:#8be0a4;}
+</style>
+</body>
+</html>

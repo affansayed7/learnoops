@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Encapsulation & Abstraction — LearnOOPs Note 07</title>
+<style>
+  :root{
+    --paper:#fbfaf7; --ink:#232323; --grid:#e8e5dd;
+    --blue:#2456a6; --red:#c0392b; --green:#1e7a4f;
+    --amber:#b8860b; --purple:#6d4aa0; --soft:#6b6b6b; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink); line-height:1.65; padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--blue);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--green);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .memory{
+    border-left:4px solid var(--amber);background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  .warning{
+    border-left:4px solid var(--red);background:#fdecea;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .warning b{color:var(--red);}
+  code{
+    font-family:'Courier New',monospace;font-size:14px;
+    background:#f1efe8;padding:1px 6px;border-radius:4px;
+  }
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{
+    font-family:'Courier New',monospace;font-size:12px;color:var(--soft);
+    margin-top:8px;letter-spacing:.5px;
+  }
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .nav-bottom{
+    display:flex;justify-content:space-between;margin-top:36px;
+    font-family:'Courier New',monospace;font-size:14px;
+  }
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 07</div>
+  <h1>Encapsulation &amp; Abstraction <span class="hl">— Deep Dive</span> 🔒🎛️</h1>
+  <p class="subtitle">Note 02 gave you the one-liners. This note gives you the design judgment — invariants, real code, and the distinction interviewers actually probe.</p>
+
+  <!-- ============ BEYOND THE ONE-LINER ============ -->
+  <div class="card">
+    <h2><span class="num">1</span> Encapsulation is not "just add getters and setters"</h2>
+    <p>Here's a class that is <b>technically</b> encapsulated — private data, public methods — and is still a <b>bad</b> design:</p>
+<pre><span class="k">class</span> BankAccount {
+    <span class="k">double</span> balance;
+<span class="k">public</span>:
+    <span class="k">void</span> setBalance(<span class="k">double</span> b) { balance = b; }   <span class="r">// accepts ANY value, no checks</span>
+    <span class="k">double</span> getBalance() { <span class="k">return</span> balance; }
+};
+
+BankAccount acc;
+acc.setBalance(-999999);   <span class="r">// ✅ "compiles and runs" — but the account is now broken</span></pre>
+    <ul>
+      <li>The data is technically private. But the setter does <b>zero validation</b> — it's a pass-through, functionally identical to making <code>balance</code> public.</li>
+      <li>This pattern is sometimes called an <b>anemic domain model</b>: a class that's just a bag of getters/setters with no actual behavior or protection. It's a genuine design smell interviewers look for.</li>
+      <li>Real encapsulation isn't about the keyword <code>private</code> — it's about <b>protecting invariants</b>.</li>
+    </ul>
+    <div class="warning">⚠️ <b>The interview trap:</b> if asked to "spot the encapsulation issue" in a code sample, don't just check for <code>public</code> data members — check whether the setters actually <b>enforce</b> anything.</div>
+  </div>
+
+  <!-- ============ INVARIANTS ============ -->
+  <div class="card">
+    <h2><span class="num">2</span> Invariants — the real thing encapsulation protects</h2>
+    <div class="def"><b>Invariant:</b> a condition that must <b>always</b> be true for an object, across its entire lifetime — no matter which method was just called.</div>
+    <ul>
+      <li>A <code>BankAccount</code>'s invariant: <b>balance can never go negative</b>.</li>
+      <li>A <code>Date</code>'s invariant: <b>month is always 1–12, day is always valid for that month</b>.</li>
+      <li>A sorted <code>vector</code> wrapper's invariant: <b>the elements are always in order</b>.</li>
+      <li>Encapsulation's actual job: make it <b>impossible</b> to reach a state that violates the invariant, by routing every mutation through code that checks it.</li>
+    </ul>
+
+<pre><span class="k">class</span> BankAccount {
+    <span class="k">double</span> balance;
+<span class="k">public</span>:
+    BankAccount(<span class="k">double</span> initial) : balance(initial &gt;= 0 ? initial : 0) {}  <span class="c">// invariant enforced at birth</span>
+
+    <span class="k">bool</span> withdraw(<span class="k">double</span> amt) {
+        <span class="k">if</span> (amt &lt; 0 || amt &gt; balance) <span class="k">return</span> <span class="k">false</span>;  <span class="c">// ← the checkpoint</span>
+        balance -= amt;
+        <span class="k">return</span> <span class="k">true</span>;
+    }
+    <span class="k">void</span> deposit(<span class="k">double</span> amt) {
+        <span class="k">if</span> (amt &gt; 0) balance += amt;               <span class="c">// ← another checkpoint</span>
+    }
+    <span class="k">double</span> getBalance() <span class="k">const</span> { <span class="k">return</span> balance; }  <span class="c">// read-only, can't break anything</span>
+};</pre>
+
+    <figure>
+      <svg viewBox="0 0 700 190" xmlns="http://www.w3.org/2000/svg" font-family="Courier New, monospace">
+        <text x="120" y="20" text-anchor="middle" font-size="13" font-weight="bold" fill="#2456a6">EVERY mutation attempt</text>
+        <g font-size="11">
+          <rect x="30" y="35" width="180" height="34" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.8"/>
+          <text x="120" y="57" text-anchor="middle">deposit(-50)</text>
+          <rect x="30" y="78" width="180" height="34" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.8"/>
+          <text x="120" y="100" text-anchor="middle">withdraw(10000)</text>
+          <rect x="30" y="121" width="180" height="34" rx="6" fill="#eaf1fb" stroke="#2456a6" stroke-width="1.8"/>
+          <text x="120" y="143" text-anchor="middle">deposit(500)</text>
+        </g>
+        <path d="M215 90 L305 90" stroke="#6b6b6b" stroke-width="2.5" fill="none" marker-end="url(#e1)"/>
+        <rect x="315" y="55" width="150" height="70" rx="10" fill="#fdf6e3" stroke="#b8860b" stroke-width="2.5"/>
+        <text x="390" y="80" text-anchor="middle" font-size="13" fill="#b8860b" font-weight="bold">🛂 THE CHECK</text>
+        <text x="390" y="98" text-anchor="middle" font-size="11" fill="#b8860b">amt &gt;= 0 ?</text>
+        <text x="390" y="113" text-anchor="middle" font-size="11" fill="#b8860b">amt &lt;= balance ?</text>
+        <path d="M475 75 L560 60" stroke="#c0392b" stroke-width="2" fill="none" marker-end="url(#e2)" stroke-dasharray="5 4"/>
+        <text x="560" y="50" font-size="11" fill="#c0392b">❌ rejected</text>
+        <path d="M475 105 L560 120" stroke="#1e7a4f" stroke-width="2" fill="none" marker-end="url(#e3)"/>
+        <text x="555" y="140" font-size="11" fill="#1e7a4f">✅ applied</text>
+        <rect x="555" y="122" width="120" height="30" rx="6" fill="#edf7f1" stroke="#1e7a4f" stroke-width="1.8"/>
+        <text x="615" y="141" text-anchor="middle" font-size="11" fill="#1e7a4f">balance updated</text>
+        <defs>
+          <marker id="e1" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#6b6b6b"/></marker>
+          <marker id="e2" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#c0392b"/></marker>
+          <marker id="e3" markerWidth="8" markerHeight="8" refX="6" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#1e7a4f"/></marker>
+        </defs>
+      </svg>
+      <figcaption>fig 2 — every path to mutating balance funnels through one checkpoint</figcaption>
+    </figure>
+
+    <div class="memory">💡 <b>Memory hook:</b> An invariant is a <b>promise the object makes about itself</b>, forever. Encapsulation is the <b>bouncer</b> that makes sure no code path can ever break that promise.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "Encapsulation's real purpose is protecting class invariants — conditions that must hold for the object to be valid — by ensuring every mutation is routed through code that can enforce them."</div>
+  </div>
+
+  <!-- ============ CONST CORRECTNESS TIE-IN ============ -->
+  <div class="card">
+    <h2><span class="num">3</span> How <code>const</code> reinforces encapsulation</h2>
+<pre><span class="k">class</span> Account {
+    <span class="k">double</span> balance;
+<span class="k">public</span>:
+    <span class="k">double</span> getBalance() <span class="k">const</span> { <span class="k">return</span> balance; }   <span class="c">// promises: won't touch invariant</span>
+    <span class="k">void</span> deposit(<span class="k">double</span> amt) { balance += amt; }       <span class="c">// can mutate — NOT const</span>
+};
+
+<span class="k">const</span> Account a(100);
+a.getBalance();     <span class="g">// ✅ read-only method on a const object — fine</span>
+<span class="c">// a.deposit(50);   // ❌ compile error: deposit is non-const</span></pre>
+    <ul>
+      <li>A <code>const</code> member function is a <b>compiler-enforced promise</b> not to modify the object's state.</li>
+      <li>This means a <code>const Account&amp;</code> parameter genuinely can't have its invariant broken by whoever receives it — the compiler polices it, not just convention.</li>
+    </ul>
+    <div class="memory">💡 <b>Hook:</b> <code>const</code> methods are the <b>"look but don't touch"</b> section of your class's interface.</div>
+  </div>
+
+  <!-- ============ INFORMATION HIDING VS ENCAPSULATION ============ -->
+  <div class="card">
+    <h2><span class="num">4</span> Bonus precision: encapsulation vs information hiding</h2>
+    <p>These get used interchangeably in casual conversation, but there's a real distinction worth having in your pocket:</p>
+    <table>
+      <tr><th>Information Hiding</th><th>Encapsulation</th></tr>
+      <tr><td>A <b>general design principle</b> (Parnas, 1972) — hide decisions likely to change behind a stable interface</td><td>The <b>specific OOP mechanism</b> — classes + access specifiers — commonly used to achieve it</td></tr>
+      <tr><td>Applies to <b>any</b> paradigm — even a C module can hide its internal struct layout via an opaque pointer</td><td>Applies specifically to <b>classes and objects</b></td></tr>
+      <tr><td>A goal</td><td>A tool that achieves the goal</td></tr>
+    </table>
+    <div class="interview">🎯 <b>If asked directly:</b> "Information hiding is the broader design principle of hiding implementation details behind a stable interface — it predates OOP. Encapsulation is how object-oriented languages implement that principle, using access specifiers to physically enforce the hiding." Most interviewers will accept the simpler one-liner from Note 02, but this shows depth if pushed.</div>
+  </div>
+
+  <!-- ============ ABSTRACTION BEYOND THE ONE-LINER ============ -->
+  <div class="card">
+    <h2><span class="num">5</span> Abstraction — hiding complexity, with real code</h2>
+    <p>A stack that hides its internal representation completely:</p>
+<pre><span class="k">class</span> Stack {
+    std::vector&lt;<span class="k">int</span>&gt; data;         <span class="c">// implementation detail — could be an array, a list, anything</span>
+<span class="k">public</span>:
+    <span class="k">void</span> push(<span class="k">int</span> x) { data.push_back(x); }
+    <span class="k">void</span> pop()          { data.pop_back(); }
+    <span class="k">int</span>  top() <span class="k">const</span>   { <span class="k">return</span> data.back(); }
+    <span class="k">bool</span> empty() <span class="k">const</span> { <span class="k">return</span> data.empty(); }
+};</pre>
+    <ul>
+      <li>The caller knows <b>push, pop, top, empty</b> — that's the <b>essential interface</b>.</li>
+      <li>The caller has <b>no idea</b> it's backed by a <code>vector</code>. You could swap it for a linked list tomorrow and every caller keeps working unchanged.</li>
+      <li>This is abstraction's actual payoff: <b>implementation is free to change</b> as long as the interface's behavior doesn't.</li>
+    </ul>
+
+    <h3>Abstraction's formal C++ tool: the abstract class (preview)</h3>
+<pre><span class="k">class</span> Shape {
+<span class="k">public</span>:
+    <span class="k">virtual double</span> area() <span class="k">const</span> = 0;    <span class="c">// pure virtual — the essential interface</span>
+    <span class="k">virtual</span> ~Shape() = <span class="k">default</span>;
+};
+<span class="k">class</span> Circle : <span class="k">public</span> Shape {
+    <span class="k">double</span> r;
+<span class="k">public</span>:
+    Circle(<span class="k">double</span> r) : r(r) {}
+    <span class="k">double</span> area() <span class="k">const override</span> { <span class="k">return</span> 3.14159 * r * r; }
+};</pre>
+    <div class="warning">⚠️ This is a preview only. Abstract classes, pure virtual functions, and why <code>Shape s;</code> won't compile get their full treatment in the upcoming Polymorphism note — they need virtual functions explained first.</div>
+    <div class="memory">💡 <b>Hook:</b> Abstraction is a <b>car's pedal</b> 🚗 — press to go, fuel injection isn't your problem. Encapsulation is the <b>locked hood</b> 🔒 stopping you from yanking the wires yourself even if you wanted to.</div>
+  </div>
+
+  <!-- ============ THE ONE-LINER, RECONFIRMED ============ -->
+  <div class="card">
+    <h2><span class="num">★</span> The distinction, one more time — now with weight behind it</h2>
+    <table>
+      <tr><th></th><th>Encapsulation</th><th>Abstraction</th></tr>
+      <tr><td><b>Hides</b></td><td>Data (and how it's protected)</td><td>Complexity (how something works)</td></tr>
+      <tr><td><b>Level</b></td><td>Implementation</td><td>Design</td></tr>
+      <tr><td><b>C++ tool</b></td><td>Access specifiers (<code>private</code>/<code>protected</code>)</td><td>Abstract classes, pure virtual functions</td></tr>
+      <tr><td><b>Protects</b></td><td>Invariants</td><td>Callers, from implementation churn</td></tr>
+      <tr><td><b>Question it answers</b></td><td>"Who can touch this?"</td><td>"What does this do?"</td></tr>
+    </table>
+    <div class="interview">🎯 <b>Final version to say out loud:</b> "Encapsulation hides data behind access control to protect invariants. Abstraction hides complexity behind a minimal interface so implementation can change freely. They usually show up together, but they answer different questions — encapsulation is about access, abstraction is about design."</div>
+  </div>
+
+  <!-- ============ INTERACTIVE QUIZ ============ -->
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Medium→hard. These test design judgment, not just syntax. Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="constructors.html">← Note 06: Constructors &amp; Destructors</a>
+    <a href="index.html">home ↑</a>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "Is this class well-encapsulated?",
+    code:
+`class Temperature {
+    double celsius;
+public:
+    void setCelsius(double c) { celsius = c; }
+    double getCelsius() { return celsius; }
+};`,
+    options: [
+      "Yes — the data is private, that's all encapsulation requires",
+      "No — the setter accepts any value with zero validation; it's private data with no real protection",
+      "Yes, because it has both a getter and a setter",
+      "No — celsius should be public since it's just a number"
+    ],
+    correct: 1,
+    explain: "Private + getter/setter is the SHAPE of encapsulation, not the substance. setCelsius accepts anything — including physically impossible values like -500°C (below absolute zero) — with no check. This is functionally identical to a public field. Real encapsulation validates."
+  },
+  {
+    q: "What's the invariant this class is trying to protect?",
+    code:
+`class Percentage {
+    int value;
+public:
+    Percentage(int v) : value(v < 0 ? 0 : (v > 100 ? 100 : v)) {}
+    void set(int v) { value = v < 0 ? 0 : (v > 100 ? 100 : v); }
+    int get() const { return value; }
+};`,
+    options: [
+      "value is always even",
+      "value is always between 0 and 100 inclusive",
+      "value is always positive",
+      "value never changes after construction"
+    ],
+    correct: 1,
+    explain: "Both the constructor and set() clamp the value into [0, 100] — that range is the invariant. No matter what's passed in, value can never leave that range. This is invariant protection via clamping rather than rejection."
+  },
+  {
+    q: "Which member function can be called on a `const Account&`?",
+    code:
+`class Account {
+    double balance;
+public:
+    double getBalance() const { return balance; }
+    void deposit(double amt) { balance += amt; }
+};
+void process(const Account& a) {
+    // which call compiles?
+}`,
+    options: [
+      "a.deposit(100);",
+      "a.getBalance();",
+      "Both compile fine",
+      "Neither compiles"
+    ],
+    correct: 1,
+    explain: "Only const member functions can be called on a const object/reference. getBalance() is const — allowed. deposit() is non-const (it mutates balance) — calling it on a const Account& is a compile error. This is const-correctness enforcing encapsulation at compile time."
+  },
+  {
+    q: "What best distinguishes information hiding from encapsulation?",
+    code: null,
+    options: [
+      "They are exactly the same thing with different names",
+      "Information hiding is the general design principle; encapsulation is the specific OOP mechanism (classes + access specifiers) that implements it",
+      "Information hiding only applies to functions; encapsulation only applies to data",
+      "Encapsulation is older and broader; information hiding is OOP-specific"
+    ],
+    correct: 1,
+    explain: "Information hiding (Parnas, 1972) predates OOP and is a general principle — hide likely-to-change decisions behind a stable interface, in ANY paradigm. Encapsulation is the OOP-specific tool (private/protected + methods) commonly used to achieve that principle. Option D reverses which one is broader."
+  },
+  {
+    q: "The Stack class below hides its internal vector. What is this an example of?",
+    code:
+`class Stack {
+    std::vector<int> data;
+public:
+    void push(int x) { data.push_back(x); }
+    int top() const { return data.back(); }
+};`,
+    options: [
+      "Encapsulation only",
+      "Abstraction — callers see push/top, not the underlying representation",
+      "Inheritance",
+      "Polymorphism"
+    ],
+    correct: 1,
+    explain: "This is abstraction: the caller sees only push() and top() — a minimal essential interface — while the implementation (a vector, could be swapped for a deque or list) is hidden. Note: making `data` private is ALSO encapsulation — the two work together here, but the question of 'what does it do without knowing how' is abstraction."
+  },
+  {
+    q: "Why can't `Shape s;` compile if Shape has a pure virtual function?",
+    code:
+`class Shape {
+public:
+    virtual double area() const = 0;
+};
+int main() {
+    Shape s;   // <-- error
+}`,
+    options: [
+      "Shape has no constructor",
+      "Shape is abstract — it has at least one pure virtual function, so it can't be instantiated",
+      "area() must have a body",
+      "Shape needs a destructor first"
+    ],
+    correct: 1,
+    explain: "A class with any pure virtual function (`= 0`) is abstract. Abstract classes exist to define a contract, not to be created directly — you can have a Shape* or Shape&, but never a standalone Shape object. (Full depth on this arrives in the Polymorphism note.)"
+  },
+  {
+    q: "A colleague says 'this class is over-encapsulated because it has 15 private fields with getters and setters for each.' What's the more precise criticism?",
+    code: null,
+    options: [
+      "There's no such thing as too much encapsulation",
+      "The issue isn't encapsulation quantity — it's that exposing a getter+setter for every field with no validation is an anemic design that provides no real protection",
+      "15 fields is always too many for one class",
+      "Getters and setters should never be used"
+    ],
+    correct: 1,
+    explain: "The word 'over-encapsulated' is a red herring — you can't have too much genuine encapsulation. The real issue is an anemic domain model: exposing every field via unchecked getters/setters gives the ILLUSION of encapsulation while providing none of its protection. The fix is fewer, more meaningful methods that enforce invariants — not 'less encapsulation'."
+  },
+  {
+    q: "What does abstraction protect, that encapsulation does not?",
+    code: null,
+    options: [
+      "Abstraction protects the object's data from corruption",
+      "Abstraction protects CALLERS from implementation changes — swap the internals, the interface stays the same",
+      "Abstraction protects against memory leaks",
+      "Abstraction and encapsulation protect exactly the same thing"
+    ],
+    correct: 1,
+    explain: "Encapsulation protects the OBJECT (its invariants, its data) from being corrupted from outside. Abstraction protects the CALLER — it lets you change internal implementation (swap a vector for a list) without breaking anyone using the class, because the interface didn't change."
+  },
+  {
+    q: "Which class demonstrates BOTH encapsulation and abstraction working together?",
+    code:
+`class Queue {
+    std::list<int> data;         // (i) private implementation detail
+public:
+    void enqueue(int x) { data.push_back(x); }   // (ii) minimal interface
+    int dequeue() {
+        int f = data.front();
+        data.pop_front();
+        return f;
+    }
+};`,
+    options: [
+      "Only (i) — that's encapsulation, there's no abstraction here",
+      "Only (ii) — that's abstraction, there's no encapsulation here",
+      "Both — (i) is encapsulation (hiding the data/access control), (ii) is abstraction (a minimal interface hiding how enqueue/dequeue actually work)",
+      "Neither — this class has no OOP principles applied"
+    ],
+    correct: 2,
+    explain: "They coexist here, as they usually do: making `data` private and inaccessible is encapsulation (access control). Exposing only enqueue()/dequeue() — hiding that it's built on a linked list, hiding the front/pop_front mechanics — is abstraction (interface simplicity). Most real classes use both simultaneously."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div');
+  block.className = 'q-block';
+
+  const qnum = document.createElement('div');
+  qnum.className = 'q-num';
+  qnum.textContent = 'Q' + (qi + 1);
+  block.appendChild(qnum);
+
+  const qtext = document.createElement('div');
+  qtext.className = 'q-text';
+  qtext.textContent = item.q;
+  block.appendChild(qtext);
+
+  if (item.code) {
+    const pre = document.createElement('pre');
+    pre.className = 'q-code';
+    pre.textContent = item.code;
+    block.appendChild(pre);
+  }
+
+  const opts = document.createElement('div');
+  opts.className = 'q-opts';
+
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) {
+        btn.classList.add('correct');
+        score++;
+        document.getElementById('score').textContent = score;
+      } else {
+        btn.classList.add('wrong');
+        allBtns[item.correct].classList.add('correct');
+      }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+
+  block.appendChild(opts);
+  quizEl.appendChild(block);
+});
+</script>
+
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{
+    border:1px solid #e3e0d7;border-radius:10px;
+    padding:18px 18px 20px;margin:18px 0;background:#fff;
+  }
+  .q-num{
+    font-family:'Courier New',monospace;font-size:12px;font-weight:bold;
+    display:inline-block;background:var(--ink);color:var(--paper);
+    padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;
+  }
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{
+    font-family:'Courier New',monospace;font-size:13px;line-height:1.5;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;
+  }
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    font-family:Georgia,serif;font-size:15px;text-align:left;
+    padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;
+    background:#fbfaf7;cursor:pointer;transition:all .12s ease;
+    display:flex;align-items:center;gap:10px;color:var(--ink);
+  }
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{
+    font-family:'Courier New',monospace;font-weight:bold;font-size:13px;
+    background:#e8e5dd;color:var(--ink);border-radius:5px;
+    width:24px;height:24px;flex:0 0 24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{
+    border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;
+  }
+  .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{
+    border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;
+  }
+  .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{
+    margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;
+  }
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);}
+  .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{
+    text-align:center;font-family:'Courier New',monospace;font-weight:bold;
+    font-size:18px;margin-top:20px;padding:12px;
+    background:var(--ink);color:var(--paper);border-radius:8px;
+  }
+  #score{color:#8be0a4;}
+</style>
+
+</body>
+</html>

@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Constructors & Destructors — LearnOOPs Note 06</title>
+<style>
+  :root{
+    --paper:#fbfaf7; --ink:#232323; --grid:#e8e5dd;
+    --blue:#2456a6; --red:#c0392b; --green:#1e7a4f;
+    --amber:#b8860b; --purple:#6d4aa0; --soft:#6b6b6b; --card:#ffffff;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{
+    font-family:Georgia,'Times New Roman',serif;
+    background:var(--paper);
+    background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+    background-size:28px 28px;
+    color:var(--ink); line-height:1.65; padding:40px 16px 80px;
+  }
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{
+    font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;
+    text-transform:uppercase;color:var(--blue);margin-bottom:8px;
+  }
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--blue);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{
+    background:var(--card);border:1px solid #dedbd2;border-radius:10px;
+    padding:26px 28px;margin-bottom:26px;
+    box-shadow:2px 3px 0 rgba(35,35,35,.07);
+  }
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{
+    font-family:'Courier New',monospace;font-size:14px;font-weight:bold;
+    background:var(--ink);color:var(--paper);border-radius:50%;
+    width:28px;height:28px;flex:0 0 28px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  h3{font-size:17px;margin:18px 0 8px;}
+  ul{padding-left:22px;margin:8px 0;}
+  li{margin-bottom:7px;}
+  .memory{
+    border-left:4px solid var(--amber);background:#fdf6e3;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .memory b{color:var(--amber);}
+  .interview{
+    border-left:4px solid var(--green);background:#edf7f1;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .interview b{color:var(--green);}
+  .warning{
+    border-left:4px solid var(--red);background:#fdecea;
+    padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;
+  }
+  .warning b{color:var(--red);}
+  code{
+    font-family:'Courier New',monospace;font-size:14px;
+    background:#f1efe8;padding:1px 6px;border-radius:4px;
+  }
+  pre{
+    font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:16px 18px;overflow-x:auto;margin:12px 0;
+  }
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;}
+  pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{
+    font-family:'Courier New',monospace;font-size:12px;color:var(--soft);
+    margin-top:8px;letter-spacing:.5px;
+  }
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  td.yes{color:var(--green);font-weight:bold;text-align:center;}
+  td.no{color:var(--red);font-weight:bold;text-align:center;}
+  .nav-bottom{
+    display:flex;justify-content:space-between;margin-top:36px;
+    font-family:'Courier New',monospace;font-size:14px;
+  }
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 06</div>
+  <h1>Constructors &amp; Destructors <span class="hl">— Full Depth</span> 👶👋</h1>
+  <p class="subtitle">Every type of constructor, the initializer-list trap that catches almost everyone once, and exactly when destruction happens.</p>
+
+  <!-- ============ RECAP ============ -->
+  <div class="card">
+    <h2><span class="num">1</span> Quick recap, then we go deep</h2>
+    <ul>
+      <li>A constructor is a special member function that runs <b>automatically when an object is created</b> — same name as the class, <b>no return type</b> (not even <code>void</code>).</li>
+      <li>Its job: put the object into a valid initial state <b>before anyone can use it</b>.</li>
+      <li>C++ gives you <b>four kinds</b>: default, parameterized, copy, and move. We'll build each one on the same class.</li>
+    </ul>
+  </div>
+
+  <!-- ============ THE FOUR TYPES ============ -->
+  <div class="card">
+    <h2><span class="num">2</span> The four constructors</h2>
+<pre><span class="k">class</span> Point {
+    <span class="k">int</span> x, y;
+<span class="k">public</span>:
+    Point()                          <span class="c">// ① DEFAULT — no arguments</span>
+        : x(0), y(0) {}
+
+    Point(<span class="k">int</span> a, <span class="k">int</span> b)             <span class="c">// ② PARAMETERIZED</span>
+        : x(a), y(b) {}
+
+    Point(<span class="k">const</span> Point&amp; other)      <span class="c">// ③ COPY — takes a const reference</span>
+        : x(other.x), y(other.y) {}
+
+    Point(Point&amp;&amp; other) <span class="k">noexcept</span>       <span class="c">// ④ MOVE — takes an rvalue reference (C++11)</span>
+        : x(other.x), y(other.y) {}
+};</pre>
+    <table>
+      <tr><th>Type</th><th>Called when</th></tr>
+      <tr><td><b>Default</b></td><td><code>Point p;</code> — no arguments given</td></tr>
+      <tr><td><b>Parameterized</b></td><td><code>Point p(3, 4);</code></td></tr>
+      <tr><td><b>Copy</b></td><td><code>Point p2 = p1;</code> · passing by value · returning by value</td></tr>
+      <tr><td><b>Move</b></td><td>Source is a temporary/rvalue, or explicitly <code>std::move(p1)</code></td></tr>
+    </table>
+    <div class="warning">⚠️ <b>Full move-semantics mechanics</b> (why it matters, what "stealing" a resource means) belongs to the Copy Semantics / Rule of Three-Five-Zero note later — here, just know it exists and when it's picked.</div>
+    <div class="memory">💡 <b>Memory hook:</b> Default = <b>a blank form</b> 📄. Parameterized = <b>a filled-in form</b> ✍️. Copy = <b>a photocopy</b> 📠. Move = <b>handing over the original</b> and keeping nothing 🤝.</div>
+  </div>
+
+  <!-- ============ COPY-INIT VS ASSIGNMENT ============ -->
+  <div class="card">
+    <h2><span class="num">3</span> The trap: <code>=</code> doesn't always mean assignment</h2>
+    <p>This single line confuses almost everyone the first time:</p>
+<pre>Point p1(3, 4);
+Point p2 = p1;     <span class="g">// looks like assignment... but it's NOT</span>
+p2 = p1;           <span class="r">// THIS is assignment</span></pre>
+    <ul>
+      <li><code>Point p2 = p1;</code> is <b>copy-initialization</b> — <code>p2</code> doesn't exist yet, so this calls the <b>copy constructor</b>. The <code>=</code> here is just initialization syntax, not the assignment operator.</li>
+      <li><code>p2 = p1;</code> (on its own line, <code>p2</code> already exists) calls <code>operator=</code> — the <b>copy assignment operator</b> — a completely different function.</li>
+    </ul>
+    <div class="warning">⚠️ <b>Rule of thumb:</b> if the variable is being <b>declared</b> on that line, it's construction (copy constructor). If it already exists, it's assignment. Same symbol <code>=</code>, two different functions.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "`T b = a;` is copy-initialization and invokes the copy constructor, not `operator=`, because `b` is being created, not reassigned. `operator=` only fires when the target object already exists."</div>
+  </div>
+
+  <!-- ============ INITIALIZER LIST ============ -->
+  <div class="card">
+    <h2><span class="num">4</span> The member initializer list</h2>
+    <ul>
+      <li><code>: x(a), y(b)</code> — this is <b>initialization</b>, not assignment. Members get their value the moment they're born.</li>
+      <li>Writing it in the body instead — <code>{ x = a; y = b; }</code> — first <b>default-constructs</b> the members, then <b>overwrites</b> them. Wasteful for non-trivial types, and sometimes not even legal (see below).</li>
+      <li><b>Mandatory</b> for: <code>const</code> members, <b>reference</b> members, and members/base classes with <b>no default constructor</b> — none of these can be assigned to after the fact.</li>
+    </ul>
+<pre><span class="k">class</span> Config {
+    <span class="k">const</span> <span class="k">int</span> id;      <span class="c">// const — MUST be initialized, can't be assigned later</span>
+    <span class="k">int</span>&amp; ref;         <span class="c">// reference — same rule</span>
+<span class="k">public</span>:
+    Config(<span class="k">int</span> i, <span class="k">int</span>&amp; r) : id(i), ref(r) {}   <span class="c">// ✅ only way that compiles</span>
+    <span class="c">// Config(int i, int& r) { id = i; ref = r; }  // ❌ won't compile</span>
+};</pre>
+
+    <h3>⚠️ The trap nobody sees coming: initialization order</h3>
+    <p>Members are initialized in the order they're <b>declared in the class</b> — <b>NOT</b> the order you write them in the initializer list.</p>
+<pre><span class="k">class</span> Broken {
+    <span class="k">int</span> a;    <span class="c">// declared FIRST → initialized FIRST</span>
+    <span class="k">int</span> b;    <span class="c">// declared SECOND → initialized SECOND</span>
+<span class="k">public</span>:
+    Broken(<span class="k">int</span> x) : b(x), a(b) {}   <span class="r">// looks like: set b, then a=b</span>
+    <span class="c">// ACTUAL execution order: a(b) runs FIRST — but b isn't set yet!</span>
+    <span class="c">// a gets garbage. Then b(x) runs. a != b, silently wrong.</span>
+};</pre>
+    <div class="warning">⚠️ Most compilers warn about this (<code>-Wreorder</code>) — but it still <b>compiles</b> and runs with a <b>silently wrong value</b>. Always write the initializer list in <b>declaration order</b> to avoid confusing yourself, even though the compiler ignores your written order anyway.</div>
+    <div class="memory">💡 <b>Memory hook:</b> The initializer list is <b>not a to-do list read top to bottom</b> — the class's own declaration order is the real schedule. The list is just where you write each item's value.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "Members initialize in declaration order regardless of initializer-list order — a classic bug appears when one member's initializer depends on another member declared later in the class."</div>
+  </div>
+
+  <!-- ============ DEFAULT CTOR SUPPRESSION ============ -->
+  <div class="card">
+    <h2><span class="num">5</span> The default constructor disappears the moment you write any other</h2>
+<pre><span class="k">class</span> Point {
+    <span class="k">int</span> x, y;
+<span class="k">public</span>:
+    Point(<span class="k">int</span> a, <span class="k">int</span> b) : x(a), y(b) {}   <span class="c">// you wrote ONE constructor</span>
+};
+
+Point p;         <span class="r">// ❌ COMPILE ERROR — no default constructor exists!</span>
+Point p2(1, 2);  <span class="g">// ✅ fine</span></pre>
+    <ul>
+      <li>The compiler <b>only</b> auto-generates a default constructor if you define <b>zero</b> constructors yourself.</li>
+      <li>The instant you write <b>any</b> constructor — even just a copy constructor — the free default constructor is <b>gone</b>.</li>
+      <li>Want it back anyway? Ask explicitly (C++11): <code>Point() = default;</code></li>
+    </ul>
+    <div class="warning">⚠️ This is one of the single most common "why won't my code compile" moments for people learning C++. If you see <code>"no matching function for call to 'X::X()'"</code>, check whether you defined any other constructor.</div>
+  </div>
+
+  <!-- ============ DELEGATING CONSTRUCTORS ============ -->
+  <div class="card">
+    <h2><span class="num">6</span> Delegating constructors (C++11) — avoid repeating yourself</h2>
+<pre><span class="k">class</span> Box {
+    <span class="k">int</span> w, h;
+<span class="k">public</span>:
+    Box(<span class="k">int</span> w, <span class="k">int</span> h) : w(w), h(h) {}
+    Box() : Box(1, 1) {}          <span class="g">// delegates — calls the constructor above</span>
+    Box(<span class="k">int</span> side) : Box(side, side) {}  <span class="g">// also delegates</span>
+};</pre>
+    <ul>
+      <li>One constructor can call <b>another constructor of the same class</b> from its initializer list — avoiding duplicated setup logic.</li>
+      <li><b>Rule:</b> if a constructor delegates, that's the <b>only</b> thing allowed in its initializer list — you can't delegate AND initialize other members in the same list.</li>
+    </ul>
+    <div class="memory">💡 <b>Memory hook:</b> Delegating = <b>forwarding a call</b> ☎️ to a colleague who already knows how to handle it, instead of explaining the whole thing again yourself.</div>
+  </div>
+
+  <!-- ============ EXPLICIT ============ -->
+  <div class="card">
+    <h2><span class="num">7</span> <code>explicit</code> — stopping silent conversions</h2>
+<pre><span class="k">class</span> Wrapper {
+<span class="k">public</span>:
+    Wrapper(<span class="k">int</span> x) {}          <span class="c">// single-argument constructor</span>
+};
+
+<span class="k">void</span> process(Wrapper w) {}
+
+process(5);              <span class="r">// ⚠️ compiles! 5 is silently converted to Wrapper(5)</span>
+</pre>
+<pre><span class="k">class</span> SafeWrapper {
+<span class="k">public</span>:
+    <span class="y">explicit</span> SafeWrapper(<span class="k">int</span> x) {}
+};
+
+<span class="k">void</span> process2(SafeWrapper w) {}
+process2(5);                     <span class="r">// ❌ now a compile error — good!</span>
+process2(SafeWrapper(5));        <span class="g">// ✅ must be explicit about it</span></pre>
+    <ul>
+      <li>A constructor taking exactly <b>one argument</b> doubles as an <b>implicit conversion</b> unless marked <code>explicit</code>.</li>
+      <li>That silent conversion is a bug magnet — a plain <code>int</code> quietly becoming your class type is rarely what you want.</li>
+    </ul>
+    <div class="interview">🎯 <b>Interview line:</b> "I mark single-argument constructors <code>explicit</code> by default, unless I deliberately want the implicit conversion — it prevents a whole category of silent, hard-to-spot bugs."</div>
+  </div>
+
+  <!-- ============ OVERLOAD AMBIGUITY ============ -->
+  <div class="card">
+    <h2><span class="num">8</span> Constructor overloading vs default arguments — the ambiguity trap</h2>
+<pre><span class="k">class</span> Sample {
+<span class="k">public</span>:
+    Sample(<span class="k">int</span> x) {}
+    Sample(<span class="k">int</span> x, <span class="k">int</span> y = 10) {}
+};
+
+Sample s(5);   <span class="r">// ❌ COMPILE ERROR: ambiguous!</span>
+<span class="c">// Both Sample(int) and Sample(int, int=10) match Sample(5) equally well</span></pre>
+    <ul>
+      <li>Constructors <b>can</b> be overloaded like any function — different parameter lists, resolved at compile time.</li>
+      <li>But <b>default arguments effectively create an overload</b> too — and if two candidate signatures can both satisfy the same call, the compiler refuses to guess. <b>Ambiguous call, not a silent pick.</b></li>
+    </ul>
+    <div class="warning">⚠️ Mixing default arguments with overloading is a common source of this exact error. Fix: remove the default, or remove the redundant single-arg overload.</div>
+  </div>
+
+  <!-- ============ WHEN CONSTRUCTORS RUN ============ -->
+  <div class="card">
+    <h2><span class="num">9</span> Every place a constructor fires automatically</h2>
+    <table>
+      <tr><th>Context</th><th>Example</th></tr>
+      <tr><td>Stack object</td><td><code>Point p(1,2);</code></td></tr>
+      <tr><td>Heap object</td><td><code>Point* p = new Point(1,2);</code></td></tr>
+      <tr><td>Array of objects</td><td><code>Point pts[5];</code> — default ctor runs <b>5 times</b>, once per element</td></tr>
+      <tr><td>Temporary</td><td><code>Point(1,2).show();</code> — constructed, used, destroyed immediately</td></tr>
+      <tr><td>Base of another object</td><td>Automatically, before the derived constructor body runs</td></tr>
+      <tr><td>Member sub-object</td><td>Automatically, before the owning object's constructor body runs</td></tr>
+    </table>
+    <div class="warning">⚠️ <code>Point pts[5];</code> requires a <b>default constructor</b> to exist (or an initializer for every element) — array creation can't pass arguments to each element individually without one.</div>
+  </div>
+
+  <!-- ============ DESTRUCTORS ============ -->
+  <div class="card">
+    <h2><span class="num">10</span> Destructors — cleanup, guaranteed</h2>
+    <ul>
+      <li><code>~ClassName()</code> — runs <b>automatically</b> when an object's lifetime ends: scope exit, <code>delete</code>, or program termination for globals/statics.</li>
+      <li><b>No arguments, no return type, cannot be overloaded</b> — a class has <b>exactly one</b> destructor. There's no call-site to select between overloads, since destruction is implicit.</li>
+      <li>Local (stack) objects are destroyed in <b>reverse order of construction</b> — LIFO, like a stack of plates.</li>
+      <li>Inside one object, its <b>data members</b> are destroyed in <b>reverse declaration order</b> (mirroring construction).</li>
+    </ul>
+<pre><span class="k">class</span> Logger {
+<span class="k">public</span>:
+    Logger()  { cout &lt;&lt; <span class="g">"Logger opened\n"</span>; }
+    ~Logger() { cout &lt;&lt; <span class="g">"Logger closed\n"</span>; }
+};
+<span class="k">void</span> run() {
+    Logger a;
+    Logger b;
+}   <span class="c">// prints: "b closed" then "a closed" — reverse order</span></pre>
+    <div class="memory">💡 <b>Memory hook:</b> 🏗️ Building a house — foundation first. 💥 Demolishing — roof comes down first. You destroy in the exact reverse order you built.</div>
+  </div>
+
+  <!-- ============ RAII ============ -->
+  <div class="card">
+    <h2><span class="num">11</span> RAII — the reason destructors matter so much</h2>
+    <div class="warning" style="border-left-color:var(--blue);background:#eaf1fb;">📘 <b>RAII</b> = Resource Acquisition Is Initialization: acquire a resource in the <b>constructor</b>, release it in the <b>destructor</b>. Tie the resource's lifetime to the object's lifetime.</div>
+<pre><span class="k">class</span> FileHandle {
+    FILE* f;
+<span class="k">public</span>:
+    FileHandle(<span class="k">const</span> <span class="k">char</span>* path) { f = fopen(path, <span class="g">"r"</span>); }
+    ~FileHandle() { <span class="k">if</span> (f) fclose(f); }   <span class="c">// guaranteed cleanup — even if an exception is thrown</span>
+};</pre>
+    <ul>
+      <li>Because destructors run <b>deterministically</b> — including during exception-driven stack unwinding — cleanup happens <b>without needing a <code>finally</code> block</b>.</li>
+      <li>This is exactly how <code>std::lock_guard</code>, <code>std::unique_ptr</code>, and <code>std::fstream</code> all work.</li>
+    </ul>
+    <div class="interview">🎯 <b>Interview line:</b> "RAII binds a resource's lifetime to an object's lifetime. Stack unwinding guarantees the destructor runs even when an exception propagates, so cleanup is exception-safe without manual `finally` logic."</div>
+  </div>
+
+  <!-- ============ WHAT'S DEFERRED ============ -->
+  <div class="card">
+    <h2><span class="num">12</span> Two things intentionally NOT covered here</h2>
+    <ul>
+      <li><b>Virtual destructors</b> — why a polymorphic base class needs one, and what leaks if it doesn't. That needs inheritance and vtables first, so it lives in the upcoming Polymorphism note.</li>
+      <li><b>Deep vs shallow copy</b> — the default copy constructor just copies member values, which is dangerous for classes holding raw pointers. That's the entire subject of the Copy Semantics / Rule of Three-Five-Zero note coming up.</li>
+    </ul>
+    <div class="memory">Knowing what's deliberately deferred (and why) is itself a good interview habit — it shows you see how the topics connect rather than memorizing them in isolation.</div>
+  </div>
+
+  <!-- ============ REVISION ============ -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li>4 constructor types: <b>default, parameterized, copy, move</b></li>
+      <li><code>T b = a;</code> → <b>copy constructor</b> (b is being created). <code>b = a;</code> (b exists) → <b>copy assignment</b>.</li>
+      <li>Initializer list runs in <b>declaration order</b>, never list-written order</li>
+      <li><code>const</code> / reference members / no-default-ctor members → initializer list is <b>mandatory</b></li>
+      <li>Define <b>any</b> constructor → the free default constructor <b>disappears</b></li>
+      <li>Delegating constructors (C++11): one ctor calls another via <code>: ClassName(...)</code></li>
+      <li><code>explicit</code> blocks silent single-argument conversions</li>
+      <li>Default arguments can make overloaded constructors <b>ambiguous</b></li>
+      <li>Destructor: <b>one per class</b>, no args, runs automatically, <b>reverse order</b> of construction</li>
+      <li><b>RAII</b>: acquire in constructor, release in destructor → exception-safe cleanup for free</li>
+    </ul>
+  </div>
+
+  <!-- ============ INTERACTIVE QUIZ ============ -->
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Medium→hard. Watch for the copy-vs-assignment trap and the initializer-list order trap. Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="friend.html">← Note 05: Friends</a>
+    <a href="index.html">home ↑</a>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "Which function is called on this line?",
+    code:
+`class Point {
+public:
+    Point() { cout << "default\\n"; }
+    Point(const Point&) { cout << "copy\\n"; }
+    Point& operator=(const Point&) { cout << "assign\\n"; return *this; }
+};
+int main() {
+    Point a;
+    Point b = a;   // <-- this line
+}`,
+    options: [
+      "default constructor",
+      "copy constructor",
+      "copy assignment operator",
+      "both copy constructor and copy assignment"
+    ],
+    correct: 1,
+    explain: "`Point b = a;` is copy-INITIALIZATION — b doesn't exist yet, so this constructs b directly via the copy constructor. The `=` here is not the assignment operator; operator= only fires when the left side already exists."
+  },
+  {
+    q: "Why does this fail to compile?",
+    code:
+`class Sample {
+    int x;
+public:
+    Sample(int val) : x(val) {}
+};
+int main() {
+    Sample s;   // <-- error here
+}`,
+    options: [
+      "x must be initialized to 0 explicitly",
+      "Sample has no default constructor — defining any constructor suppresses it",
+      "Sample needs a copy constructor first",
+      "int x needs a default value in the class"
+    ],
+    correct: 1,
+    explain: "Once you define ANY constructor — even just a parameterized one — the compiler stops generating the free default constructor. `Sample s;` needs a no-argument constructor that no longer exists. Fix: add `Sample() : x(0) {}` or `Sample() = default;`."
+  },
+  {
+    q: "What's the bug in this constructor?",
+    code:
+`class Broken {
+    int a;
+    int b;
+public:
+    Broken(int x) : b(x), a(b) {}
+};`,
+    options: [
+      "No bug — a and b both end up equal to x",
+      "a is initialized before b runs, so a(b) reads an uninitialized b",
+      "This won't compile — initializer list order must match declaration order",
+      "b(x) is illegal syntax"
+    ],
+    correct: 1,
+    explain: "Members initialize in DECLARATION order (a, then b) — not initializer-list order. So `a(b)` executes first, before `b(x)` has run — a gets garbage. It compiles fine (often with a -Wreorder warning) and silently misbehaves."
+  },
+  {
+    q: "Which member REQUIRES the initializer list (can't be assigned in the constructor body)?",
+    code:
+`class Config {
+    const int id;
+public:
+    Config(int i) {
+        id = i;   // <-- this line
+    }
+};`,
+    options: [
+      "This is fine, no issue",
+      "Compile error — const members can't be assigned, must use the initializer list",
+      "Only a warning, not an error",
+      "Works, but id becomes mutable afterward"
+    ],
+    correct: 1,
+    explain: "A `const` member can only be given a value once, at initialization — never assigned afterward. `id = i;` inside the body is a compile error. It MUST be done via the initializer list: `Config(int i) : id(i) {}`."
+  },
+  {
+    q: "What's wrong with this delegating constructor?",
+    code:
+`class Box {
+    int w, h;
+public:
+    Box(int w, int h) : w(w), h(h) {}
+    Box() : w(1), Box(1, 1) {}   // <-- here
+};`,
+    options: [
+      "Nothing — this correctly sets defaults",
+      "A delegating constructor can't ALSO initialize other members in the same list",
+      "Box() needs to come before Box(int,int) in the class",
+      "Delegating constructors don't exist in C++"
+    ],
+    correct: 1,
+    explain: "If a constructor delegates to another constructor of the same class, that delegation must be the ONLY thing in its initializer list. You can't mix `w(1)` and `Box(1,1)` together — pick one: either delegate fully, or initialize members directly."
+  },
+  {
+    q: "What does `explicit` prevent here?",
+    code:
+`class Meters {
+public:
+    explicit Meters(double val) {}
+};
+void report(Meters m) {}
+int main() {
+    report(5.0);   // <-- this line
+}`,
+    options: [
+      "Nothing — this compiles fine",
+      "Compile error — 5.0 can no longer implicitly convert to Meters",
+      "A runtime error when report() is called",
+      "explicit only affects copy constructors, not this"
+    ],
+    correct: 1,
+    explain: "Without `explicit`, `report(5.0)` would silently convert 5.0 into a Meters object via the single-argument constructor. With `explicit`, that implicit conversion path is blocked — you'd need `report(Meters(5.0))` instead. This is a compile-time error, not runtime."
+  },
+  {
+    q: "Why is this constructor call ambiguous?",
+    code:
+`class Sample {
+public:
+    Sample(int x) {}
+    Sample(int x, int y = 10) {}
+};
+int main() {
+    Sample s(5);   // <-- error here
+}`,
+    options: [
+      "Sample(5) doesn't match either constructor",
+      "Both Sample(int) and Sample(int, int=10) can satisfy Sample(5) equally",
+      "You can't overload constructors in C++",
+      "Default arguments are illegal in constructors"
+    ],
+    correct: 1,
+    explain: "With y defaulted to 10, `Sample(int, int=10)` can be called with just one argument — so `Sample(5)` matches BOTH `Sample(int)` and `Sample(int, int=10)`. Neither is more specific, so the compiler refuses to guess: ambiguous call, compile error."
+  },
+  {
+    q: "What is the destruction order here?",
+    code:
+`class Item {
+    string name;
+public:
+    Item(string n) : name(n) {}
+    ~Item() { cout << name << " destroyed\\n"; }
+};
+int main() {
+    Item a("A");
+    Item b("B");
+    Item c("C");
+}`,
+    options: [
+      "A destroyed, B destroyed, C destroyed",
+      "C destroyed, B destroyed, A destroyed",
+      "All three destroyed simultaneously",
+      "Order is undefined/compiler-specific"
+    ],
+    correct: 1,
+    explain: "Local objects are destroyed in REVERSE order of construction — LIFO, like a stack of plates. a, b, c were built in that order, so they're torn down c, b, a."
+  },
+  {
+    q: "Can a constructor be declared `virtual`?",
+    code: null,
+    options: [
+      "Yes, and it's common practice for base classes",
+      "No — virtual dispatch needs the vptr, which the constructor itself sets up",
+      "Yes, but only the default constructor",
+      "No — because constructors can't return a value"
+    ],
+    correct: 1,
+    explain: "Virtual dispatch works through the vptr, and the vptr is initialized DURING construction. At that point the object's full dynamic type isn't established yet, so there's nothing to dispatch on. Constructors can never be virtual — this holds for every constructor type, not just default."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div');
+  block.className = 'q-block';
+
+  const qnum = document.createElement('div');
+  qnum.className = 'q-num';
+  qnum.textContent = 'Q' + (qi + 1);
+  block.appendChild(qnum);
+
+  const qtext = document.createElement('div');
+  qtext.className = 'q-text';
+  qtext.textContent = item.q;
+  block.appendChild(qtext);
+
+  if (item.code) {
+    const pre = document.createElement('pre');
+    pre.className = 'q-code';
+    pre.textContent = item.code;
+    block.appendChild(pre);
+  }
+
+  const opts = document.createElement('div');
+  opts.className = 'q-opts';
+
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) {
+        btn.classList.add('correct');
+        score++;
+        document.getElementById('score').textContent = score;
+      } else {
+        btn.classList.add('wrong');
+        allBtns[item.correct].classList.add('correct');
+      }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+
+  block.appendChild(opts);
+  quizEl.appendChild(block);
+});
+</script>
+
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{
+    border:1px solid #e3e0d7;border-radius:10px;
+    padding:18px 18px 20px;margin:18px 0;background:#fff;
+  }
+  .q-num{
+    font-family:'Courier New',monospace;font-size:12px;font-weight:bold;
+    display:inline-block;background:var(--ink);color:var(--paper);
+    padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;
+  }
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{
+    font-family:'Courier New',monospace;font-size:13px;line-height:1.5;
+    background:#232323;color:#eee;border-radius:8px;
+    padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;
+  }
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{
+    font-family:Georgia,serif;font-size:15px;text-align:left;
+    padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;
+    background:#fbfaf7;cursor:pointer;transition:all .12s ease;
+    display:flex;align-items:center;gap:10px;color:var(--ink);
+  }
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{
+    font-family:'Courier New',monospace;font-weight:bold;font-size:13px;
+    background:#e8e5dd;color:var(--ink);border-radius:5px;
+    width:24px;height:24px;flex:0 0 24px;
+    display:flex;align-items:center;justify-content:center;
+  }
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{
+    border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;
+  }
+  .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{
+    border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;
+  }
+  .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{
+    margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;
+  }
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);}
+  .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{
+    text-align:center;font-family:'Courier New',monospace;font-weight:bold;
+    font-size:18px;margin-top:20px;padding:12px;
+    background:var(--ink);color:var(--paper);border-radius:8px;
+  }
+  #score{color:#8be0a4;}
+</style>
+
+</body>
+</html>

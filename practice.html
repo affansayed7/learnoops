@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Practice & Application — LearnOOPs Note 16</title>
+<style>
+  :root{--paper:#fbfaf7;--ink:#232323;--grid:#e8e5dd;--blue:#2456a6;--red:#c0392b;--green:#1e7a4f;--amber:#b8860b;--purple:#6d4aa0;--soft:#6b6b6b;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:28px 28px;color:var(--ink);line-height:1.65;padding:40px 16px 80px;}
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--red);margin-bottom:8px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--green);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{background:var(--card);border:1px solid #dedbd2;border-radius:10px;padding:26px 28px;margin-bottom:26px;box-shadow:2px 3px 0 rgba(35,35,35,.07);}
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{font-family:'Courier New',monospace;font-size:14px;font-weight:bold;background:var(--ink);color:var(--paper);border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;}
+  h3{font-size:17px;margin:18px 0 8px;}
+  ul{padding-left:22px;margin:8px 0;} li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+
+  /* tiers */
+  .tier-head{display:flex;align-items:center;gap:12px;margin-bottom:6px;}
+  .tier-badge{font-family:'Courier New',monospace;font-size:11px;letter-spacing:1.5px;padding:4px 11px;border-radius:20px;color:#fff;font-weight:bold;}
+  .tier-badge.t1{background:var(--green);}
+  .tier-badge.t2{background:var(--blue);}
+  .tier-badge.t3{background:var(--purple);}
+  .tier-desc{color:var(--soft);font-style:italic;font-size:14.5px;margin-bottom:18px;}
+
+  .ex{border:1px solid #e3e0d7;border-radius:9px;padding:16px 18px;margin-bottom:14px;background:#fcfbf8;}
+  .ex-title{font-size:16px;font-weight:bold;margin-bottom:6px;display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+  .ex-tags{font-family:'Courier New',monospace;font-size:11px;color:var(--soft);font-weight:normal;}
+  .ex-tags span{background:#eee;padding:2px 7px;border-radius:4px;margin-left:4px;}
+  .ex p{font-size:14.5px;margin-bottom:6px;}
+  .ex ul{font-size:14.5px;margin-top:4px;}
+
+  /* checklist */
+  .checklist{list-style:none;padding-left:0;}
+  .checklist li{
+    display:flex;align-items:flex-start;gap:10px;padding:9px 0;
+    border-bottom:1px solid #ece9e1;font-size:15px;
+  }
+  .checklist li:last-child{border-bottom:none;}
+  .checklist input[type=checkbox]{
+    margin-top:3px;width:17px;height:17px;flex:0 0 17px;accent-color:var(--green);cursor:pointer;
+  }
+  .checklist label{cursor:pointer;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">Note 16 · The one you actually have to DO</div>
+  <h1>Practice &amp; <span class="hl">Application</span> 🛠️</h1>
+  <p class="subtitle">15 notes get you to recognize the right answer. This page is where you find out if you can produce it yourself. No quiz here — just work, and a way to get it reviewed.</p>
+
+  <!-- HOW TO USE -->
+  <div class="card">
+    <h2><span class="num">0</span> How this page works</h2>
+    <ul>
+      <li>Work through the tiers <b>in order</b> — each one assumes the skills from the tier before it.</li>
+      <li>Write real code in a real compiler. Don't just plan it in your head — type it, run it, break it.</li>
+      <li>When done (or stuck), <b>paste your code into this chat</b>. Ask for a review "like an interviewer would" — that's the whole point of having Claude alongside these notes.</li>
+      <li>Run the <b>self-review checklist</b> (Section 4) on your own code <i>before</i> asking for a review — catching your own bugs first is a skill in itself.</li>
+    </ul>
+  </div>
+
+  <!-- TIER 1 -->
+  <div class="card">
+    <div class="tier-head"><span class="tier-badge t1">TIER 1</span><h2 style="margin:0;">Warm-ups — one concept each</h2></div>
+    <p class="tier-desc">Small, single-purpose classes. Goal: muscle memory for syntax, not design skill yet.</p>
+
+    <div class="ex">
+      <div class="ex-title">BankAccount <span class="ex-tags">Notes:<span>03</span><span>07</span></span></div>
+      <p>Private <code>balance</code>. Public <code>deposit(amt)</code> (rejects negative), <code>withdraw(amt)</code> (rejects overdraft, returns bool), <code>getBalance() const</code>.</p>
+      <p><b>This one's still owed from earlier in this chat — do it first.</b></p>
+    </div>
+
+    <div class="ex">
+      <div class="ex-title">Matrix (Rule of Three drill) <span class="ex-tags">Notes:<span>06</span><span>11</span></span></div>
+      <p>Wraps a dynamically-allocated 2D array (<code>int**</code> or a flat <code>int*</code> with row/col math). Constructor allocates, destructor frees, copy constructor <b>deep</b>-copies. Verify: copy two Matrix objects, modify one, confirm the other is untouched, and confirm no crash on destruction.</p>
+    </div>
+
+    <div class="ex">
+      <div class="ex-title">Fraction (operator overloading) <span class="ex-tags">Notes:<span>10</span></span></div>
+      <p>Overload <code>+</code>, <code>-</code>, <code>*</code>, <code>==</code> as members; overload <code>&lt;&lt;</code> as a friend. Store numerator/denominator, don't worry about auto-simplifying unless you want the extra challenge.</p>
+    </div>
+
+    <div class="ex">
+      <div class="ex-title">Stack&lt;T&gt; (template) <span class="ex-tags">Notes:<span>12</span><span>13</span></span></div>
+      <p>Generic class template: <code>push</code>, <code>pop</code>, <code>top</code>, <code>isEmpty</code>. Then make <code>pop()</code> on an empty stack <code>throw</code> a custom <code>StackUnderflowException</code> instead of undefined behavior — catch it in <code>main()</code>.</p>
+    </div>
+  </div>
+
+  <!-- TIER 2 -->
+  <div class="card">
+    <div class="tier-head"><span class="tier-badge t2">TIER 2</span><h2 style="margin:0;">Small systems — multiple classes working together</h2></div>
+    <p class="tier-desc">Now design judgment matters: what's a class, what's a member, what talks to what.</p>
+
+    <div class="ex">
+      <div class="ex-title">Shape Hierarchy <span class="ex-tags">Notes:<span>08</span><span>09</span><span>14</span></span></div>
+      <p>Abstract <code>Shape</code> with pure virtual <code>area() const</code> and a virtual destructor. Derive <code>Circle</code>, <code>Rectangle</code>, <code>Triangle</code>. Write a function taking <code>const vector&lt;unique_ptr&lt;Shape&gt;&gt;&amp;</code> that sums total area.</p>
+      <ul>
+        <li>Self-test: what happens if you use <code>vector&lt;Shape&gt;</code> instead of <code>vector&lt;unique_ptr&lt;Shape&gt;&gt;</code>? (You should be able to explain <i>why</i>, not just that it's "wrong.")</li>
+      </ul>
+    </div>
+
+    <div class="ex">
+      <div class="ex-title">Employee Payroll <span class="ex-tags">Notes:<span>08</span><span>09</span><span>14</span></span></div>
+      <p><code>Employee</code> base (name, id, virtual <code>calculatePay() const</code>). <code>Manager</code>, <code>Developer</code>, <code>Intern</code> derived, each overriding pay differently. A <code>Company</code> class holding <code>vector&lt;unique_ptr&lt;Employee&gt;&gt;</code>, with <code>totalPayroll() const</code> that polymorphically sums everyone's pay.</p>
+    </div>
+
+    <div class="ex">
+      <div class="ex-title">Library Management System <span class="ex-tags">Notes:<span>07</span><span>13</span></span></div>
+      <p><code>Book</code> (title, author, ISBN, <code>isAvailable</code>). <code>Member</code> (name, id, list of currently-borrowed books). <code>Library</code> (composition: <b>has</b> books and members) with <code>borrowBook(memberId, isbn)</code> and <code>returnBook(...)</code> — throw a custom exception if the book's already out or doesn't exist.</p>
+    </div>
+  </div>
+
+  <!-- TIER 3 -->
+  <div class="card">
+    <div class="tier-head"><span class="tier-badge t3">TIER 3</span><h2 style="margin:0;">Capstone — everything at once</h2></div>
+    <p class="tier-desc">One project, most of the syllabus. This is your portfolio piece — the one you can actually talk through in an interview.</p>
+
+    <div class="ex">
+      <div class="ex-title">Mini Bank System <span class="ex-tags">Notes:<span>07</span><span>08</span><span>09</span><span>11</span><span>13</span><span>14</span><span>15</span></span></div>
+      <p>Abstract <code>Account</code> (encapsulated balance, pure virtual <code>interestRate() const</code>) → <code>SavingsAccount</code>, <code>CurrentAccount</code> with different rules (overdraft allowed on Current, not Savings). A <code>Bank</code> class holding <code>vector&lt;unique_ptr&lt;Account&gt;&gt;</code>. Custom <code>InsufficientFundsException</code>, caught by reference. Overload <code>&lt;&lt;</code> to print a statement. <b>Stretch:</b> use the <b>Strategy</b> pattern for interest calculation instead of hardcoding it per subclass, and a <b>Factory</b> to create the right account type from a string.</p>
+    </div>
+
+    <div class="warning">⚠️ Don't start here. If Tier 1 and 2 felt easy, great — but the capstone is where sloppy habits from skipping earlier tiers show up as real bugs (usually: forgetting a virtual destructor, or slicing a polymorphic object somewhere without noticing).</div>
+  </div>
+
+  <!-- SELF-REVIEW CHECKLIST -->
+  <div class="card">
+    <h2><span class="num">4</span> Self-review checklist — run this before asking for a review</h2>
+    <ul class="checklist">
+      <li><input type="checkbox" id="c1"><label for="c1">All data members are <code>private</code>, touched only through methods (Note 03, 07)</label></li>
+      <li><input type="checkbox" id="c2"><label for="c2">Any class managing a raw resource follows the Rule of Three/Five, or better, uses the Rule of Zero via <code>vector</code>/<code>unique_ptr</code> (Note 11)</label></li>
+      <li><input type="checkbox" id="c3"><label for="c3">Every base class with a virtual function has a <b>virtual destructor</b> (Note 09)</label></li>
+      <li><input type="checkbox" id="c4"><label for="c4">No polymorphic type is stored or passed <b>by value</b> where slicing could occur — pointers/references/smart pointers only (Note 09)</label></li>
+      <li><input type="checkbox" id="c5"><label for="c5"><code>operator=</code> guards against self-assignment, if I wrote one (Note 10)</label></li>
+      <li><input type="checkbox" id="c6"><label for="c6">Constructors use the <b>member initializer list</b>, not body assignment, especially for <code>const</code>/reference members (Note 06)</label></li>
+      <li><input type="checkbox" id="c7"><label for="c7"><code>const</code> is applied to every getter / read-only method (Note 07, and crash course Part 3)</label></li>
+      <li><input type="checkbox" id="c8"><label for="c8">Exceptions are caught by <code>const&amp;</code>, never by value (Note 13)</label></li>
+      <li><input type="checkbox" id="c9"><label for="c9">I used <code>make_unique</code>/<code>make_shared</code> — zero raw <code>new</code>/<code>delete</code> in my own code (Note 14)</label></li>
+      <li><input type="checkbox" id="c10"><label for="c10">I actually <b>compiled and ran</b> this — not just wrote it and assumed it works</label></li>
+    </ul>
+    <div class="memory">💡 Every single item on this list is a real trap covered somewhere in Notes 01–15. If one trips you up, that's not a failure — that's your revision list telling you exactly which note to reread.</div>
+  </div>
+
+  <!-- WHAT COMES AFTER -->
+  <div class="card">
+    <h2><span class="num">5</span> After the capstone</h2>
+    <ul>
+      <li><b>Explain it out loud</b> — walk through your Bank System's design decisions as if an interviewer just asked "walk me through this" with no code in front of them.</li>
+      <li><b>Do a mock interview round</b> — have Claude ask you questions live and give honest feedback on how each answer would land.</li>
+      <li><b>Revisit the 4 gaps</b> flagged earlier if you have time before the interview: Object Relationships (association/aggregation/composition/dependency), lvalue/rvalue depth, the four casts as a dedicated topic, and stack/heap fundamentals.</li>
+    </ul>
+    <div class="interview">🎯 The single best predictor of how you'll do isn't how many notes you've read — it's how many times you've said an answer out loud before the room that actually counts.</div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="design-patterns.html">← Note 15: Design Principles &amp; Patterns</a>
+    <a href="index.html">home ↑</a>
+  </div>
+</div>
+</body>
+</html>

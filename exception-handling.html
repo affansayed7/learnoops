@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Exception Handling — LearnOOPs Note 13</title>
+<style>
+  :root{--paper:#fbfaf7;--ink:#232323;--grid:#e8e5dd;--blue:#2456a6;--red:#c0392b;--green:#1e7a4f;--amber:#b8860b;--purple:#6d4aa0;--soft:#6b6b6b;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:28px 28px;color:var(--ink);line-height:1.65;padding:40px 16px 80px;}
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--red);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{background:var(--card);border:1px solid #dedbd2;border-radius:10px;padding:26px 28px;margin-bottom:26px;box-shadow:2px 3px 0 rgba(35,35,35,.07);}
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{font-family:'Courier New',monospace;font-size:14px;font-weight:bold;background:var(--ink);color:var(--paper);border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;}
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;} li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;}
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;} pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 13</div>
+  <h1>Exception Handling <span class="hl">🛡️</span></h1>
+  <p class="subtitle">Object slicing comes back to haunt catch blocks, RAII pays off exactly when things go wrong, and one dropped keyword can crash your whole program.</p>
+
+  <!-- 1 -->
+  <div class="card">
+    <h2><span class="num">1</span> The basics: try, throw, catch</h2>
+<pre><span class="k">try</span> {
+    <span class="k">if</span> (balance &lt; amt)
+        <span class="k">throw</span> std::runtime_error(<span class="g">"insufficient funds"</span>);
+    balance -= amt;
+} <span class="k">catch</span> (<span class="k">const</span> std::runtime_error&amp; e) {
+    cout &lt;&lt; <span class="g">"Caught: "</span> &lt;&lt; e.what();
+}</pre>
+    <ul>
+      <li><code>throw</code> creates an exception object and immediately starts <b>unwinding the stack</b>, looking for a matching <code>catch</code>.</li>
+      <li><code>e.what()</code> returns a human-readable message — it's a <b>virtual function</b> defined on <code>std::exception</code> and overridden by its derived types.</li>
+    </ul>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <h2><span class="num">2</span> Custom exception classes</h2>
+<pre><span class="k">class</span> InsufficientFundsException : <span class="k">public</span> std::runtime_error {
+<span class="k">public</span>:
+    InsufficientFundsException(<span class="k">double</span> shortfall)
+        : std::runtime_error(<span class="g">"Insufficient funds, short by "</span> + std::to_string(shortfall)) {}
+};
+
+<span class="k">void</span> withdraw(<span class="k">double</span> balance, <span class="k">double</span> amt) {
+    <span class="k">if</span> (amt &gt; balance)
+        <span class="k">throw</span> InsufficientFundsException(amt - balance);
+}
+<span class="k">try</span> { withdraw(100, 150); }
+<span class="k">catch</span> (<span class="k">const</span> InsufficientFundsException&amp; e) { cout &lt;&lt; e.what(); }</pre>
+    <div class="memory">💡 <b>Standard practice:</b> derive custom exceptions from <code>std::runtime_error</code> or <code>std::exception</code>, and pass your message to the <b>base constructor</b> — you get <code>what()</code> for free.</div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <h2><span class="num">3</span> Catch by reference, not by value — slicing strikes again</h2>
+<pre><span class="k">try</span> {
+    <span class="k">throw</span> std::runtime_error(<span class="g">"disk full"</span>);
+} <span class="k">catch</span> (std::exception e) {          <span class="r">// ❌ caught BY VALUE — sliced!</span>
+    cout &lt;&lt; e.what();                  <span class="r">// prints a GENERIC message, NOT "disk full"</span>
+}
+<span class="c">// -----------------------------------------------------------</span>
+<span class="k">try</span> {
+    <span class="k">throw</span> std::runtime_error(<span class="g">"disk full"</span>);
+} <span class="k">catch</span> (<span class="k">const</span> std::exception&amp; e) {   <span class="g">// ✅ caught by reference — polymorphism preserved</span>
+    cout &lt;&lt; e.what();                       <span class="g">// prints "disk full"</span>
+}</pre>
+    <div class="warning">⚠️ Catching <code>std::exception e</code> <b>by value</b> slices the thrown <code>runtime_error</code> down to a plain <code>std::exception</code> — same object-slicing bug from the Polymorphism note, now in a catch block. The sliced copy's vtable points to <code>std::exception</code>, so <code>e.what()</code> calls the <b>base's generic version</b>, not <code>runtime_error</code>'s stored message.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "I always catch by const reference. Catching by value slices the exception object and can silently discard both its derived type and its actual message."</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <h2><span class="num">4</span> Catch block order — most-derived first</h2>
+<pre><span class="k">try</span> {
+    <span class="k">throw</span> std::runtime_error(<span class="g">"oops"</span>);
+}
+<span class="k">catch</span> (std::exception&amp; e)       { cout &lt;&lt; <span class="g">"exception"</span>; }      <span class="r">// ❌ matches FIRST — too general</span>
+<span class="k">catch</span> (std::runtime_error&amp; e)  { cout &lt;&lt; <span class="g">"runtime_error"</span>; } <span class="r">// unreachable! never runs</span></pre>
+    <ul>
+      <li>Catch blocks are tried <b>top to bottom</b>, first match wins. Since <code>runtime_error</code> IS-A <code>exception</code>, the general catch above matches <b>everything</b>, making the specific one below dead code.</li>
+      <li><b>Fix:</b> order from <b>most specific to most general</b> — derived classes' catch blocks first, base class (or <code>catch(...)</code>) last as a fallback.</li>
+    </ul>
+<pre><span class="k">catch</span> (std::runtime_error&amp; e) { ... }   <span class="g">// specific — checked first</span>
+<span class="k">catch</span> (std::exception&amp; e)  { ... }   <span class="g">// general fallback — checked last</span>
+<span class="k">catch</span> (...)                { ... }   <span class="c">// catches literally anything, even non-exception types</span></pre>
+  </div>
+
+  <!-- 5 -->
+  <div class="card">
+    <h2><span class="num">5</span> Stack unwinding &amp; RAII — where it all pays off</h2>
+    <ul>
+      <li>When an exception propagates, the stack <b>unwinds</b> — every local object between the throw and the matching catch has its <b>destructor called</b>, in reverse order of construction.</li>
+      <li>This is exactly why <b>RAII</b> (Note 06) matters: a <code>lock_guard</code> or <code>unique_ptr</code> releases its resource automatically during unwinding, even though no code explicitly told it to.</li>
+    </ul>
+<pre><span class="k">void</span> process() {
+    std::lock_guard&lt;std::mutex&gt; lock(mtx);   <span class="c">// acquires the mutex</span>
+    riskyOperation();                        <span class="c">// throws!</span>
+    <span class="c">// lock_guard's destructor STILL runs during unwinding → mutex released, no deadlock</span>
+}</pre>
+    <div class="interview">🎯 <b>Interview line:</b> "Stack unwinding guarantees destructors run even when an exception propagates — that's what makes RAII exception-safe without needing a `finally` block."</div>
+  </div>
+
+  <!-- 6 -->
+  <div class="card">
+    <h2><span class="num">6</span> <code>noexcept</code> and rethrowing</h2>
+<pre><span class="k">void</span> safeFunc() <span class="y">noexcept</span> {
+    <span class="k">throw</span> std::runtime_error(<span class="g">"oops"</span>);   <span class="r">// std::terminate() is called IMMEDIATELY — not caught, even by an outer try/catch</span>
+}</pre>
+    <div class="warning">⚠️ A function marked <code>noexcept</code> that throws anyway causes an <b>instant program termination</b> via <code>std::terminate()</code> — the exception does not propagate normally, and no <code>catch</code> block anywhere can intercept it.</div>
+<pre><span class="k">try</span> {
+    doSomething();
+} <span class="k">catch</span> (<span class="k">const</span> std::exception&amp; e) {
+    log(e.what());
+    <span class="y">throw</span>;        <span class="c">// ✅ re-throws the SAME exception, preserving its original dynamic type</span>
+    <span class="c">// throw e;   ❌ would COPY-CONSTRUCT a new exception from e's STATIC type — can re-introduce slicing</span>
+}</pre>
+    <div class="memory">💡 <b>Hook:</b> bare <code>throw;</code> = "hand the <b>same</b> letter back." <code>throw e;</code> = "write a <b>new</b> letter based on what you can currently see of the old one" — and if <code>e</code> is a base reference, that new letter is a sliced copy.</div>
+  </div>
+
+  <!-- 7 -->
+  <div class="card">
+    <h2><span class="num">7</span> Exception safety guarantees</h2>
+    <table>
+      <tr><th>Guarantee</th><th>Meaning</th></tr>
+      <tr><td><b>Basic</b></td><td>No leaks; object remains in some valid (but possibly changed) state</td></tr>
+      <tr><td><b>Strong</b></td><td><b>Commit-or-rollback</b> — the operation either fully succeeds or the object is left completely unchanged</td></tr>
+      <tr><td><b>Nothrow</b> (<code>noexcept</code>)</td><td>Guaranteed to never throw at all</td></tr>
+    </table>
+    <div class="memory">💡 <b><code>std::vector::push_back</code></b> gives the strong guarantee: if the reallocation fails partway through, the vector is left exactly as it was before the call. RAII is how this is achieved for free.</div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li>Always catch by <code>const&amp;</code> — catching by value slices the exception and can silently change what <code>what()</code> returns</li>
+      <li>Order catch blocks <b>derived → base</b>; a base catch placed first makes every derived catch below it unreachable</li>
+      <li>Custom exceptions inherit from <code>std::runtime_error</code>/<code>std::exception</code>, passing the message to the base constructor</li>
+      <li>Stack unwinding runs destructors in reverse order → this is why RAII makes code exception-safe</li>
+      <li>A <code>noexcept</code> function that throws → <code>std::terminate()</code> immediately, no catch can intercept it</li>
+      <li>Bare <code>throw;</code> rethrows the original exception intact. <code>throw e;</code> copies from <code>e</code>'s static type — can slice</li>
+      <li>Three safety levels: <b>basic</b> (no leak), <b>strong</b> (commit-or-rollback), <b>nothrow</b></li>
+    </ul>
+  </div>
+
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="templates.html">← Note 12: Templates</a>
+    <a href="index.html">home ↑</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "What's wrong with this catch order?",
+    code:
+`try {
+    throw std::runtime_error("disk error");
+}
+catch (std::exception& e) {
+    cout << "generic";
+}
+catch (std::runtime_error& e) {
+    cout << "specific";
+}`,
+    options: [
+      "Nothing — both catch blocks are checked",
+      "The second catch block is unreachable — the first (base class) catch matches everything runtime_error could match too",
+      "This is a compile error — you can't have two catch blocks",
+      "The most specific catch always wins regardless of order"
+    ],
+    correct: 1,
+    explain: "Catch blocks are tried top-to-bottom, first match wins. Since std::runtime_error IS-A std::exception, the first catch (std::exception&) matches the thrown runtime_error, so it always runs. The second, more specific catch block is dead code and never executes."
+  },
+  {
+    q: "What does e.what() print here?",
+    code:
+`try {
+    throw std::runtime_error("disk full");
+} catch (std::exception e) {   // caught by VALUE
+    cout << e.what();
+}`,
+    options: [
+      "disk full",
+      "A generic message (NOT 'disk full') — the runtime_error was sliced down to a plain std::exception when caught by value",
+      "Compile error — can't catch std::exception here",
+      "Empty string"
+    ],
+    correct: 1,
+    explain: "Catching by VALUE slices the thrown runtime_error object down to just its std::exception base part — including replacing its vtable pointer. e.what() now calls std::exception's own generic what(), not runtime_error's stored message. Catching by const reference would have preserved 'disk full'."
+  },
+  {
+    q: "What happens here?",
+    code:
+`void safeFunc() noexcept {
+    throw std::runtime_error("oops");
+}
+int main() {
+    try {
+        safeFunc();
+    } catch (...) {
+        cout << "caught!";
+    }
+}`,
+    options: [
+      "Prints 'caught!'",
+      "std::terminate() is called — the program crashes immediately, the catch(...) never runs",
+      "The exception is silently ignored",
+      "Compile error — noexcept functions can't contain throw"
+    ],
+    correct: 1,
+    explain: "A noexcept function that throws anyway triggers std::terminate() immediately — this happens BEFORE normal exception propagation, so even a catch(...) in the caller can't intercept it. The program crashes."
+  },
+  {
+    q: "What's the difference between `throw;` and `throw e;` inside a catch block?",
+    code:
+`catch (const std::exception& e) {
+    log(e.what());
+    throw;      // (A)
+    // vs
+    // throw e;  // (B)
+}`,
+    options: [
+      "They are functionally identical",
+      "(A) rethrows the ORIGINAL exception object with its full original type; (B) constructs a NEW exception from e's static type, which can slice",
+      "(A) is illegal syntax",
+      "(B) rethrows the original; (A) creates a copy"
+    ],
+    correct: 1,
+    explain: "Bare `throw;` rethrows the currently-handled exception exactly as it was originally thrown — preserving its full dynamic type. `throw e;` copy-constructs a NEW exception object using e's STATIC type (std::exception& here) — if the original was actually a derived type, this can slice it down, losing information."
+  },
+  {
+    q: "Why does a lock_guard released during an exception avoid a deadlock?",
+    code:
+`void process(std::mutex& mtx) {
+    std::lock_guard<std::mutex> lock(mtx);
+    riskyOperation();  // throws
+}`,
+    options: [
+      "It doesn't — this WILL deadlock",
+      "Stack unwinding still calls lock_guard's destructor, which releases the mutex, even though the function exits abnormally",
+      "lock_guard is immune to exceptions",
+      "The mutex is released only if you manually catch the exception first"
+    ],
+    correct: 1,
+    explain: "Stack unwinding during exception propagation calls destructors for every local object in scope, in reverse order — including lock_guard's. Its destructor releases the mutex regardless of HOW the function exited. This is RAII providing automatic exception safety."
+  },
+  {
+    q: "What does the 'strong exception safety guarantee' mean?",
+    code: null,
+    options: [
+      "The function will never throw an exception",
+      "If the operation fails partway through, the object is left completely unchanged — as if the call never happened (commit-or-rollback)",
+      "The exception message is guaranteed to be descriptive",
+      "The function catches all possible exceptions internally"
+    ],
+    correct: 1,
+    explain: "Strong guarantee = commit-or-rollback: either the operation fully succeeds, or the object's state is exactly as it was before the call — no partial changes are visible. std::vector::push_back is a classic example providing this guarantee."
+  },
+  {
+    q: "Which catch block will handle a thrown `int` (not an exception-derived type)?",
+    code:
+`try {
+    throw 42;
+} catch (const std::exception& e) {
+    cout << "exception";
+} catch (...) {
+    cout << "catch-all";
+}`,
+    options: [
+      "The std::exception& catch, since int converts to it",
+      "catch(...) — it matches literally anything, including non-exception types like int",
+      "Neither — this is a compile error",
+      "Both catch blocks run"
+    ],
+    correct: 1,
+    explain: "int does NOT derive from std::exception, so the first catch doesn't match. `catch(...)` is the universal catch-all — it matches ANY thrown value, regardless of type, including primitive types like int. It's typically used as a last-resort safety net."
+  },
+  {
+    q: "Where should you derive a custom exception class from?",
+    code: null,
+    options: [
+      "It must inherit directly from a built-in type like int",
+      "Typically from std::exception or one of its standard derived classes like std::runtime_error, so you inherit what() and fit standard catch patterns",
+      "Custom exceptions cannot inherit from anything",
+      "From std::vector, to store multiple error messages"
+    ],
+    correct: 1,
+    explain: "Deriving from std::exception (or std::runtime_error/std::logic_error) gives you the virtual what() interface for free and lets generic `catch (const std::exception&)` blocks still catch your custom type — good practice for interoperability."
+  },
+  {
+    q: "What is the risk of catching a custom exception by its base class reference too broadly?",
+    code:
+`class NetworkError : public std::runtime_error { /* ... */ };
+class DiskError : public std::runtime_error { /* ... */ };
+
+try {
+    throw NetworkError("timeout");
+} catch (std::runtime_error& e) {
+    // handle generically
+}`,
+    options: [
+      "No risk at all — this always works fine",
+      "You lose the ability to distinguish NetworkError from DiskError in your handling code, even though both are technically caught",
+      "This is a compile error",
+      "It causes a memory leak"
+    ],
+    correct: 1,
+    explain: "This compiles and catches the exception fine, but by catching only at the std::runtime_error level, the handler can't tell NetworkError and DiskError apart to react differently (e.g., retry vs. alert). If different handling is needed per type, catch the specific derived types (in most-to-least specific order)."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div'); block.className = 'q-block';
+  const qnum = document.createElement('div'); qnum.className = 'q-num'; qnum.textContent = 'Q' + (qi + 1); block.appendChild(qnum);
+  const qtext = document.createElement('div'); qtext.className = 'q-text'; qtext.textContent = item.q; block.appendChild(qtext);
+  if (item.code) { const pre = document.createElement('pre'); pre.className = 'q-code'; pre.textContent = item.code; block.appendChild(pre); }
+  const opts = document.createElement('div'); opts.className = 'q-opts';
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button'); btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) { btn.classList.add('correct'); score++; document.getElementById('score').textContent = score; }
+      else { btn.classList.add('wrong'); allBtns[item.correct].classList.add('correct'); }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+  block.appendChild(opts); quizEl.appendChild(block);
+});
+</script>
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{border:1px solid #e3e0d7;border-radius:10px;padding:18px 18px 20px;margin:18px 0;background:#fff;}
+  .q-num{font-family:'Courier New',monospace;font-size:12px;font-weight:bold;display:inline-block;background:var(--ink);color:var(--paper);padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;}
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{font-family:'Courier New',monospace;font-size:13px;line-height:1.5;background:#232323;color:#eee;border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;}
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{font-family:Georgia,serif;font-size:15px;text-align:left;padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;background:#fbfaf7;cursor:pointer;transition:all .12s ease;display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{font-family:'Courier New',monospace;font-weight:bold;font-size:13px;background:#e8e5dd;color:var(--ink);border-radius:5px;width:24px;height:24px;flex:0 0 24px;display:flex;align-items:center;justify-content:center;}
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;} .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;} .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;}
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);} .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{text-align:center;font-family:'Courier New',monospace;font-weight:bold;font-size:18px;margin-top:20px;padding:12px;background:var(--ink);color:var(--paper);border-radius:8px;}
+  #score{color:#8be0a4;}
+</style>
+</body>
+</html>

@@ -1,0 +1,412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Operator Overloading — LearnOOPs Note 10</title>
+<style>
+  :root{--paper:#fbfaf7;--ink:#232323;--grid:#e8e5dd;--blue:#2456a6;--red:#c0392b;--green:#1e7a4f;--amber:#b8860b;--purple:#6d4aa0;--soft:#6b6b6b;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:28px 28px;color:var(--ink);line-height:1.65;padding:40px 16px 80px;}
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--green);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{background:var(--card);border:1px solid #dedbd2;border-radius:10px;padding:26px 28px;margin-bottom:26px;box-shadow:2px 3px 0 rgba(35,35,35,.07);}
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{font-family:'Courier New',monospace;font-size:14px;font-weight:bold;background:var(--ink);color:var(--paper);border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;}
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;} li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;}
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;} pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  figure{margin:18px 0 6px;text-align:center;}
+  figcaption{font-family:'Courier New',monospace;font-size:12px;color:var(--soft);margin-top:8px;letter-spacing:.5px;}
+  svg{max-width:100%;height:auto;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 10</div>
+  <h1>Operator Overloading <span class="hl">➕</span></h1>
+  <p class="subtitle">Every operator is secretly just a function with a funny name. Once you see that, the member-vs-friend decision, the pre/post-increment trick, and the self-assignment guard all make sense.</p>
+
+  <!-- 1 -->
+  <div class="card">
+    <h2><span class="num">1</span> The core idea: operators are functions</h2>
+    <div class="def"><b>Definition:</b> Giving an existing operator (<code>+</code>, <code>==</code>, <code>&lt;&lt;</code>...) a user-defined meaning for your own type. It's <b>compile-time polymorphism</b> — the operator is resolved to a specific function at compile time based on operand types.</div>
+    <p><code>a + b</code> literally compiles to <code>a.operator+(b)</code> (member) or <code>operator+(a, b)</code> (free function). That's it — no magic.</p>
+    <div class="memory">💡 <b>Hook:</b> <code>a + b</code> is <code>a.operator+(b)</code> wearing a costume 🎭.</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <h2><span class="num">2</span> Member vs friend — the decision that gets asked</h2>
+    <table>
+      <tr><th></th><th>Member function</th><th>Friend / free function</th></tr>
+      <tr><td><b>Left operand</b></td><td>Must be your class (it's <code>this</code>)</td><td>Can be anything</td></tr>
+      <tr><td><b>Must use for</b></td><td><code>=</code> <code>[]</code> <code>()</code> <code>-&gt;</code> (language requires these to be members)</td><td><code>&lt;&lt;</code> <code>&gt;&gt;</code>, or when you want symmetry (e.g. <code>2 + c</code> AND <code>c + 2</code>)</td></tr>
+    </table>
+<pre><span class="k">class</span> Complex {
+    <span class="k">double</span> re, im;
+<span class="k">public</span>:
+    Complex(<span class="k">double</span> r = 0, <span class="k">double</span> i = 0) : re(r), im(i) {}
+
+    Complex <span class="k">operator</span>+(<span class="k">const</span> Complex&amp; o) <span class="k">const</span> {   <span class="c">// member: left operand is *this</span>
+        <span class="k">return</span> Complex(re + o.re, im + o.im);
+    }
+
+    <span class="y">friend</span> ostream&amp; <span class="k">operator</span>&lt;&lt;(ostream&amp; os, <span class="k">const</span> Complex&amp; c) {  <span class="c">// FRIEND — left operand is ostream, not Complex!</span>
+        <span class="k">return</span> os &lt;&lt; c.re &lt;&lt; <span class="g">" + "</span> &lt;&lt; c.im &lt;&lt; <span class="g">"i"</span>;
+    }
+};
+Complex a(1,2), b(3,4);
+cout &lt;&lt; a + b;   <span class="c">// "4 + 6i"</span></pre>
+    <div class="warning">⚠️ <b>Why <code>&lt;&lt;</code> can't be a member:</b> a member operator's left operand must be <code>this</code>. In <code>cout &lt;&lt; obj</code>, the left operand is <code>cout</code> (an <code>ostream</code>) — you don't own that type, so you can't add a member to it. It <b>must</b> be a free function, made a <code>friend</code> if it needs private access. <b>This is the single most common reason friend exists.</b></div>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <h2><span class="num">3</span> Unary operators &amp; the pre/post-increment trick</h2>
+<pre><span class="k">class</span> Complex {
+    <span class="k">double</span> re, im;
+<span class="k">public</span>:
+    Complex <span class="k">operator</span>-() <span class="k">const</span> { <span class="k">return</span> Complex(-re, -im); }  <span class="c">// unary minus: zero params as a member</span>
+};</pre>
+    <p>Prefix and postfix <code>++</code> have the <b>same name</b> — C++ tells them apart with a fake, unused <code>int</code> parameter on the postfix version:</p>
+<pre><span class="k">class</span> Counter {
+    <span class="k">int</span> val = 0;
+<span class="k">public</span>:
+    Counter&amp; <span class="k">operator</span>++() {          <span class="c">// PREFIX: ++c — returns reference, no dummy param</span>
+        ++val; <span class="k">return</span> *<span class="y">this</span>;
+    }
+    Counter <span class="k">operator</span>++(<span class="k">int</span>) {     <span class="c">// POSTFIX: c++ — dummy `int` marks it, returns BY VALUE</span>
+        Counter temp = *<span class="y">this</span>;   <span class="c">// save old state</span>
+        ++val;
+        <span class="k">return</span> temp;         <span class="c">// return the OLD value</span>
+    }
+};</pre>
+    <ul>
+      <li>The <code>int</code> parameter in <code>operator++(int)</code> is <b>never used</b> — it exists purely so the compiler can tell prefix and postfix apart at the declaration level.</li>
+      <li><b>Prefix returns by reference</b> (cheap, no copy). <b>Postfix must return by value</b> (the old state, since <code>c++</code>'s value is the value <i>before</i> incrementing) — it's inherently one copy more expensive.</li>
+    </ul>
+    <div class="interview">🎯 <b>Interview line:</b> "Postfix increment takes a dummy int parameter purely to distinguish it from prefix — and it must return the pre-increment value by value, which is why prefix is preferred in hot loops when the return value isn't used."</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <h2><span class="num">4</span> <code>operator[]</code> and <code>operator()</code></h2>
+<pre><span class="k">class</span> MyArray {
+    <span class="k">int</span> data[10];
+<span class="k">public</span>:
+    <span class="k">int</span>&amp; <span class="k">operator</span>[](<span class="k">int</span> i) { <span class="k">return</span> data[i]; }              <span class="c">// allows arr[i] = 5;   (mutable)</span>
+    <span class="k">const int</span>&amp; <span class="k">operator</span>[](<span class="k">int</span> i) <span class="k">const</span> { <span class="k">return</span> data[i]; }  <span class="c">// for const objects — read-only</span>
+};</pre>
+    <ul>
+      <li>Returning a <b>reference</b> is what lets <code>arr[i] = 5;</code> work — you're not returning a copy, you're returning a handle to the actual storage.</li>
+      <li><b>Both overloads are needed</b>: without the <code>const</code> version, a <code>const MyArray&amp;</code> couldn't use <code>[]</code> at all.</li>
+    </ul>
+<pre><span class="k">class</span> Multiplier {           <span class="c">// the "functor" pattern</span>
+    <span class="k">int</span> factor;
+<span class="k">public</span>:
+    Multiplier(<span class="k">int</span> f) : factor(f) {}
+    <span class="k">int</span> <span class="k">operator</span>()(<span class="k">int</span> x) <span class="k">const</span> { <span class="k">return</span> x * factor; }
+};
+Multiplier triple(3);
+cout &lt;&lt; triple(5);   <span class="c">// 15 — calling an OBJECT like a function</span></pre>
+    <div class="memory">💡 <b>Why <code>operator()</code> matters:</b> this is a <b>functor</b> — an object that behaves like a function. It's the mechanism behind custom comparators passed to <code>std::sort</code>, and conceptually what a lambda compiles down to under the hood.</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="card">
+    <h2><span class="num">5</span> <code>operator=</code> — the one that must guard itself</h2>
+<pre><span class="k">class</span> Buffer {
+    <span class="k">int</span>* data; <span class="k">int</span> n;
+<span class="k">public</span>:
+    Buffer(<span class="k">int</span> n) : n(n) { data = <span class="k">new int</span>[n]; }
+    ~Buffer() { <span class="k">delete</span>[] data; }
+
+    Buffer&amp; <span class="k">operator</span>=(<span class="k">const</span> Buffer&amp; o) {
+        <span class="k">if</span> (<span class="y">this</span> == &amp;o) <span class="k">return</span> *<span class="y">this</span>;    <span class="c">// ① self-assignment guard</span>
+        <span class="k">delete</span>[] data;                     <span class="c">// ② free old memory FIRST</span>
+        n = o.n;
+        data = <span class="k">new int</span>[n];                   <span class="c">// ③ allocate new</span>
+        std::copy(o.data, o.data + n, data);  <span class="c">// ④ deep-copy contents</span>
+        <span class="k">return</span> *<span class="y">this</span>;                        <span class="c">// ⑤ return ref → enables a = b = c chaining</span>
+    }
+};</pre>
+    <div class="warning">⚠️ <b>Skip step ① and <code>x = x;</code> breaks:</b> you'd <code>delete[] data</code>, then try to copy FROM the memory you just freed — undefined behavior, garbage data. This exact line is what interviewers look for when they ask you to write <code>operator=</code>.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "I always guard operator= against self-assignment, free the old resource before allocating the new one, and return *this by reference so assignments can chain."</div>
+  </div>
+
+  <!-- 6 -->
+  <div class="card">
+    <h2><span class="num">6</span> <code>operator-&gt;</code> — for smart-pointer-like classes</h2>
+<pre><span class="k">class</span> SmartPtr {
+    Employee* ptr;
+<span class="k">public</span>:
+    SmartPtr(Employee* p) : ptr(p) {}
+    Employee* <span class="k">operator</span>-&gt;() { <span class="k">return</span> ptr; }
+};
+SmartPtr sp(<span class="k">new</span> Employee());
+sp-&gt;raiseSalary();   <span class="c">// compiler recursively applies operator-> until it hits a raw pointer, then dereferences</span></pre>
+    <div class="memory">💡 <b>This is exactly how <code>unique_ptr</code> and <code>shared_ptr</code> work</b> — they overload <code>operator-&gt;</code> and <code>operator*</code> to behave like raw pointers while managing memory underneath.</div>
+  </div>
+
+  <!-- 7 -->
+  <div class="card">
+    <h2><span class="num">7</span> The rules &amp; limits</h2>
+    <ul>
+      <li><b>Cannot overload:</b> <code>.</code>&nbsp; <code>::</code>&nbsp; <code>?:</code>&nbsp; <code>sizeof</code>&nbsp; <code>.*</code> — memorize these five.</li>
+      <li><b>Cannot</b> invent new operators (like <code>**</code> for power), change <b>arity</b> (a binary operator must stay binary), or change <b>precedence/associativity</b>.</li>
+      <li>At least <b>one operand must be a user-defined type</b> — you can never redefine what <code>int + int</code> means.</li>
+      <li>Return by <b>value</b> for <code>+</code> (a new object is created). Return by <b>reference</b> for <code>=</code>, <code>+=</code>, <code>&lt;&lt;</code> — enables chaining.</li>
+    </ul>
+  </div>
+
+  <!-- REVISION -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li><code>a + b</code> = <code>a.operator+(b)</code> or <code>operator+(a,b)</code> — just a function call in disguise</li>
+      <li><code>=</code> <code>[]</code> <code>()</code> <code>-&gt;</code> must be members. <code>&lt;&lt;</code>/<code>&gt;&gt;</code> must be free/friend (left operand isn't your type)</li>
+      <li>Postfix <code>++</code> uses a dummy <code>int</code> param, returns by value (old state). Prefix returns by reference.</li>
+      <li><code>operator[]</code> needs both a mutable and a <code>const</code> overload</li>
+      <li><code>operator()</code> makes an object callable — the functor pattern</li>
+      <li><code>operator=</code> needs: self-check → free old → allocate new → copy → return <code>*this</code></li>
+      <li>Non-overloadable: <code>. :: ?: sizeof .*</code></li>
+    </ul>
+  </div>
+
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Medium→hard. Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="polymorphism.html">← Note 09: Polymorphism</a>
+    <a href="index.html">home ↑</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "Why must `operator<<` be a friend/free function, not a member?",
+    code:
+`class Point {
+    int x, y;
+public:
+    // want: cout << p;
+};`,
+    options: [
+      "Member functions can't be overloaded",
+      "The left operand of << is std::ostream (cout), not Point — a member operator requires the left operand to be *this",
+      "operator<< doesn't exist for custom types",
+      "It CAN be a member, either way works identically"
+    ],
+    correct: 1,
+    explain: "For a member operator, the left operand IS the object the method is called on (this). In `cout << p`, the left operand is cout (ostream), which you don't own — you can't add member functions to it. So operator<< must be a free function taking (ostream&, const Point&), declared friend if it needs private access."
+  },
+  {
+    q: "What's wrong with this postfix increment?",
+    code:
+`class Counter {
+    int val = 0;
+public:
+    Counter operator++(int) {
+        ++val;
+        return *this;   // <-- returns the NEW value
+    }
+};`,
+    options: [
+      "Nothing — this is correct",
+      "Postfix must return the value BEFORE incrementing, not after — this returns the new state instead of a saved copy of the old one",
+      "operator++(int) must return void",
+      "The dummy int parameter is missing"
+    ],
+    correct: 1,
+    explain: "c++ (postfix) must evaluate to the value BEFORE the increment. This implementation increments first, then returns *this — which is now the incremented value. Correct version: save `Counter temp = *this;` BEFORE incrementing, then `return temp;` after."
+  },
+  {
+    q: "Why does MyArray need both operator[] overloads shown here?",
+    code:
+`class MyArray {
+    int data[10];
+public:
+    int& operator[](int i) { return data[i]; }
+    const int& operator[](int i) const { return data[i]; }
+};
+void printFirst(const MyArray& a) {
+    cout << a[0];   // <-- which overload does this need?
+}`,
+    options: [
+      "Only the non-const version is ever needed",
+      "The const version — a const MyArray& can only call const member functions, so without it a[0] wouldn't compile",
+      "Both overloads always run for every call",
+      "Neither — operator[] doesn't support const objects"
+    ],
+    correct: 1,
+    explain: "`a` is a `const MyArray&`, so only const member functions are callable on it. Without the const-qualified operator[], `a[0]` inside printFirst would fail to compile. This is const-correctness applied to operator overloading."
+  },
+  {
+    q: "What does `triple(5)` actually call?",
+    code:
+`class Multiplier {
+    int factor;
+public:
+    Multiplier(int f) : factor(f) {}
+    int operator()(int x) const { return x * factor; }
+};
+Multiplier triple(3);
+cout << triple(5);`,
+    options: [
+      "A constructor call, creating a new Multiplier",
+      "triple.operator()(5) — the functor call operator, returns 15",
+      "This is a syntax error — objects can't be called like functions",
+      "It calls Multiplier(5), overwriting triple's factor"
+    ],
+    correct: 1,
+    explain: "triple(5) is sugar for triple.operator()(5). Multiplier overloaded operator() to make its objects callable like functions — this is the 'functor' pattern. Result: 5 * 3 = 15."
+  },
+  {
+    q: "What's the critical missing line in this operator=?",
+    code:
+`Buffer& Buffer::operator=(const Buffer& o) {
+    delete[] data;
+    n = o.n;
+    data = new int[n];
+    std::copy(o.data, o.data + n, data);
+    return *this;
+}`,
+    options: [
+      "Nothing missing — this is correct",
+      "A self-assignment check: if (this == &o) return *this; — without it, x = x corrupts data",
+      "A null check on o.data",
+      "The return type should be void"
+    ],
+    correct: 1,
+    explain: "Without the self-assignment guard, `x = x;` deletes data, then tries to copy FROM o.data — which IS data, now freed. Undefined behavior. Always check `this == &o` first and return immediately if true."
+  },
+  {
+    q: "Which operator CANNOT be overloaded in C++?",
+    code: null,
+    options: ["+", "==", "?:", "[]"],
+    correct: 2,
+    explain: "The ternary conditional operator ?: cannot be overloaded — along with :: (scope resolution), . (member access), .* (pointer-to-member), and sizeof. +, ==, and [] are all overloadable."
+  },
+  {
+    q: "What does `sp->raiseSalary()` do here?",
+    code:
+`class SmartPtr {
+    Employee* ptr;
+public:
+    SmartPtr(Employee* p) : ptr(p) {}
+    Employee* operator->() { return ptr; }
+};
+SmartPtr sp(new Employee());
+sp->raiseSalary();`,
+    options: [
+      "Compile error — SmartPtr has no raiseSalary() method",
+      "The compiler calls sp.operator->() to get the raw Employee*, then calls raiseSalary() on THAT",
+      "It calls SmartPtr's own raiseSalary(), which doesn't exist, so it's silently ignored",
+      "It only works if SmartPtr inherits from Employee"
+    ],
+    correct: 1,
+    explain: "operator-> is special: the compiler keeps applying it until it reaches an actual raw pointer, then dereferences. sp->raiseSalary() becomes (sp.operator->())->raiseSalary(), which is ptr->raiseSalary(). This is exactly how unique_ptr and shared_ptr work."
+  },
+  {
+    q: "Which is a valid operator overload?",
+    code: null,
+    options: [
+      "int operator+(int a, int b) { return a - b; }  // redefine int+int",
+      "Complex operator**(Complex a, Complex b) { ... }  // invent a new operator",
+      "Complex operator+(Complex a, Complex b, Complex c) { ... }  // three parameters for binary +",
+      "Complex Complex::operator-() const { return Complex(-re, -im); }  // unary minus"
+    ],
+    correct: 3,
+    explain: "Option D is valid — a proper unary operator- as a member (zero explicit params; the operand is *this). A is illegal: you can't overload an operator where EVERY operand is a built-in type (int+int). B is illegal: ** isn't an operator in C++'s grammar — you can't invent new ones. C is illegal: as a free function, binary operator+ must take EXACTLY 2 parameters — arity is fixed by the language, you can't add a third."
+  },
+  {
+    q: "Why does the postfix version cost more than prefix in a loop like `for (...; ...; it++)`?",
+    code: null,
+    options: [
+      "It doesn't — they're identical in cost",
+      "Postfix must save a copy of the old state before modifying, and returns that copy by value; prefix modifies in place and returns by reference",
+      "Postfix requires heap allocation",
+      "Prefix is deprecated in modern C++"
+    ],
+    correct: 1,
+    explain: "Postfix operator++(int) has to construct `Counter temp = *this;` before incrementing, and return that temp BY VALUE — an extra copy. Prefix operator++() just mutates and returns *this by reference — no copy. For loop increments where the return value is discarded, prefer prefix (++it) over postfix (it++)."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div'); block.className = 'q-block';
+  const qnum = document.createElement('div'); qnum.className = 'q-num'; qnum.textContent = 'Q' + (qi + 1); block.appendChild(qnum);
+  const qtext = document.createElement('div'); qtext.className = 'q-text'; qtext.textContent = item.q; block.appendChild(qtext);
+  if (item.code) { const pre = document.createElement('pre'); pre.className = 'q-code'; pre.textContent = item.code; block.appendChild(pre); }
+  const opts = document.createElement('div'); opts.className = 'q-opts';
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button'); btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) { btn.classList.add('correct'); score++; document.getElementById('score').textContent = score; }
+      else { btn.classList.add('wrong'); allBtns[item.correct].classList.add('correct'); }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+  block.appendChild(opts); quizEl.appendChild(block);
+});
+</script>
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{border:1px solid #e3e0d7;border-radius:10px;padding:18px 18px 20px;margin:18px 0;background:#fff;}
+  .q-num{font-family:'Courier New',monospace;font-size:12px;font-weight:bold;display:inline-block;background:var(--ink);color:var(--paper);padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;}
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{font-family:'Courier New',monospace;font-size:13px;line-height:1.5;background:#232323;color:#eee;border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;}
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{font-family:Georgia,serif;font-size:15px;text-align:left;padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;background:#fbfaf7;cursor:pointer;transition:all .12s ease;display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{font-family:'Courier New',monospace;font-weight:bold;font-size:13px;background:#e8e5dd;color:var(--ink);border-radius:5px;width:24px;height:24px;flex:0 0 24px;display:flex;align-items:center;justify-content:center;}
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;} .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;} .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;}
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);} .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{text-align:center;font-family:'Courier New',monospace;font-weight:bold;font-size:18px;margin-top:20px;padding:12px;background:var(--ink);color:var(--paper);border-radius:8px;}
+  #score{color:#8be0a4;}
+</style>
+</body>
+</html>

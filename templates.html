@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Templates & Generic Programming — LearnOOPs Note 12</title>
+<style>
+  :root{--paper:#fbfaf7;--ink:#232323;--grid:#e8e5dd;--blue:#2456a6;--red:#c0392b;--green:#1e7a4f;--amber:#b8860b;--purple:#6d4aa0;--soft:#6b6b6b;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:28px 28px;color:var(--ink);line-height:1.65;padding:40px 16px 80px;}
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--purple);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{background:var(--card);border:1px solid #dedbd2;border-radius:10px;padding:26px 28px;margin-bottom:26px;box-shadow:2px 3px 0 rgba(35,35,35,.07);}
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{font-family:'Courier New',monospace;font-size:14px;font-weight:bold;background:var(--ink);color:var(--paper);border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;}
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;} li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  .industry{border-left:4px solid var(--purple);background:#f3edfa;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .industry b{color:var(--purple);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;}
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;} pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 12</div>
+  <h1>Templates &amp; <span class="hl">Generic Programming</span> 🧬</h1>
+  <p class="subtitle">Write the logic once, let the compiler generate a version for every type you actually use — zero runtime cost, at the price of code bloat and slower builds.</p>
+
+  <!-- 1 -->
+  <div class="card">
+    <h2><span class="num">1</span> Function templates</h2>
+    <div class="def"><b>Definition:</b> a blueprint for generating a family of functions — the compiler stamps out a real, concrete function for each type it's actually called with. This is <b>compile-time polymorphism</b>.</div>
+<pre><span class="k">template</span>&lt;<span class="k">typename</span> T&gt;
+T maxVal(T a, T b) {
+    <span class="k">return</span> (a &gt; b) ? a : b;
+}
+<span class="k">int</span> main() {
+    cout &lt;&lt; maxVal(3, 7);         <span class="c">// 7 — T deduced as int</span>
+    cout &lt;&lt; maxVal(3.5, 2.1);     <span class="c">// 3.5 — T deduced as double, a SEPARATE function generated</span>
+    cout &lt;&lt; maxVal&lt;<span class="k">int</span>&gt;(3, 7.5);  <span class="c">// forces T=int → 7.5 truncates to 7 → max(3,7) = 7</span>
+}</pre>
+    <ul>
+      <li>Normally the compiler <b>deduces</b> <code>T</code> from the arguments — you don't write <code>&lt;int&gt;</code> yourself.</li>
+      <li>You <b>can</b> force it explicitly with <code>maxVal&lt;int&gt;(...)</code> — useful when deduction would be ambiguous or wrong.</li>
+    </ul>
+    <div class="memory">💡 <b>Hook:</b> A template is a <b>cookie cutter for functions</b> 🍪✂️ — one shape, stamped out fresh for each type you feed it.</div>
+  </div>
+
+  <!-- 2 -->
+  <div class="card">
+    <h2><span class="num">2</span> Class templates</h2>
+<pre><span class="k">template</span>&lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> Box {
+    T value;
+<span class="k">public</span>:
+    Box(T v) : value(v) {}
+    T get() <span class="k">const</span> { <span class="k">return</span> value; }
+};
+Box&lt;<span class="k">int</span>&gt; b1(5);          <span class="c">// compiler generates a distinct Box_int class</span>
+Box&lt;string&gt; b2(<span class="g">"hello"</span>);  <span class="c">// and a completely separate Box_string class</span></pre>
+    <ul>
+      <li><code>Box&lt;int&gt;</code> and <code>Box&lt;string&gt;</code> are genuinely <b>two different types</b> as far as the compiler is concerned — not one flexible type.</li>
+      <li>This is exactly how <code>std::vector&lt;T&gt;</code>, <code>std::map&lt;K,V&gt;</code>, and the rest of the STL work.</li>
+    </ul>
+  </div>
+
+  <!-- 3 -->
+  <div class="card">
+    <h2><span class="num">3</span> Multiple &amp; non-type template parameters</h2>
+<pre><span class="k">template</span>&lt;<span class="k">typename</span> K, <span class="k">typename</span> V&gt;    <span class="c">// multiple type parameters</span>
+<span class="k">class</span> Pair {
+    K key; V value;
+<span class="k">public</span>:
+    Pair(K k, V v) : key(k), value(v) {}
+    <span class="k">void</span> show() { cout &lt;&lt; key &lt;&lt; <span class="g">": "</span> &lt;&lt; value; }
+};
+Pair&lt;string, <span class="k">int</span>&gt; p(<span class="g">"age"</span>, 25);   <span class="c">// this is literally how std::pair works</span>
+
+<span class="k">template</span>&lt;<span class="k">typename</span> T, <span class="k">int</span> N&gt;         <span class="c">// N is a NON-TYPE parameter — a compile-time constant</span>
+<span class="k">class</span> FixedArray {
+    T data[N];
+<span class="k">public</span>:
+    <span class="k">int</span> size() <span class="k">const</span> { <span class="k">return</span> N; }
+};
+FixedArray&lt;<span class="k">int</span>, 10&gt; arr;   <span class="c">// this is literally how std::array&lt;T,N&gt; works</span>
+cout &lt;&lt; arr.size();          <span class="c">// 10</span></pre>
+    <div class="industry">🏭 <b>Industry framing:</b> This exact pattern (<code>T</code> + a compile-time <code>N</code>) is <code>std::array&lt;T, N&gt;</code> in the standard library — a fixed-size array with zero heap allocation and known size at compile time.</div>
+  </div>
+
+  <!-- 4 -->
+  <div class="card">
+    <h2><span class="num">4</span> Template specialization</h2>
+    <div class="def"><b>Specialization:</b> providing a <b>completely different implementation</b> for one specific type, while the generic template still handles everyone else.</div>
+<pre><span class="k">template</span>&lt;<span class="k">typename</span> T&gt;
+<span class="k">class</span> Container {
+<span class="k">public</span>:
+    <span class="k">void</span> show() { cout &lt;&lt; <span class="g">"Generic container\n"</span>; }
+};
+
+<span class="k">template</span>&lt;&gt;                          <span class="c">// full specialization syntax</span>
+<span class="k">class</span> Container&lt;<span class="k">bool</span>&gt; {
+<span class="k">public</span>:
+    <span class="k">void</span> show() { cout &lt;&lt; <span class="g">"Specialized bool container\n"</span>; }
+};
+
+Container&lt;<span class="k">int</span>&gt; ci; ci.show();    <span class="c">// "Generic container"</span>
+Container&lt;<span class="k">bool</span>&gt; cb; cb.show();   <span class="c">// "Specialized bool container"</span></pre>
+    <div class="industry">🏭 <b>Real example:</b> <code>std::vector&lt;bool&gt;</code> is a genuine specialization in the standard library — it packs booleans into individual bits instead of full bytes, trading some interface quirks for an 8x memory saving.</div>
+  </div>
+
+  <!-- 5 -->
+  <div class="card">
+    <h2><span class="num">5</span> Templates vs virtual functions — the real comparison</h2>
+    <table>
+      <tr><th></th><th>Templates</th><th>Virtual functions</th></tr>
+      <tr><td><b>Binding</b></td><td>Compile time</td><td>Runtime</td></tr>
+      <tr><td><b>Cost</b></td><td><b>Zero</b> — fully inlinable</td><td>One indirection (vtable lookup)</td></tr>
+      <tr><td><b>Types known</b></td><td>Must be known at compile time</td><td>Can arrive later (plugins, dynamic libraries)</td></tr>
+      <tr><td><b>Code size</b></td><td>Grows — one copy generated per type used</td><td>One copy, shared by all subtypes</td></tr>
+      <tr><td><b>Needs inheritance?</b></td><td>No — works via <b>duck typing</b> (any type with the right operations compiles)</td><td>Yes — needs a common base class</td></tr>
+    </table>
+    <div class="warning">⚠️ <b>The trap most people don't know:</b> template code is largely <b>only checked when instantiated</b> with a real type. A template function can compile cleanly for years, then suddenly fail — with a long, confusing error — the first time it's used with a type that doesn't support some operation the template silently assumed.</div>
+    <div class="interview">🎯 <b>Interview line:</b> "Templates give compile-time polymorphism with zero runtime cost, at the price of code bloat and slower builds. Virtual functions give runtime flexibility for one indirection. I reach for templates when types are known at compile time, and virtual dispatch when they genuinely aren't — like a plugin system."</div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li>Function/class templates: one definition, compiler generates a <b>separate concrete version</b> per type used</li>
+      <li><code>Box&lt;int&gt;</code> and <code>Box&lt;string&gt;</code> are genuinely <b>different types</b></li>
+      <li>Non-type template parameters (like <code>int N</code>) are <b>compile-time constants</b>, not types — the basis of <code>std::array&lt;T,N&gt;</code></li>
+      <li>Specialization: <code>template&lt;&gt; class X&lt;bool&gt; {...}</code> — a totally custom implementation for one specific type</li>
+      <li>Templates = zero-cost but compile-time-only, code bloat. Virtual = runtime-flexible but one indirection.</li>
+      <li>Template errors often only surface at <b>instantiation</b>, not at the template's own definition</li>
+    </ul>
+  </div>
+
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="copy-semantics.html">← Note 11: Copy Semantics</a>
+    <a href="index.html">home ↑</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "What does this print?",
+    code:
+`template<typename T>
+T square(T x) { return x * x; }
+int main() {
+    cout << square(4);
+    cout << square(2.5);
+}`,
+    options: ["16 6.25", "16.0 6", "Compile error — T is ambiguous", "16 6"],
+    correct: 0,
+    explain: "T is deduced separately for each call: square(4) deduces T=int → 16. square(2.5) deduces T=double → 6.25. Two completely separate functions get generated by the compiler."
+  },
+  {
+    q: "Are Box<int> and Box<double> the same type?",
+    code:
+`template<typename T>
+class Box { T value; public: Box(T v):value(v){} };
+Box<int> a(5);
+Box<double> b(5.5);`,
+    options: [
+      "Yes — Box is one flexible type that adapts",
+      "No — they are two entirely distinct types generated by the compiler",
+      "Only if T has the same size in bytes",
+      "It depends on the compiler"
+    ],
+    correct: 1,
+    explain: "Class templates generate a genuinely separate, distinct type for each template argument combination used. Box<int> and Box<double> share no relationship at the type level — you can't assign one to the other, and they have independent compiled code."
+  },
+  {
+    q: "What kind of template parameter is N here?",
+    code:
+`template<typename T, int N>
+class FixedArray {
+    T data[N];
+public:
+    int size() const { return N; }
+};
+FixedArray<int, 10> arr;`,
+    options: [
+      "A type parameter, just like T",
+      "A non-type template parameter — a compile-time constant value, not a type",
+      "This is invalid syntax",
+      "N must always default to 0"
+    ],
+    correct: 1,
+    explain: "N is a non-type template parameter — its value (10) is fixed at compile time and used directly, e.g., to size the array. This is exactly the mechanism behind std::array<T, N>."
+  },
+  {
+    q: "What does Container<bool> print here?",
+    code:
+`template<typename T>
+class Container {
+public:
+    void show() { cout << "Generic"; }
+};
+template<>
+class Container<bool> {
+public:
+    void show() { cout << "Specialized"; }
+};
+int main() {
+    Container<bool> cb;
+    cb.show();
+}`,
+    options: ["Generic", "Specialized", "Compile error — can't specialize a template", "Both print"],
+    correct: 1,
+    explain: "The `template<> class Container<bool> {...}` is a FULL SPECIALIZATION — it completely replaces the generic implementation specifically for bool. Container<bool> uses this specialized version entirely, printing 'Specialized'."
+  },
+  {
+    q: "Why is std::vector<bool> often cited as an unusual case in interviews?",
+    code: null,
+    options: [
+      "It doesn't actually exist in the standard library",
+      "It's a template specialization that packs bits instead of storing full bool elements, which changes some of its interface behavior",
+      "It's slower than std::vector<int> with no benefit",
+      "It can only hold true, never false"
+    ],
+    correct: 1,
+    explain: "std::vector<bool> is specialized to store one BIT per element instead of a full byte/bool, saving significant memory — but this means operator[] can't return a real bool&, which breaks some generic code expecting standard vector semantics. A classic 'gotcha' template specialization."
+  },
+  {
+    q: "Which statement about templates vs virtual functions is TRUE?",
+    code: null,
+    options: [
+      "Templates require inheritance; virtual functions don't",
+      "Templates resolve at compile time with zero runtime cost; virtual functions resolve at runtime through a vtable lookup",
+      "Virtual functions always produce smaller compiled code than templates",
+      "Templates and virtual functions are functionally identical"
+    ],
+    correct: 1,
+    explain: "Templates: compile-time binding, no runtime cost, but require all types to be known at compile time. Virtual functions: runtime binding via vtable, one indirection, but types can be decided later (e.g., a plugin loaded at runtime). Templates DON'T require inheritance — duck typing is enough."
+  },
+  {
+    q: "Why can heavy template use increase compiled binary size?",
+    code: null,
+    options: [
+      "Templates are always compiled to the same machine code regardless of type",
+      "The compiler generates a SEPARATE concrete function/class for every distinct type combination actually used — this is called 'code bloat'",
+      "Templates require dynamic linking",
+      "This is a myth — templates never affect binary size"
+    ],
+    correct: 1,
+    explain: "Each distinct instantiation (Box<int>, Box<string>, Box<Employee>...) becomes its own separate compiled code, even though they came from one template definition. Using a template with many different types can meaningfully increase binary size — this tradeoff is called code bloat."
+  },
+  {
+    q: "What's the practical trap with template error messages?",
+    code:
+`template<typename T>
+T addOne(T x) { return x + 1; }
+struct Point { int x, y; };  // no operator+ defined
+int main() {
+    addOne(5);           // fine
+    addOne(Point{1,2});   // <-- what happens?
+}`,
+    options: [
+      "Both calls compile fine — templates work with any type",
+      "addOne(Point{1,2}) fails to compile — Point has no operator+, and this error only surfaces at THIS instantiation, not when addOne was originally defined",
+      "Only addOne(5) is checked; the Point call is silently skipped",
+      "This causes a runtime crash, not a compile error"
+    ],
+    correct: 1,
+    explain: "Template bodies are largely only checked when instantiated with a specific type. addOne<int> compiles fine because int supports +. addOne<Point> fails because Point has no operator+ — and this failure appears only when the compiler tries to generate that specific version, often with a long, hard-to-read error."
+  },
+  {
+    q: "Which real standard-library type is built on the T + non-type-N template pattern?",
+    code: null,
+    options: ["std::vector<T>", "std::array<T, N>", "std::string", "std::map<K,V>"],
+    correct: 1,
+    explain: "std::array<T, N> takes both a type parameter T and a non-type parameter N (the fixed size), exactly matching the FixedArray<T, N> pattern shown earlier. std::vector<T> and std::map<K,V> take only type parameters; std::string isn't a template at all (it's std::basic_string<char>, but not typically written as a template by users)."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div'); block.className = 'q-block';
+  const qnum = document.createElement('div'); qnum.className = 'q-num'; qnum.textContent = 'Q' + (qi + 1); block.appendChild(qnum);
+  const qtext = document.createElement('div'); qtext.className = 'q-text'; qtext.textContent = item.q; block.appendChild(qtext);
+  if (item.code) { const pre = document.createElement('pre'); pre.className = 'q-code'; pre.textContent = item.code; block.appendChild(pre); }
+  const opts = document.createElement('div'); opts.className = 'q-opts';
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button'); btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) { btn.classList.add('correct'); score++; document.getElementById('score').textContent = score; }
+      else { btn.classList.add('wrong'); allBtns[item.correct].classList.add('correct'); }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+  block.appendChild(opts); quizEl.appendChild(block);
+});
+</script>
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{border:1px solid #e3e0d7;border-radius:10px;padding:18px 18px 20px;margin:18px 0;background:#fff;}
+  .q-num{font-family:'Courier New',monospace;font-size:12px;font-weight:bold;display:inline-block;background:var(--ink);color:var(--paper);padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;}
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{font-family:'Courier New',monospace;font-size:13px;line-height:1.5;background:#232323;color:#eee;border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;}
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{font-family:Georgia,serif;font-size:15px;text-align:left;padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;background:#fbfaf7;cursor:pointer;transition:all .12s ease;display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{font-family:'Courier New',monospace;font-weight:bold;font-size:13px;background:#e8e5dd;color:var(--ink);border-radius:5px;width:24px;height:24px;flex:0 0 24px;display:flex;align-items:center;justify-content:center;}
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;} .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;} .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;}
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);} .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{text-align:center;font-family:'Courier New',monospace;font-weight:bold;font-size:18px;margin-top:20px;padding:12px;background:var(--ink);color:var(--paper);border-radius:8px;}
+  #score{color:#8be0a4;}
+</style>
+</body>
+</html>

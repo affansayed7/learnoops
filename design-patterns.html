@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Principles & Patterns — LearnOOPs Note 15</title>
+<style>
+  :root{--paper:#fbfaf7;--ink:#232323;--grid:#e8e5dd;--blue:#2456a6;--red:#c0392b;--green:#1e7a4f;--amber:#b8860b;--purple:#6d4aa0;--soft:#6b6b6b;--card:#ffffff;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:Georgia,'Times New Roman',serif;background:var(--paper);background-image:linear-gradient(var(--grid) 1px, transparent 1px),linear-gradient(90deg, var(--grid) 1px, transparent 1px);background-size:28px 28px;color:var(--ink);line-height:1.65;padding:40px 16px 80px;}
+  .page{max-width:880px;margin:0 auto;}
+  .crumb{font-family:'Courier New',monospace;font-size:13px;margin-bottom:18px;}
+  .crumb a{color:var(--blue);text-decoration:none;}
+  .eyebrow{font-family:'Courier New',monospace;font-size:13px;letter-spacing:2px;text-transform:uppercase;color:var(--blue);margin-bottom:8px;}
+  h1{font-size:clamp(28px,5vw,42px);line-height:1.15;margin-bottom:6px;}
+  h1 .hl{color:var(--blue);}
+  .subtitle{color:var(--soft);font-style:italic;margin-bottom:28px;font-size:17px;}
+  .card{background:var(--card);border:1px solid #dedbd2;border-radius:10px;padding:26px 28px;margin-bottom:26px;box-shadow:2px 3px 0 rgba(35,35,35,.07);}
+  h2{font-size:22px;margin-bottom:14px;display:flex;align-items:center;gap:10px;}
+  h2 .num{font-family:'Courier New',monospace;font-size:14px;font-weight:bold;background:var(--ink);color:var(--paper);border-radius:50%;width:28px;height:28px;flex:0 0 28px;display:flex;align-items:center;justify-content:center;}
+  h3{font-size:17px;margin:18px 0 8px;}
+  .def{background:#eaf1fb;border:1px solid #bcd0ee;border-radius:8px;padding:12px 16px;font-size:15.5px;margin:10px 0;}
+  .def b{color:var(--blue);}
+  ul{padding-left:22px;margin:8px 0;} li{margin-bottom:7px;}
+  .memory{border-left:4px solid var(--amber);background:#fdf6e3;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .memory b{color:var(--amber);}
+  .interview{border-left:4px solid var(--green);background:#edf7f1;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .interview b{color:var(--green);}
+  .warning{border-left:4px solid var(--red);background:#fdecea;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .warning b{color:var(--red);}
+  .industry{border-left:4px solid var(--purple);background:#f3edfa;padding:12px 16px;border-radius:0 8px 8px 0;font-size:15px;margin-top:14px;}
+  .industry b{color:var(--purple);}
+  code{font-family:'Courier New',monospace;font-size:14px;background:#f1efe8;padding:1px 6px;border-radius:4px;}
+  pre{font-family:'Courier New',monospace;font-size:13.5px;line-height:1.6;background:#232323;color:#eee;border-radius:8px;padding:16px 18px;overflow-x:auto;margin:12px 0;}
+  pre .c{color:#8a8a8a;} pre .k{color:#7fb4ff;} pre .g{color:#8be0a4;} pre .r{color:#ff8a80;} pre .y{color:#ffd54f;}
+  table{width:100%;border-collapse:collapse;font-size:15px;margin-top:10px;}
+  th,td{border:1px solid #dedbd2;padding:9px 12px;text-align:left;vertical-align:top;}
+  th{background:#f1efe8;font-family:'Courier New',monospace;font-size:13px;letter-spacing:1px;text-transform:uppercase;}
+  .solid-row{display:flex;gap:14px;align-items:flex-start;border:1px solid #e3e0d7;border-radius:9px;padding:14px 16px;margin-bottom:11px;background:#fcfbf8;}
+  .solid-letter{font-family:'Courier New',monospace;font-weight:bold;font-size:20px;width:38px;height:38px;flex:0 0 38px;border-radius:8px;display:flex;align-items:center;justify-content:center;color:#fff;}
+  .solid-row h4{font-size:15.5px;margin-bottom:3px;}
+  .solid-row p{font-size:14.5px;color:#444;}
+  .nav-bottom{display:flex;justify-content:space-between;margin-top:36px;font-family:'Courier New',monospace;font-size:14px;}
+  .nav-bottom a{color:var(--blue);text-decoration:none;}
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="crumb"><a href="index.html">← LearnOOPs home</a></div>
+  <div class="eyebrow">OOP Interview Prep · Note 15</div>
+  <h1>Design Principles <span class="hl">&amp; Patterns</span> 🏛️🧩</h1>
+  <p class="subtitle">SOLID plus the four design patterns that actually get asked — with real ❌→✅ code, not just definitions.</p>
+
+  <!-- SOLID -->
+  <div class="card">
+    <h2><span class="num">1</span> SOLID — five principles, five real fixes</h2>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--blue)">S</div>
+      <div><h4>Single Responsibility — one reason to change</h4><p>A class should do exactly one job.</p></div>
+    </div>
+<pre><span class="c">// ❌ Invoice does THREE unrelated jobs</span>
+<span class="k">class</span> Invoice {
+<span class="k">public</span>:
+    <span class="k">double</span> calculateTotal() { <span class="k">return</span> 100; }
+    <span class="k">void</span> printToPDF() { <span class="c">/* rendering logic */</span> }
+    <span class="k">void</span> emailToCustomer() { <span class="c">/* mail logic */</span> }
+};
+<span class="c">// ✅ split by responsibility</span>
+<span class="k">class</span> Invoice { <span class="k">public</span>: <span class="k">double</span> calculateTotal() { <span class="k">return</span> 100; } };
+<span class="k">class</span> InvoiceRenderer { <span class="k">public</span>: <span class="k">void</span> printToPDF(<span class="k">const</span> Invoice&amp;) {} };
+<span class="k">class</span> InvoiceMailer { <span class="k">public</span>: <span class="k">void</span> emailToCustomer(<span class="k">const</span> Invoice&amp;) {} };</pre>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--green)">O</div>
+      <div><h4>Open/Closed — open to extension, closed to modification</h4><p>Add features by adding code, not editing working code.</p></div>
+    </div>
+<pre><span class="c">// ❌ must edit this function every time a new payment type appears</span>
+<span class="k">double</span> processPayment(string type, <span class="k">double</span> amt) {
+    <span class="k">if</span> (type == <span class="g">"credit"</span>) { <span class="c">/*...*/</span> }
+    <span class="k">else if</span> (type == <span class="g">"upi"</span>)    { <span class="c">/*...*/</span> }  <span class="c">// keep adding branches forever</span>
+    <span class="k">return</span> amt;
+}
+<span class="c">// ✅ new payment method = new class, ZERO changes to existing code</span>
+<span class="k">class</span> PaymentMethod { <span class="k">public</span>: <span class="k">virtual void</span> pay(<span class="k">double</span>) = 0; <span class="k">virtual</span> ~PaymentMethod()=<span class="k">default</span>; };
+<span class="k">class</span> CreditCard : <span class="k">public</span> PaymentMethod { <span class="k">public</span>: <span class="k">void</span> pay(<span class="k">double</span>) <span class="k">override</span> {} };
+<span class="k">class</span> UPI : <span class="k">public</span> PaymentMethod { <span class="k">public</span>: <span class="k">void</span> pay(<span class="k">double</span>) <span class="k">override</span> {} };</pre>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--amber)">L</div>
+      <div><h4>Liskov Substitution — a subtype must be truly substitutable</h4><p>Code written against the base must keep working, unmodified, for any derived type.</p></div>
+    </div>
+<pre><span class="k">class</span> Rectangle {
+<span class="k">protected</span>:
+    <span class="k">int</span> width, height;
+<span class="k">public</span>:
+    <span class="k">virtual void</span> setWidth(<span class="k">int</span> w)  { width = w; }
+    <span class="k">virtual void</span> setHeight(<span class="k">int</span> h) { height = h; }
+    <span class="k">int</span> area() <span class="k">const</span> { <span class="k">return</span> width * height; }
+};
+<span class="k">class</span> Square : <span class="k">public</span> Rectangle {   <span class="r">// "a square IS a rectangle" — feels right, but...</span>
+<span class="k">public</span>:
+    <span class="k">void</span> setWidth(<span class="k">int</span> w)  <span class="k">override</span> { width = height = w; }   <span class="r">// forces both dimensions</span>
+    <span class="k">void</span> setHeight(<span class="k">int</span> h) <span class="k">override</span> { width = height = h; }
+};
+<span class="k">void</span> test(Rectangle&amp; r) {
+    r.setWidth(5); r.setHeight(4);
+    <span class="k">assert</span>(r.area() == 20);   <span class="r">// PASSES for Rectangle, FAILS for Square (area is 16!)</span>
+}</pre>
+    <div class="warning">⚠️ The lesson: <b>is-a is about behavior, not vocabulary.</b> "A square is mathematically a rectangle" is true in geometry — but Square can't honor Rectangle's contract (independently settable width/height) without breaking it. That makes the inheritance wrong, regardless of how natural the English sentence sounds.</div>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--purple)">I</div>
+      <div><h4>Interface Segregation — many small interfaces beat one fat one</h4><p>Don't force a class to implement methods it doesn't need.</p></div>
+    </div>
+<pre><span class="c">// ❌ fat interface forces meaningless implementations</span>
+<span class="k">class</span> IMachine { <span class="k">public</span>: <span class="k">virtual void</span> print()=0; <span class="k">virtual void</span> scan()=0; <span class="k">virtual void</span> fax()=0; };
+<span class="k">class</span> SimplePrinter : <span class="k">public</span> IMachine {
+<span class="k">public</span>:
+    <span class="k">void</span> print() <span class="k">override</span> { <span class="c">/*...*/</span> }
+    <span class="k">void</span> scan() <span class="k">override</span> { <span class="k">throw</span> std::logic_error(<span class="g">"unsupported"</span>); }  <span class="r">// forced to stub this out</span>
+    <span class="k">void</span> fax()  <span class="k">override</span> { <span class="k">throw</span> std::logic_error(<span class="g">"unsupported"</span>); }
+};
+<span class="c">// ✅ segregated — SimplePrinter only implements what it actually does</span>
+<span class="k">class</span> IPrinter { <span class="k">public</span>: <span class="k">virtual void</span> print()=0; <span class="k">virtual</span> ~IPrinter()=<span class="k">default</span>; };
+<span class="k">class</span> SimplePrinter : <span class="k">public</span> IPrinter { <span class="k">public</span>: <span class="k">void</span> print() <span class="k">override</span> {} };</pre>
+
+    <div class="solid-row">
+      <div class="solid-letter" style="background:var(--red)">D</div>
+      <div><h4>Dependency Inversion — depend on abstractions, not concretions</h4><p>High-level logic shouldn't hard-code low-level details.</p></div>
+    </div>
+<pre><span class="c">// ❌ OrderService is glued to ONE concrete database — can't swap, can't test</span>
+<span class="k">class</span> MySQLDatabase { <span class="k">public</span>: <span class="k">void</span> save(string d) {} };
+<span class="k">class</span> OrderService {
+    MySQLDatabase db;
+<span class="k">public</span>: <span class="k">void</span> placeOrder() { db.save(<span class="g">"order"</span>); }
+};
+<span class="c">// ✅ depend on the ABSTRACTION — now a mock can be injected in tests</span>
+<span class="k">class</span> IDatabase { <span class="k">public</span>: <span class="k">virtual void</span> save(string)=0; <span class="k">virtual</span> ~IDatabase()=<span class="k">default</span>; };
+<span class="k">class</span> MySQLDatabase : <span class="k">public</span> IDatabase { <span class="k">public</span>: <span class="k">void</span> save(string d) <span class="k">override</span> {} };
+<span class="k">class</span> OrderService {
+    IDatabase&amp; db;
+<span class="k">public</span>: OrderService(IDatabase&amp; d) : db(d) {}
+    <span class="k">void</span> placeOrder() { db.save(<span class="g">"order"</span>); }
+};</pre>
+    <div class="industry">🏭 <b>The honest reason SOLID matters:</b> testability. Dependency Inversion is specifically what lets you inject a <code>MockDatabase</code> in unit tests instead of hitting a real database. Mentioning testing unprompted signals you've actually shipped software.</div>
+    <div class="memory">💡 <b>If you blank on a letter:</b> L is Liskov — remember the square/rectangle story and you'll reconstruct the rest.</div>
+  </div>
+
+  <!-- PATTERNS -->
+  <div class="card">
+    <h2><span class="num">2</span> The four patterns that actually get asked</h2>
+
+    <h3>① Singleton — exactly one instance</h3>
+<pre><span class="k">class</span> Logger {
+    Logger() = <span class="k">default</span>;
+<span class="k">public</span>:
+    Logger(<span class="k">const</span> Logger&amp;) = <span class="k">delete</span>;
+    Logger&amp; <span class="k">operator</span>=(<span class="k">const</span> Logger&amp;) = <span class="k">delete</span>;
+    <span class="k">static</span> Logger&amp; get() {
+        <span class="k">static</span> Logger instance;      <span class="y">// thread-safe initialization guaranteed since C++11</span>
+        <span class="k">return</span> instance;
+    }
+    <span class="k">void</span> log(<span class="k">const</span> string&amp; m) { cout &lt;&lt; m; }
+};
+Logger::get().log(<span class="g">"started"</span>);</pre>
+    <div class="warning">⚠️ This is the <b>Meyers Singleton</b>. Since C++11, initialization of a function-local <code>static</code> is guaranteed <b>thread-safe and lazy</b> — no manual locking needed. Worth mentioning the criticism too: singletons are <b>global state</b>, which hurts testability. Many teams prefer passing dependencies explicitly instead.</div>
+
+    <h3>② Factory — create without naming the concrete class</h3>
+<pre><span class="k">class</span> Shape { <span class="k">public</span>: <span class="k">virtual void</span> draw() = 0; <span class="k">virtual</span> ~Shape() = <span class="k">default</span>; };
+<span class="k">class</span> Circle : <span class="k">public</span> Shape { <span class="k">public</span>: <span class="k">void</span> draw() <span class="k">override</span> { cout &lt;&lt; <span class="g">"Circle"</span>; } };
+<span class="k">class</span> Square : <span class="k">public</span> Shape { <span class="k">public</span>: <span class="k">void</span> draw() <span class="k">override</span> { cout &lt;&lt; <span class="g">"Square"</span>; } };
+
+<span class="k">class</span> ShapeFactory {
+<span class="k">public</span>:
+    <span class="k">static</span> std::unique_ptr&lt;Shape&gt; create(<span class="k">const</span> string&amp; type) {
+        <span class="k">if</span> (type == <span class="g">"circle"</span>) <span class="k">return</span> std::make_unique&lt;Circle&gt;();
+        <span class="k">if</span> (type == <span class="g">"square"</span>) <span class="k">return</span> std::make_unique&lt;Square&gt;();
+        <span class="k">return</span> <span class="k">nullptr</span>;
+    }
+};
+<span class="k">auto</span> s = ShapeFactory::create(<span class="g">"circle"</span>);
+s-&gt;draw();</pre>
+    <p style="font-size:15px;">Object creation lives in <b>one place</b>. The caller never names <code>Circle</code> or <code>Square</code> directly — only the factory knows the concrete types.</p>
+
+    <h3>③ Strategy — swap an algorithm at runtime</h3>
+<pre><span class="k">class</span> SortStrategy { <span class="k">public</span>: <span class="k">virtual void</span> sort(std::vector&lt;<span class="k">int</span>&gt;&amp;) = 0; <span class="k">virtual</span> ~SortStrategy()=<span class="k">default</span>; };
+<span class="k">class</span> QuickSort  : <span class="k">public</span> SortStrategy { <span class="k">public</span>: <span class="k">void</span> sort(std::vector&lt;<span class="k">int</span>&gt;&amp; v) <span class="k">override</span> { <span class="c">/*...*/</span> } };
+<span class="k">class</span> BubbleSort : <span class="k">public</span> SortStrategy { <span class="k">public</span>: <span class="k">void</span> sort(std::vector&lt;<span class="k">int</span>&gt;&amp; v) <span class="k">override</span> { <span class="c">/*...*/</span> } };
+
+<span class="k">class</span> Sorter {
+    std::unique_ptr&lt;SortStrategy&gt; strategy;    <span class="c">// COMPOSITION — a swappable member, not a fixed base class</span>
+<span class="k">public</span>:
+    <span class="k">void</span> setStrategy(std::unique_ptr&lt;SortStrategy&gt; s) { strategy = std::move(s); }
+    <span class="k">void</span> run(std::vector&lt;<span class="k">int</span>&gt;&amp; v) { strategy-&gt;sort(v); }
+};
+Sorter sorter;
+sorter.setStrategy(std::make_unique&lt;QuickSort&gt;());
+sorter.run(data);   <span class="c">// swap the algorithm any time, without changing Sorter at all</span></pre>
+    <div class="memory">💡 <b>Strategy is "prefer composition over inheritance" made concrete</b> — behavior is a <i>member you can replace</i>, not a base class you're locked into.</div>
+
+    <h3>④ Observer — publish/subscribe</h3>
+<pre><span class="k">class</span> Observer { <span class="k">public</span>: <span class="k">virtual void</span> update(<span class="k">int</span> v) = 0; <span class="k">virtual</span> ~Observer()=<span class="k">default</span>; };
+<span class="k">class</span> Display : <span class="k">public</span> Observer {
+<span class="k">public</span>: <span class="k">void</span> update(<span class="k">int</span> v) <span class="k">override</span> { cout &lt;&lt; <span class="g">"Display shows: "</span> &lt;&lt; v; }
+};
+<span class="k">class</span> Subject {
+    std::vector&lt;Observer*&gt; observers;
+<span class="k">public</span>:
+    <span class="k">void</span> attach(Observer* o) { observers.push_back(o); }
+    <span class="k">void</span> setValue(<span class="k">int</span> v) {
+        <span class="k">for</span> (<span class="k">auto</span>* o : observers) o-&gt;update(v);   <span class="c">// notify EVERY subscriber</span>
+    }
+};
+Display d; Subject s;
+s.attach(&amp;d);
+s.setValue(42);   <span class="c">// "Display shows: 42"</span></pre>
+    <p style="font-size:15px;">One-to-many: when the subject changes, every subscriber hears about it automatically. This is every UI event system and message bus you've used.</p>
+
+    <div class="interview">🎯 <b>Interview line:</b> "Patterns are named solutions to recurring design problems — a shared vocabulary. I reach for Strategy and Factory routinely; I'm more cautious with Singleton because it's global state that makes testing harder."</div>
+  </div>
+
+  <!-- OVERENGINEERING -->
+  <div class="card">
+    <h2><span class="num">3</span> The honest caveat: patterns aren't the goal</h2>
+    <ul>
+      <li>A pattern is a <b>named solution to a recurring problem</b> — not something to apply for its own sake.</li>
+      <li>Wrapping a single, never-changing algorithm in a full Strategy hierarchy, or building a Factory for a class with exactly one implementation, is <b>overengineering</b> — added indirection with no real payoff.</li>
+      <li>The best interview answer often isn't "I'd use pattern X" — it's explaining <b>what problem</b> you're solving, and reaching for a pattern <i>because</i> it fits, not to sound sophisticated.</li>
+    </ul>
+    <div class="interview">🎯 <b>Say this if asked to "design X":</b> "I'd start with the simplest thing that works, and reach for a pattern like Strategy or Factory specifically when I see the problem it's meant to solve — like needing to swap behavior at runtime, or centralizing object creation."</div>
+  </div>
+
+  <!-- REVISION -->
+  <div class="card">
+    <h2><span class="num">★</span> 30-second revision</h2>
+    <ul>
+      <li><b>S</b>ingle Responsibility · <b>O</b>pen/Closed · <b>L</b>iskov Substitution · <b>I</b>nterface Segregation · <b>D</b>ependency Inversion</li>
+      <li>LSP's classic violation: Square overriding Rectangle's setters breaks code written against Rectangle</li>
+      <li>DIP's real payoff: <b>testability</b> — depend on interfaces so mocks can be injected</li>
+      <li><b>Singleton:</b> Meyers pattern, thread-safe since C++11, but global state hurts testing</li>
+      <li><b>Factory:</b> centralizes object creation, caller never names the concrete class</li>
+      <li><b>Strategy:</b> composition-based, swappable algorithm at runtime</li>
+      <li><b>Observer:</b> one-to-many notification — the basis of most event systems</li>
+      <li>Patterns solve real problems — don't apply one just to look sophisticated</li>
+    </ul>
+  </div>
+
+  <div class="card quiz-card">
+    <h2><span class="num">?</span> OA Practice — 9 FAANG-style questions 🧠</h2>
+    <p style="font-size:15px;color:var(--soft);font-style:italic;margin-bottom:6px;">Tap an option to lock it &amp; see why.</p>
+    <div id="quiz"></div>
+    <div id="scoreboard" class="scoreboard">Score: <span id="score">0</span> / <span id="total">9</span></div>
+  </div>
+
+  <div class="nav-bottom">
+    <a href="smart-pointers.html">← Note 14: Smart Pointers</a>
+    <a href="index.html">home ↑</a>
+  </div>
+</div>
+
+<script>
+const QUESTIONS = [
+  {
+    q: "Which SOLID principle does this class violate?",
+    code:
+`class Report {
+public:
+    void generateData() { /* compute numbers */ }
+    void formatAsHTML() { /* build HTML */ }
+    void sendEmail() { /* SMTP logic */ }
+};`,
+    options: [
+      "Open/Closed Principle",
+      "Single Responsibility Principle — this class has three unrelated reasons to change",
+      "Liskov Substitution Principle",
+      "It doesn't violate anything"
+    ],
+    correct: 1,
+    explain: "Report handles data computation, HTML formatting, AND email delivery — three separate concerns, three separate reasons to change. A change to the email server config shouldn't require touching the same class that computes report data. This should be split into three focused classes."
+  },
+  {
+    q: "Why does this design violate Open/Closed?",
+    code:
+`double calculateArea(string shapeType, double a, double b) {
+    if (shapeType == "rectangle") return a * b;
+    if (shapeType == "triangle") return 0.5 * a * b;
+    // must add a new branch here for every new shape
+    return 0;
+}`,
+    options: [
+      "It doesn't violate OCP — this is fine",
+      "Every new shape requires editing this existing, working function — it's not closed to modification",
+      "It's missing a default return value",
+      "String comparisons are always OCP violations"
+    ],
+    correct: 1,
+    explain: "Adding a new shape means editing calculateArea() itself — risking breaking existing, tested logic. The OCP-compliant fix: a Shape base class with a virtual area() method; each new shape is a new class, and calculateArea's caller never needs to change."
+  },
+  {
+    q: "What specifically breaks in this classic LSP violation?",
+    code:
+`class Rectangle {
+protected:
+    int w, h;
+public:
+    virtual void setW(int x) { w = x; }
+    virtual void setH(int y) { h = y; }
+    int area() const { return w * h; }
+};
+class Square : public Rectangle {
+public:
+    void setW(int x) override { w = h = x; }
+    void setH(int y) override { w = h = y; }
+};
+void test(Rectangle& r) {
+    r.setW(5); r.setH(4);
+    // expects area() == 20
+}`,
+    options: [
+      "Nothing breaks — Square correctly extends Rectangle",
+      "If r is actually a Square, area() returns 16, not 20 — code written correctly against Rectangle's contract silently fails for Square",
+      "This causes a compile error",
+      "Square should not override any methods at all"
+    ],
+    correct: 1,
+    explain: "test() assumes setting width and height independently should give width*height = 5*4 = 20. But Square's overrides force w and h to always match, so after setW(5) then setH(4), both become 4, giving area() = 16. Square isn't truly substitutable for Rectangle — a Liskov violation, even though 'a square is a rectangle' sounds true geometrically."
+  },
+  {
+    q: "What's the Interface Segregation fix for this problem?",
+    code:
+`class IMachine {
+public:
+    virtual void print() = 0;
+    virtual void scan() = 0;
+    virtual void fax() = 0;
+};
+class SimplePrinter : public IMachine {
+public:
+    void print() override { /* works */ }
+    void scan() override { throw std::logic_error("nope"); }
+    void fax() override { throw std::logic_error("nope"); }
+};`,
+    options: [
+      "Add default implementations that do nothing",
+      "Split IMachine into separate IPrinter, IScanner, IFax interfaces — SimplePrinter only implements IPrinter",
+      "Make scan() and fax() non-virtual",
+      "There's no way to fix this in C++"
+    ],
+    correct: 1,
+    explain: "The fat IMachine interface forces every implementer to handle capabilities it may not have. Splitting into focused, single-capability interfaces means SimplePrinter only implements IPrinter — no forced stub methods that throw at runtime."
+  },
+  {
+    q: "What does Dependency Inversion actually buy you in practice?",
+    code:
+`class IDatabase { public: virtual void save(string) = 0; };
+class OrderService {
+    IDatabase& db;
+public:
+    OrderService(IDatabase& d) : db(d) {}
+    void placeOrder() { db.save("order"); }
+};`,
+    options: [
+      "Faster runtime performance",
+      "The ability to inject a mock/fake IDatabase implementation in unit tests, without touching OrderService's code",
+      "Smaller compiled binary size",
+      "It prevents all possible bugs in OrderService"
+    ],
+    correct: 1,
+    explain: "Because OrderService depends on the IDatabase abstraction rather than a concrete MySQLDatabase, tests can construct OrderService with a MockDatabase that doesn't touch a real database — this is the practical payoff of DIP: testability."
+  },
+  {
+    q: "Why is the Meyers Singleton's initialization thread-safe without manual locking?",
+    code:
+`class Logger {
+public:
+    static Logger& get() {
+        static Logger instance;
+        return instance;
+    }
+};`,
+    options: [
+      "It isn't actually thread-safe — this is a common misconception",
+      "Since C++11, the standard guarantees function-local static variable initialization is thread-safe and happens exactly once",
+      "Logger's constructor must be marked 'thread_safe' manually",
+      "It only works with the -pthread compiler flag"
+    ],
+    correct: 1,
+    explain: "C++11 introduced a guarantee (sometimes called 'magic statics'): if multiple threads reach the static's initialization simultaneously, the standard ensures only one thread actually performs it and others wait — no manual mutex needed."
+  },
+  {
+    q: "What is the main criticism of the Singleton pattern?",
+    code: null,
+    options: [
+      "It's always slower than creating a normal object",
+      "It introduces global state, which makes unit testing harder — you can't easily substitute a mock in its place",
+      "Singletons cannot have any methods",
+      "It's not possible to implement in C++"
+    ],
+    correct: 1,
+    explain: "A Singleton is effectively global, mutable state accessible from anywhere. Code that directly calls Logger::get() is tightly coupled to that specific instance, making it hard to substitute a test double — the same testability problem DIP is meant to solve, reintroduced through the back door."
+  },
+  {
+    q: "In the Strategy pattern, what OOP principle from earlier notes is being applied?",
+    code:
+`class Sorter {
+    std::unique_ptr<SortStrategy> strategy;
+public:
+    void setStrategy(std::unique_ptr<SortStrategy> s) { strategy = std::move(s); }
+    void run(std::vector<int>& v) { strategy->sort(v); }
+};`,
+    options: [
+      "Inheritance — Sorter inherits from SortStrategy",
+      "Composition (has-a) — Sorter HOLDS a SortStrategy as a swappable member, rather than inheriting behavior fixed at compile time",
+      "Multiple inheritance",
+      "Operator overloading"
+    ],
+    correct: 1,
+    explain: "Sorter doesn't inherit from SortStrategy — it HAS one, as a member it can replace at runtime via setStrategy(). This is composition over inheritance in action: behavior becomes something you can swap, not something baked into the class hierarchy."
+  },
+  {
+    q: "What does Subject.setValue(42) do in this Observer pattern example?",
+    code:
+`class Subject {
+    std::vector<Observer*> observers;
+public:
+    void attach(Observer* o) { observers.push_back(o); }
+    void setValue(int v) {
+        for (auto* o : observers) o->update(v);
+    }
+};`,
+    options: [
+      "It only updates the first attached observer",
+      "It calls update(v) on EVERY attached observer — a one-to-many notification to all subscribers",
+      "It throws an error if no observers are attached",
+      "It removes all observers after notifying them"
+    ],
+    correct: 1,
+    explain: "setValue loops through the entire observers vector, calling update() on each one. This is the core of the Observer pattern: one change to the Subject broadcasts to every subscriber automatically — the basis of most event/notification systems."
+  }
+];
+
+const quizEl = document.getElementById('quiz');
+let score = 0;
+document.getElementById('total').textContent = QUESTIONS.length;
+QUESTIONS.forEach((item, qi) => {
+  const block = document.createElement('div'); block.className = 'q-block';
+  const qnum = document.createElement('div'); qnum.className = 'q-num'; qnum.textContent = 'Q' + (qi + 1); block.appendChild(qnum);
+  const qtext = document.createElement('div'); qtext.className = 'q-text'; qtext.textContent = item.q; block.appendChild(qtext);
+  if (item.code) { const pre = document.createElement('pre'); pre.className = 'q-code'; pre.textContent = item.code; block.appendChild(pre); }
+  const opts = document.createElement('div'); opts.className = 'q-opts';
+  item.options.forEach((opt, oi) => {
+    const btn = document.createElement('button'); btn.className = 'opt';
+    btn.innerHTML = '<span class="opt-key">' + String.fromCharCode(65 + oi) + '</span>' + opt;
+    btn.onclick = () => {
+      if (block.dataset.answered) return;
+      block.dataset.answered = "1";
+      const allBtns = opts.querySelectorAll('.opt');
+      allBtns.forEach(b => b.classList.add('locked'));
+      if (oi === item.correct) { btn.classList.add('correct'); score++; document.getElementById('score').textContent = score; }
+      else { btn.classList.add('wrong'); allBtns[item.correct].classList.add('correct'); }
+      const exp = document.createElement('div');
+      exp.className = 'q-explain ' + (oi === item.correct ? 'exp-right' : 'exp-wrong');
+      exp.innerHTML = (oi === item.correct ? '✅ Correct! ' : '❌ Not quite. ') + item.explain;
+      block.appendChild(exp);
+    };
+    opts.appendChild(btn);
+  });
+  block.appendChild(opts); quizEl.appendChild(block);
+});
+</script>
+<style>
+  .quiz-card{background:linear-gradient(180deg,#ffffff, #fbfaf7);}
+  .q-block{border:1px solid #e3e0d7;border-radius:10px;padding:18px 18px 20px;margin:18px 0;background:#fff;}
+  .q-num{font-family:'Courier New',monospace;font-size:12px;font-weight:bold;display:inline-block;background:var(--ink);color:var(--paper);padding:2px 10px;border-radius:5px;margin-bottom:10px;letter-spacing:1px;}
+  .q-text{font-size:16.5px;font-weight:bold;margin-bottom:10px;}
+  pre.q-code{font-family:'Courier New',monospace;font-size:13px;line-height:1.5;background:#232323;color:#eee;border-radius:8px;padding:14px 16px;overflow-x:auto;margin:10px 0 14px;white-space:pre;}
+  .q-opts{display:flex;flex-direction:column;gap:9px;}
+  .opt{font-family:Georgia,serif;font-size:15px;text-align:left;padding:11px 14px;border:1.5px solid #d8d5cc;border-radius:8px;background:#fbfaf7;cursor:pointer;transition:all .12s ease;display:flex;align-items:center;gap:10px;color:var(--ink);}
+  .opt:hover:not(.locked){border-color:var(--blue);background:#f0f5fc;transform:translateX(3px);}
+  .opt-key{font-family:'Courier New',monospace;font-weight:bold;font-size:13px;background:#e8e5dd;color:var(--ink);border-radius:5px;width:24px;height:24px;flex:0 0 24px;display:flex;align-items:center;justify-content:center;}
+  .opt.locked{cursor:default;opacity:.92;}
+  .opt.correct{border-color:var(--green);background:#e6f5ec;color:#155e3c;font-weight:bold;} .opt.correct .opt-key{background:var(--green);color:#fff;}
+  .opt.wrong{border-color:var(--red);background:#fdece9;color:#a5281b;font-weight:bold;} .opt.wrong .opt-key{background:var(--red);color:#fff;}
+  .q-explain{margin-top:13px;padding:12px 15px;border-radius:8px;font-size:14.5px;line-height:1.55;}
+  .exp-right{background:#edf7f1;border-left:4px solid var(--green);} .exp-wrong{background:#fdf6e3;border-left:4px solid var(--amber);}
+  .scoreboard{text-align:center;font-family:'Courier New',monospace;font-weight:bold;font-size:18px;margin-top:20px;padding:12px;background:var(--ink);color:var(--paper);border-radius:8px;}
+  #score{color:#8be0a4;}
+</style>
+</body>
+</html>
